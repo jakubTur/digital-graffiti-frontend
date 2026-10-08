@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Map',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -30,13 +31,13 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.lightGreen),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const OSMFlutterMap(title: 'Flutter Map Test'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class OSMFlutterMap extends StatefulWidget {
+  const OSMFlutterMap({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -50,10 +51,32 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<OSMFlutterMap> createState() => _FlutterMapState();
+
+
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _FlutterMapState extends State<OSMFlutterMap> {
+  @override
+  Widget build(BuildContext context){
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
+    return FlutterMap(
+      options: const MapOptions(),
+      children: [
+        TileLayer(
+          urlTemplate:
+              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.app',
+        ),
+      ],
+    );
+  }
+  /*
   int _counter = 0;
 
   void _incrementCounter() {
@@ -66,15 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+  */
 
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+  /*
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
@@ -119,4 +136,5 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+  */
 }
