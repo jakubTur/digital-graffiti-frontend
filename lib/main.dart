@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,15 +31,15 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.lightGreen),
+        colorScheme: .fromSeed(seedColor: Colors.red),
       ),
-      home: const OSMFlutterMap(title: 'Flutter Map Test'),
+      home: const TestMap(title: 'Flutter Map Test'),
     );
   }
 }
 
-class OSMFlutterMap extends StatefulWidget {
-  const OSMFlutterMap({super.key, required this.title});
+class TestMap extends StatefulWidget {
+  const TestMap({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -51,14 +53,12 @@ class OSMFlutterMap extends StatefulWidget {
   final String title;
 
   @override
-  State<OSMFlutterMap> createState() => _FlutterMapState();
-
-
+  State<TestMap> createState() => _TestMapState();
 }
 
-class _FlutterMapState extends State<OSMFlutterMap> {
+class _TestMapState extends State<TestMap> {
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -69,9 +69,23 @@ class _FlutterMapState extends State<OSMFlutterMap> {
       options: const MapOptions(),
       children: [
         TileLayer(
-          urlTemplate:
-              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'com.example.app',
+        ),
+        MarkerLayer(
+          markers: [
+            Marker(
+              point: LatLng(40, 40),
+              width: 80,
+              height: 80,
+              child: Icon(
+                Icons.arrow_downward,
+                color: Colors.red,
+                size: 24.0,
+                semanticLabel: 'You are here',
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -137,4 +151,47 @@ class _FlutterMapState extends State<OSMFlutterMap> {
     );
   }
   */
+}
+
+/// CODE PASTED FROM GEOLOCATOR TUTORIAL: https://pub.dev/packages/geolocator
+/// Determine the current position of the device.
+///
+/// When the location services are not enabled or permissions
+/// are denied the `Future` will return an error.
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+      'Location permissions are permanently denied, we cannot request permissions.',
+    );
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
 }
