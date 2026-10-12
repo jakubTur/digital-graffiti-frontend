@@ -39,11 +39,55 @@ class _TestMapState extends State<TestMap> {
   }
 
   void updateLocation() async {
-    var position = await _determinePosition();
+    Position position = await _determinePosition();
     userLocation = LatLng(position.latitude, position.longitude);
   }
 
-  late LatLng userLocation = LatLng(0, 0);
+  LatLng userLocation = LatLng(0, 0);
+
+  /// Dummy post locations
+  /// TODO: read this from backend and put it here, and that will update the pins
+  List<LatLng> post_locations = [
+    LatLng(10, 10),
+    LatLng(20, 10),
+    LatLng(10, 20),
+    LatLng(20, 20),
+  ];
+
+  // Style information for the user marker
+  MarkerData user_marker_data = MarkerData(icon: Icons.man);
+
+  // Style information
+  // TODO: replace with a more complex data structure later
+  MarkerData post_marker_data = MarkerData(
+    icon: Icons.location_pin,
+    color: Colors.green,
+  );
+
+  // Quick and dirty marker maker
+  Marker createMarkerFromData(LatLng location, MarkerData data) {
+    return Marker(
+      point: location,
+      width: 80,
+      height: 80,
+      child: Icon(
+        data.icon,
+        color: data.color,
+        size: 24.0,
+        semanticLabel: 'Marker',
+      ),
+    );
+  }
+
+  // Returns the list of markers required for build.
+  List<Marker> buildMarkers() {
+    List<Marker> markers = [];
+    markers.add(createMarkerFromData(userLocation, user_marker_data));
+    for (var post_location in post_locations) {
+      markers.add(createMarkerFromData(post_location, post_marker_data));
+    }
+    return markers;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,40 +97,18 @@ class _TestMapState extends State<TestMap> {
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
         ),
-        MarkerLayer(
-          markers: [
-            Marker(
-              point: userLocation,
-              width: 80,
-              height: 80,
-              child: Icon(
-                Icons.arrow_downward,
-                color: Colors.red,
-                size: 24.0,
-                semanticLabel: 'You are here',
-              ),
-            ),
-          ],
-        ),
+        MarkerLayer(markers: buildMarkers()),
       ],
     );
   }
 }
 
-/*
-class InheritedMapDisplay extends InheritedWidget {
-  LatLng coords = LatLng(0, 0);
-
-  InheritedMapDisplay({this.coords = const LatLng(0, 0), required Widget child})
-    : super(child: child);
-
-  @override
-  bool updateShouldNotify(InheritedWidget oldWidget) => true;
-
-  static InheritedMapDisplay? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<InheritedMapDisplay>();
+/// Data required to display a marker.
+class MarkerData {
+  MarkerData({this.icon = Icons.location_pin, this.color = Colors.blue});
+  final IconData icon;
+  final Color color;
 }
-*/
 
 /// Determine the current position of the device.
 /// CODE PASTED FROM GEOLOCATOR TUTORIAL: https://pub.dev/packages/geolocator
