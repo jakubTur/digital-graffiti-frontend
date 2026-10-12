@@ -5,6 +5,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 
+
+///TODO: split this megascript into smaller scripts when it grows out of scale
+
 void main() {
   runApp(const MyApp());
 }
@@ -12,7 +15,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,6 +33,7 @@ class TestMap extends StatefulWidget {
   State<TestMap> createState() => _TestMapState();
 }
 
+/// State of the test map. Contains information about where the posts are.
 class _TestMapState extends State<TestMap> {
   @override
   void initState() {
@@ -45,8 +48,9 @@ class _TestMapState extends State<TestMap> {
 
   LatLng userLocation = LatLng(0, 0);
 
-  /// Dummy post locations
-  /// TODO: read this from backend and put it here, and that will update the pins
+  /// Locations of posts. Dummy variables for now.
+  /// TODO: replace this with data drawn from backend, and that will update the pins
+  /// TODO: replace "post_locations" with more complex data structure, storing post title, content, etc.
   List<LatLng> post_locations = [
     LatLng(10, 10),
     LatLng(20, 10),
@@ -79,7 +83,8 @@ class _TestMapState extends State<TestMap> {
     );
   }
 
-  // Returns the list of markers required for build.
+  // Returns the list of markers required for the build() method.
+  // TODO: replace this with a stateful approach (more scalable)
   List<Marker> buildMarkers() {
     List<Marker> markers = [];
     markers.add(createMarkerFromData(userLocation, user_marker_data));
@@ -89,6 +94,7 @@ class _TestMapState extends State<TestMap> {
     return markers;
   }
 
+  /// Builds the map. Called again when the map changes.
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
@@ -104,6 +110,7 @@ class _TestMapState extends State<TestMap> {
 }
 
 /// Data required to display a marker.
+/// Dummy style class. TODO: refactor into something fancy.
 class MarkerData {
   MarkerData({this.icon = Icons.location_pin, this.color = Colors.blue});
   final IconData icon;
