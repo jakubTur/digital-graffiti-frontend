@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,7 +24,9 @@ class _TestMapState extends State<TestMap> {
 
   void updateLocation() async {
     Position position = await _determinePosition();
-    userLocation = LatLng(position.latitude, position.longitude);
+    setState(() {
+      userLocation = LatLng(position.latitude, position.longitude);
+    });
   }
 
   LatLng userLocation = LatLng(0, 0);
