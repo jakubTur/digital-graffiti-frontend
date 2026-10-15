@@ -1,8 +1,13 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:frontend/features/map/data/map_model.dart';
+import 'package:frontend/features/map/data/post_data.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart'; // TODO: for clustering
+import 'package:provider/provider.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart'; // TODO: for vector map
 
 class TestMap extends StatefulWidget {
@@ -41,38 +46,26 @@ class _TestMapState extends State<TestMap> {
     LatLng(20, 20),
   ];
 
-  // Style information for the user marker
-  MarkerData user_marker_data = MarkerData(icon: Icons.man);
-
-  // Style information
-  // TODO: replace with a more complex data structure later
-  MarkerData post_marker_data = MarkerData(
-    icon: Icons.location_pin,
-    color: Colors.green,
-  );
-
   // Quick and dirty marker maker
-  Marker createMarkerFromData(LatLng location, MarkerData data) {
+  Marker createMarkerFromData(LatLng location, IconData icon, Color color) {
     return Marker(
       point: location,
       width: 80,
       height: 80,
-      child: Icon(
-        data.icon,
-        color: data.color,
-        size: 24.0,
-        semanticLabel: 'Marker',
-      ),
+      child: Icon(icon, color: color, size: 24.0, semanticLabel: 'Marker'),
     );
   }
 
   // Returns the list of markers required for the build() method.
   // TODO: replace this with a stateful approach (more scalable)
-  List<Marker> buildMarkers() {
+  List<Marker> buildMarkers(MapView<int, PostData> postData) {
     List<Marker> markers = [];
-    markers.add(createMarkerFromData(userLocation, user_marker_data));
-    for (var post_location in post_locations) {
-      markers.add(createMarkerFromData(post_location, post_marker_data));
+    markers.add(createMarkerFromData(userLocation, Icons.man, Colors.blue));
+
+    for (PostData post in postData.values) {
+      markers.add(
+        createMarkerFromData(post.location, Icons.location_pin, Colors.green),
+      );
     }
     return markers;
   }
@@ -87,18 +80,14 @@ class _TestMapState extends State<TestMap> {
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: "digital-graffiti",
         ),
-        MarkerLayer(markers: buildMarkers()),
+        Consumer<MapModel>(
+          builder: (context, map, child) {
+            return MarkerLayer(markers: buildMarkers(map.posts));
+          },
+        ), // TODO MAKE THIS A CONSUMER
       ],
     );
   }
-}
-
-/// Data required to display a marker.
-/// Dummy style class. TODO: refactor into something fancy.
-class MarkerData {
-  MarkerData({this.icon = Icons.location_pin, this.color = Colors.blue});
-  final IconData icon;
-  final Color color;
 }
 
 /// Determine the current position of the device.
