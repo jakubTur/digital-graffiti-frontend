@@ -6,7 +6,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'post_data.dart';
 
-/// Data class storing map state (user location and posts).
+/// Data class storing state local to map (user location and posts).
 /// Made with help of state management tutorial: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
 /// Stores data locally for now. Will be dependant on backend later.
 class MapModel extends ChangeNotifier {

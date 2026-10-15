@@ -7,17 +7,17 @@ import 'package:frontend/features/map/data/post_data.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-class TestMap extends StatefulWidget {
-  const TestMap({super.key, required this.title});
-
-  final String title;
+class DisplayMap extends StatefulWidget {
+  const DisplayMap({super.key});
 
   @override
-  State<TestMap> createState() => _TestMapState();
+  State<DisplayMap> createState() => _DisplayMapState();
 }
 
 /// State of the test map. Contains information about where the posts are.
-class _TestMapState extends State<TestMap> {
+class _DisplayMapState extends State<DisplayMap> {
+  final _mapController = MapController();
+
   @override
   void initState() {
     super.initState();
@@ -35,7 +35,10 @@ class _TestMapState extends State<TestMap> {
   }
 
   /// Builds a list of markers from post data.
-  List<Marker> buildMarkers(LatLng userLocation, MapView<int, PostData> postData) {
+  List<Marker> buildMarkers(
+    LatLng userLocation,
+    MapView<int, PostData> postData,
+  ) {
     List<Marker> markers = [];
     markers.add(createMarkerFromData(userLocation, Icons.man, Colors.blue));
 
@@ -51,6 +54,7 @@ class _TestMapState extends State<TestMap> {
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
+      mapController: _mapController,
       options: const MapOptions(),
       children: [
         TileLayer(
@@ -59,7 +63,9 @@ class _TestMapState extends State<TestMap> {
         ),
         Consumer<MapModel>(
           builder: (context, map, child) {
-            return MarkerLayer(markers: buildMarkers(map.userLocation, map.posts));
+            return MarkerLayer(
+              markers: buildMarkers(map.userLocation, map.posts),
+            );
           },
         ),
       ],
