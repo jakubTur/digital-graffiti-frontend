@@ -4,11 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/data/post_data.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart'; // TODO: for clustering
-import 'package:vector_map_tiles/vector_map_tiles.dart'; // TODO: for vector map
 
 class TestMap extends StatefulWidget {
   const TestMap({super.key, required this.title});
@@ -37,8 +34,7 @@ class _TestMapState extends State<TestMap> {
     );
   }
 
-  // Returns the list of markers required for the build() method.
-  // TODO: replace this with a stateful approach (more scalable)
+  /// Builds a list of markers from post data.
   List<Marker> buildMarkers(LatLng userLocation, MapView<int, PostData> postData) {
     List<Marker> markers = [];
     markers.add(createMarkerFromData(userLocation, Icons.man, Colors.blue));

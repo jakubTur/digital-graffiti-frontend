@@ -3,24 +3,35 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+
 import 'post_data.dart';
 
-/// Data class encapsulating map state.
+/// Data class storing map state (user location and posts).
 /// Made with help of state management tutorial: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
-/// Local for now. Will be dependant on backend later.
+/// Stores data locally for now. Will be dependant on backend later.
 class MapModel extends ChangeNotifier {
-  final Map<int, PostData> _posts = { // test values
+
+  /// User location to be displayed on the map.
+  /// TODO: update periodically (right now updates just once)
+  LatLng _userLocation = LatLng(0, 0);
+
+  /// Posts downloaded from the backend will be stored here.
+  /// Any posts added here will be displayed on the map
+  /// Right now it's just 2 sample posts
+  final Map<int, PostData> _posts = {
     1: PostData(location: LatLng(50, 50), title: "Helo"),
-    2: PostData(location: LatLng(51, 50), title: "Hiii")
+    2: PostData(location: LatLng(51, 50), title: "Hiii"),
   };
 
-  LatLng userLocation = LatLng(0, 0);
+  /// Getter for user location
+  LatLng get userLocation => _userLocation;
 
+  /// Getter for posts
   UnmodifiableMapView<int, PostData> get posts => UnmodifiableMapView(_posts);
 
   /// Tempoerary post-creation method
   /// Call to upload a new post (keeping it locally on the frontend)
-  /// TODO: replace with backend implementation
+  /// TODO: make this send a post creation request to the backend instead
   void upload(PostData newPost) {
     var post_id = 1;
     while (_posts.containsKey(post_id)) {
@@ -30,9 +41,10 @@ class MapModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateUserLocation()async {
+  /// Call to update the user's location
+  void updateUserLocation() async {
     Position position = await _determinePosition();
-    userLocation = LatLng(position.latitude, position.longitude);
+    _userLocation = LatLng(position.latitude, position.longitude);
     notifyListeners();
   }
 
