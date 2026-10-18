@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/map/presentation/map_screen.dart';
+import 'package:frontend/features/auth/presentation/login_ui.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Digital Graffiti', home: MapScreen());
+    // TODO: if the user is logged in, redirect to the map screen
+    return MaterialApp(title: 'Digital Graffiti', home: LoginUi());
   }
 }
