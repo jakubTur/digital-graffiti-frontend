@@ -1,14 +1,14 @@
-/*
 import 'package:flutter/material.dart';
+import 'package:flutter_painter/flutter_painter.dart';
 
-class ExampleWidget extends StatefulWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+class DrawingCanvas extends StatefulWidget {
+  const DrawingCanvas({Key? key}) : super(key: key);
 
   @override
-  _ExampleWidgetState createState() => _ExampleWidgetState();
+  _DrawingCanvasState createState() => _DrawingCanvasState();
 }
 
-class _ExampleWidgetState extends State<ExampleWidget> {
+class _DrawingCanvasState extends State<DrawingCanvas> {
   PainterController controller = PainterController();
 
   @override
@@ -16,10 +16,7 @@ class _ExampleWidgetState extends State<ExampleWidget> {
     return SizedBox(
       width: 300,
       height: 300,
-      child: FlutterPainter(
-        controller: controller,        
-      ),
+      child: FlutterPainter(controller: controller),
     );
   }
 }
-*/
