@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
+import 'package:frontend/features/map/presentation/map_screen.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  GoRouter router = GoRouter(
+    routes: [
+      GoRoute(path: '/', builder: (context, state) => LoginUi()),
+      GoRoute(path: '/map', builder: (context,state) => MapScreen())
+      // TODO: put other routes here!!!
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    // TODO: if the user is logged in, redirect to the map screen
-    return MaterialApp(title: 'Digital Graffiti', home: LoginUi());
+    return MaterialApp.router(routerConfig: router);
   }
 }

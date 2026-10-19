@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:go_router/go_router.dart';
 
 @Preview(name: 'Login - phone', size: Size(390, 844))
 Widget loginPreview() => const LoginUi();
@@ -22,6 +23,7 @@ class _LoginUiState extends State<LoginUi> {
     //TODO: integrate with backend
 
     //TODO: update _credentialsError if login failed
+    context.go('/map'); // this routes to login screen
 
     setState(() {
       _credentialsError = "E-mail or password is incorrect";
