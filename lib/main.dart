@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(path: '/', builder: (context, state) => LoginUi()),
       GoRoute(path: '/map', builder: (context,state) => MapScreen())
+      // TODO: put other routes here!!!
     ],
   );
 
