@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
+import 'package:frontend/features/drawing/presentation/drawing_canvas.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,7 +12,8 @@ class MyApp extends StatelessWidget {
   GoRouter router = GoRouter(
     routes: [
       GoRoute(path: '/', builder: (context, state) => LoginUi()),
-      GoRoute(path: '/map', builder: (context,state) => MapScreen())
+      GoRoute(path: '/map', builder: (context,state) => MapScreen()),
+      GoRoute(path: '/canvas', builder: (context,state) => DrawingCanvas()),
       // TODO: put other routes here!!!
     ],
   );
