@@ -1,18 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:custom_paint/custom_paint.dart';
+import 'package:frontend/features/drawing/data/drawn_line.dart';
 
 class GraffitiPainter extends CustomPainter {
+  final List<DrawnLine> lines;
+
+  GraffitiPainter(this.lines);
+
   @override
   void paint(Canvas canvas, Size size) {
-    // todo: painting
-    //// 1
-    Offset startPoint = Offset(0, 0);
+    for (int lineNo = 0; lineNo < lines.length; lineNo++) {
+      canvas.drawPath(lines[lineNo].path, Paint());
+    }
+    /*
+    // todo: painting    // 1
+    Paint paintMountains = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.brown;
     // 2
-    Offset endPoint = Offset(size.width, size.height);
+    Paint paintSun = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.deepOrangeAccent;
+
     // 3
-    Paint paint = Paint();
+    Path path = Path();
+    path.moveTo(0, 250);
+    path.lineTo(100, 200);
+    path.lineTo(150, 150);
+    path.lineTo(200, 50);
+    path.lineTo(250, 150);
+    path.lineTo(300, 200);
+    path.lineTo(size.width, 250);
+    path.lineTo(0, 250);
+    canvas.drawPath(path, paintMountains);
+
     // 4
-    canvas.drawLine(startPoint, endPoint, paint);
+    path = Path();
+    path.moveTo(100, 100);
+    path.addOval(Rect.fromCircle(center: Offset(100, 100), radius: 25));
+    canvas.drawPath(path, paintSun);
+    */
   }
 
   @override
