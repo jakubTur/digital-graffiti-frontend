@@ -19,6 +19,7 @@
     <application
         android:label="frontend"
         android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
         tools:ignore="Instantiatable">
         <activity
             android:name=".MainActivity"
