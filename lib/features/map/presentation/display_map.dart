@@ -16,8 +16,6 @@ class DisplayMap extends StatefulWidget {
 
 /// State of the test map. Contains information about where the posts are.
 class _DisplayMapState extends State<DisplayMap> {
-  final _mapController = MapController();
-
   @override
   void initState() {
     super.initState();
@@ -53,8 +51,10 @@ class _DisplayMapState extends State<DisplayMap> {
   /// Builds the map. Called again when the map changes.
   @override
   Widget build(BuildContext context) {
+    final mapModel = Provider.of<MapModel>(context, listen: false);
+
     return FlutterMap(
-      mapController: _mapController,
+      mapController: mapModel.mapController,
       options: const MapOptions(),
       children: [
         TileLayer(

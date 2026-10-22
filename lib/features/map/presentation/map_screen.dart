@@ -7,6 +7,9 @@ import 'display_map.dart';
 
 /// Main screen of the app, containing the map and its model (aka state repository)
 class MapScreen extends StatelessWidget {
+  const MapScreen({super.key});
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Map',
