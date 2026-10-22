@@ -28,10 +28,7 @@ class _PaintScreenState extends State<PaintScreen> {
       child: Container(
         color: Colors.green[100],
         child: Stack(
-          children: [
-            buildAllPaths(context),
-            buildCurrentPath(context),
-          ],
+          children: [buildAllPaths(context), buildCurrentPath(context)],
         ),
       ),
     );
