@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 
 /// UI containing buttons that display above the map.
 class MapUi extends StatelessWidget {
+  const MapUi({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -15,15 +17,49 @@ class MapUi extends StatelessWidget {
         children: [
           Consumer<MapModel>(
             builder: (context, map, child) {
-              return IconButton(
-                onPressed: () {
-                  map.upload(
-                    PostData(location: map.userLocation, title: "new post"),
-                  ); // TODO replace this with local post UI
-                },
-                icon: Icon(Icons.add_circle),
-                iconSize: 72,
+              return Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.deepPurple,
+                    onPressed: () {
+                      map.upload(
+                        PostData(location: map.userLocation, title: "new post"),
+                      ); // TODO replace this with local post UI
+                    },
+                    child: const Icon(
+                      Icons.add_circle,
+                      color: Colors.white,
+                      size: 65,
+                    ),
+                  ),
+                ),
               ); // post
+            },
+          ),
+          Consumer<MapModel>(
+            builder: (context, map, child) {
+              return Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.deepPurple,
+                    onPressed: () {
+                      map.moveMap(map.userLocation, 19.4, 0.0);
+                      map.updateUserLocation();
+                    },
+                    child: const Icon(
+                      Icons.my_location,
+                      color: Colors.white,
+                      size: 65,
+                    ),
+                  ), // location
+                ),
+              );
             },
           ),
           // TODO: add other UI buttons here
