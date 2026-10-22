@@ -1,8 +1,9 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'post_data.dart';
 
@@ -10,6 +11,9 @@ import 'post_data.dart';
 /// Made with help of state management tutorial: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
 /// Stores data locally for now. Will be dependant on backend later.
 class MapModel extends ChangeNotifier {
+  final _mapController = MapController();
+
+  MapController get mapController => _mapController;
 
   /// User location to be displayed on the map.
   /// TODO: update periodically (right now updates just once)
@@ -33,11 +37,11 @@ class MapModel extends ChangeNotifier {
   /// Call to upload a new post (keeping it locally on the frontend)
   /// TODO: make this send a post creation request to the backend instead
   void upload(PostData newPost) {
-    var post_id = 1;
-    while (_posts.containsKey(post_id)) {
-      post_id++;
+    var postId = 1;
+    while (_posts.containsKey(postId)) {
+      postId++;
     }
-    _posts[post_id] = newPost;
+    _posts[postId] = newPost;
     notifyListeners();
   }
 
@@ -45,6 +49,12 @@ class MapModel extends ChangeNotifier {
   void updateUserLocation() async {
     Position position = await _determinePosition();
     _userLocation = LatLng(position.latitude, position.longitude);
+    notifyListeners();
+  }
+
+  // Function to move the map to coordinates, change zoom and rotation
+  void moveMap(LatLng center, double zoom, double degree) {
+    _mapController.moveAndRotate(center, zoom, degree);
     notifyListeners();
   }
 
