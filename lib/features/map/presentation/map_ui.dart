@@ -17,20 +17,23 @@ class MapUi extends StatelessWidget {
         children: [
           Consumer<MapModel>(
             builder: (context, map, child) {
-              return SizedBox(
-                width: 80,
-                height: 80,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.deepPurple,
-                  onPressed: () {
-                    map.upload(
-                      PostData(location: map.userLocation, title: "new post"),
-                    ); // TODO replace this with local post UI
-                  },
-                  child: const Icon(
-                    Icons.add_circle,
-                    color: Colors.white,
-                    size: 65,
+              return Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.deepPurple,
+                    onPressed: () {
+                      map.upload(
+                        PostData(location: map.userLocation, title: "new post"),
+                      ); // TODO replace this with local post UI
+                    },
+                    child: const Icon(
+                      Icons.add_circle,
+                      color: Colors.white,
+                      size: 65,
+                    ),
                   ),
                 ),
               ); // post
@@ -38,20 +41,24 @@ class MapUi extends StatelessWidget {
           ),
           Consumer<MapModel>(
             builder: (context, map, child) {
-              return SizedBox(
-                width: 80,
-                height: 80,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.deepPurple,
-                  onPressed: () {
-                    map.moveMap(map.userLocation, 19.4, 0.0);
-                  },
-                  child: const Icon(
-                    Icons.my_location,
-                    color: Colors.white,
-                    size: 65,
-                  ),
-                ), // location
+              return Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.deepPurple,
+                    onPressed: () {
+                      map.moveMap(map.userLocation, 19.4, 0.0);
+                      map.updateUserLocation();
+                    },
+                    child: const Icon(
+                      Icons.my_location,
+                      color: Colors.white,
+                      size: 65,
+                    ),
+                  ), // location
+                ),
               );
             },
           ),
