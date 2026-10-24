@@ -23,6 +23,7 @@ class MapUi extends StatelessWidget {
                   width: 80,
                   height: 80,
                   child: FloatingActionButton(
+                    heroTag: 'upload_button',
                     backgroundColor: Colors.deepPurple,
                     onPressed: () {
                       map.upload(
@@ -47,6 +48,7 @@ class MapUi extends StatelessWidget {
                   width: 80,
                   height: 80,
                   child: FloatingActionButton(
+                    heroTag: 'location_button',
                     backgroundColor: Colors.deepPurple,
                     onPressed: () {
                       map.moveMap(map.userLocation, 19.4, 0.0);
