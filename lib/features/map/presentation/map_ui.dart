@@ -50,7 +50,6 @@ class MapUi extends StatelessWidget {
                     backgroundColor: Colors.deepPurple,
                     onPressed: () {
                       map.moveMap(map.userLocation, 19.4, 0.0);
-                      map.startUserLocationUpdates();
                     },
                     child: const Icon(
                       Icons.my_location,

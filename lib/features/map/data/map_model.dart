@@ -14,6 +14,8 @@ import 'post_data.dart';
 class MapModel extends ChangeNotifier {
   final _mapController = MapController();
 
+  TickerProvider? vsync;
+
   MapController get mapController => _mapController;
 
   /// User location to be displayed on the map.
@@ -30,6 +32,9 @@ class MapModel extends ChangeNotifier {
 
   /// Used to keep track of the user's location
   StreamSubscription<Position>? _positionSubscription;
+
+  /// Active animation controller for map movement
+  AnimationController? _activeAnimationController;
 
   /// Getter for user location
   LatLng get userLocation => _userLocation;
@@ -67,7 +72,7 @@ class MapModel extends ChangeNotifier {
           ).listen((Position position) {
             LatLng coordinates = LatLng(position.latitude, position.longitude);
             _userLocation = coordinates;
-            moveMap(coordinates);
+            moveMap(coordinates, 19.4, 0.0);
 
             debugPrint(
               "New location: ${position.latitude} ${position.longitude}",
@@ -80,10 +85,64 @@ class MapModel extends ChangeNotifier {
     }
   }
 
-  // Function to move the map to coordinates, change zoom and rotation
-  void moveMap(LatLng center, [double zoom = 19.4, double degree = 0.0]) {
+  /// Function to move the map to coordinates, change zoom and rotation
+  void recenterMap(LatLng center, [double zoom = 19.4, double degree = 0.0]) {
     _mapController.moveAndRotate(center, zoom, degree);
     notifyListeners();
+  }
+
+  /// Function to move the map to coordinates smoothly
+  void moveMap(LatLng center, double zoom, double rotation) {
+    if (vsync == null) {
+      _mapController.move(center, zoom);
+      return;
+    }
+    _activeAnimationController?.dispose();
+    _activeAnimationController = null;
+
+    final camera = _mapController.camera;
+    final latTween = Tween<double>(
+      begin: camera.center.latitude,
+      end: center.latitude,
+    );
+    final lngTween = Tween<double>(
+      begin: camera.center.longitude,
+      end: center.longitude,
+    );
+    final zoomTween = Tween<double>(begin: camera.zoom, end: zoom);
+
+    final rotationTween = Tween<double>(begin: camera.rotation, end: rotation);
+
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: vsync!,
+    );
+    _activeAnimationController = controller;
+
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.fastOutSlowIn,
+    );
+
+    controller.addListener(() {
+      _mapController.moveAndRotate(
+        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+        zoomTween.evaluate(animation),
+        rotationTween.evaluate(animation),
+      );
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        controller.dispose();
+        if (_activeAnimationController == controller) {
+          _activeAnimationController = null;
+        }
+      }
+    });
+
+    controller.forward();
   }
 
   /// Checks the location permissions, throws an exception if unavailable
@@ -117,6 +176,7 @@ class MapModel extends ChangeNotifier {
   @override
   void dispose() {
     stopLocationUpdates();
+    _activeAnimationController?.dispose();
     super.dispose();
   }
 
