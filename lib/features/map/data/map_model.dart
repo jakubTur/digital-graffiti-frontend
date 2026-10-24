@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -27,6 +28,9 @@ class MapModel extends ChangeNotifier {
     2: PostData(location: LatLng(51, 50), title: "Hiii"),
   };
 
+  /// Used to keep track of the user's location
+  StreamSubscription<Position>? _positionSubscription;
+
   /// Getter for user location
   LatLng get userLocation => _userLocation;
 
@@ -45,22 +49,46 @@ class MapModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Call to update the user's location
-  void updateUserLocation() async {
-    Position position = await _determinePosition();
-    _userLocation = LatLng(position.latitude, position.longitude);
-    notifyListeners();
+  /// Call to start updating the user's location
+  void startUserLocationUpdates() async {
+    // Avoid creating duplicate listeners
+    if (_positionSubscription != null) {
+      return;
+    }
+
+    try {
+      await _ensureLocationPermissions();
+      _positionSubscription =
+          Geolocator.getPositionStream(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.best,
+              distanceFilter: 1,
+            ),
+          ).listen((Position position) {
+            LatLng coordinates = LatLng(position.latitude, position.longitude);
+            _userLocation = coordinates;
+            moveMap(coordinates);
+
+            debugPrint(
+              "New location: ${position.latitude} ${position.longitude}",
+            );
+            notifyListeners();
+          });
+    } catch (e) {
+      debugPrint(e.toString());
+      return;
+    }
   }
 
   // Function to move the map to coordinates, change zoom and rotation
-  void moveMap(LatLng center, double zoom, double degree) {
+  void moveMap(LatLng center, [double zoom = 19.4, double degree = 0.0]) {
     _mapController.moveAndRotate(center, zoom, degree);
     notifyListeners();
   }
 
-  /// Determine the current position of the device.
+  /// Checks the location permissions, throws an exception if unavailable
   /// CODE PASTED FROM GEOLOCATOR TUTORIAL: https://pub.dev/packages/geolocator
-  Future<Position> _determinePosition() async {
+  Future<void> _ensureLocationPermissions() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -83,7 +111,18 @@ class MapModel extends ChangeNotifier {
         'Location permissions are permanently denied, we cannot request permissions.',
       );
     }
+  }
 
-    return await Geolocator.getCurrentPosition();
+  /// Stream is cancelled when MapModel is disposed
+  @override
+  void dispose() {
+    stopLocationUpdates();
+    super.dispose();
+  }
+
+  /// Stop listening to location updates
+  void stopLocationUpdates() {
+    _positionSubscription?.cancel();
+    _positionSubscription = null;
   }
 }

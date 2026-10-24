@@ -19,7 +19,7 @@ class _DisplayMapState extends State<DisplayMap> {
   @override
   void initState() {
     super.initState();
-    Provider.of<MapModel>(context, listen: false).updateUserLocation();
+    Provider.of<MapModel>(context, listen: false).startUserLocationUpdates();
   }
 
   // Quick and dirty marker maker
