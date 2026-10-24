@@ -60,7 +60,7 @@ class _PaintScreenState extends State<PaintScreen> {
       setState(() {
         var path = Path();
         path.moveTo(point.dx, point.dy);
-        currentLine = DrawnLine(Path(), graffitiColor, graffitiWidth);
+        currentLine = DrawnLine(path, graffitiColor, graffitiWidth);
         lines.add(currentLine);
       });
     }
