@@ -5,6 +5,8 @@ import 'package:frontend/features/drawing/data/drawn_line.dart';
 import 'package:frontend/features/drawing/presentation/graffiti_painter.dart';
 
 class PaintScreen extends StatefulWidget {
+  const PaintScreen({super.key});
+
   @override
   State<PaintScreen> createState() => _PaintScreenState();
 }
@@ -27,7 +29,6 @@ class _PaintScreenState extends State<PaintScreen> {
         color: Colors.green[100],
         child: Stack(
           children: [
-            CustomPaint(painter: GraffitiPainter(lines)),
             buildAllPaths(context),
             buildCurrentPath(context),
           ],
@@ -36,6 +37,8 @@ class _PaintScreenState extends State<PaintScreen> {
     );
   }
 
+  // Builds all lines that have already been drawn.
+  // Does not build the currently-drawn line.
   Widget buildAllPaths(BuildContext context) {
     return RepaintBoundary(
       child: Container(
@@ -51,31 +54,28 @@ class _PaintScreenState extends State<PaintScreen> {
     );
   }
 
+  // Builds the line that is currently being drawn.
+  // Separate from buildAllPaths for performance (you don't want to rebuild lines that were already painted).
   GestureDetector buildCurrentPath(BuildContext context) {
     void onPanStart(DragStartDetails details) {
-      print('User started drawing');
       final box = context.findRenderObject() as RenderBox;
       final point = box.globalToLocal(details.globalPosition);
-      print(point);
-      setState(() {
-        var path = Path();
-        path.moveTo(point.dx, point.dy);
-        currentLine = DrawnLine(path, graffitiColor, graffitiWidth);
-        lines.add(currentLine);
-      });
+      var path = Path();
+      path.moveTo(point.dx, point.dy);
+      currentLine = DrawnLine(path, graffitiColor, graffitiWidth);
+      currentLineStreamController.add(currentLine);
     }
 
     void onPanUpdate(DragUpdateDetails details) {
       final box = context.findRenderObject() as RenderBox;
       final point = box.globalToLocal(details.globalPosition);
-      print(point);
-      setState(() {
-        currentLine.path.lineTo(point.dx, point.dy);
-      });
+      currentLine.path.lineTo(point.dx, point.dy);
+      currentLineStreamController.add(currentLine);
     }
 
     void onPanEnd(DragEndDetails details) {
-      print('User ended drawing');
+      lines = List.from(lines)..add(currentLine);
+      linesStreamController.add(lines);
     }
 
     return GestureDetector(
