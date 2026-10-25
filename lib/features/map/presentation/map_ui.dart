@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/data/post_data.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 /// UI containing buttons that display above the map.
@@ -26,6 +27,7 @@ class MapUi extends StatelessWidget {
                     heroTag: 'upload_button',
                     backgroundColor: Colors.deepPurple,
                     onPressed: () {
+                      context.go('/canvas');
                       map.upload(
                         PostData(location: map.userLocation, title: "new post"),
                       ); // TODO replace this with local post UI
