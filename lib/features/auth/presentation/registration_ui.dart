@@ -3,6 +3,7 @@ import 'package:flutter/widget_previews.dart';
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
 import '../data/repositories/user_repository_impl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FakeUserRepository implements UserRepository {
   const FakeUserRepository();
@@ -62,7 +63,16 @@ class RegistrationUiState extends State<RegistrationUi> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration failed')),
       );
+    } finally {
+      await saveUserDataToPreferences(user);
     }
+  }
+
+  Future<void> saveUserDataToPreferences(User user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('nickname', user.nickname);
+    prefs.setString('email', user.email);
+    prefs.setString('password', user.password);
   }
 
   @override
