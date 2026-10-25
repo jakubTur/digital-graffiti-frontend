@@ -67,6 +67,7 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
           builder: (context, map, child) {
             return MarkerLayer(
               markers: buildMarkers(map.userLocation, map.posts),
+              rotate: true,
             );
           },
         ),

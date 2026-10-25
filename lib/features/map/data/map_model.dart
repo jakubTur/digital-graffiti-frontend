@@ -19,8 +19,8 @@ class MapModel extends ChangeNotifier {
   MapController get mapController => _mapController;
 
   /// User location to be displayed on the map.
-  /// TODO: update periodically (right now updates just once)
   LatLng _userLocation = LatLng(0, 0);
+  bool _isFirstLocation = true;
 
   /// Posts downloaded from the backend will be stored here.
   /// Any posts added here will be displayed on the map
@@ -35,6 +35,9 @@ class MapModel extends ChangeNotifier {
 
   /// Active animation controller for map movement
   AnimationController? _activeAnimationController;
+
+  /// Active animation controller for location movement
+  AnimationController? _locationAnimationController;
 
   /// Getter for user location
   LatLng get userLocation => _userLocation;
@@ -71,18 +74,75 @@ class MapModel extends ChangeNotifier {
             ),
           ).listen((Position position) {
             LatLng coordinates = LatLng(position.latitude, position.longitude);
-            _userLocation = coordinates;
-            moveMap(coordinates, 19.4, 0.0);
+            if (_isFirstLocation) {
+              _userLocation = coordinates;
+              _isFirstLocation = false;
+              recenterMap(coordinates, 19.4, 0.0);
+              notifyListeners();
+            } else {
+              _animateUserLocation(coordinates);
+              moveMap(coordinates, 19.4, 0.0);
+            }
 
             debugPrint(
               "New location: ${position.latitude} ${position.longitude}",
             );
-            notifyListeners();
           });
     } catch (e) {
       debugPrint(e.toString());
       return;
     }
+  }
+
+  void _animateUserLocation(LatLng targetLocation) {
+    if (vsync == null) {
+      _userLocation = targetLocation;
+      notifyListeners();
+      return;
+    }
+    _locationAnimationController?.dispose();
+    _locationAnimationController = null;
+
+    final startLocation = _userLocation;
+    final latTween = Tween<double>(
+      begin: startLocation.latitude,
+      end: targetLocation.latitude,
+    );
+    final lngTween = Tween<double>(
+      begin: startLocation.longitude,
+      end: targetLocation.longitude,
+    );
+
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: vsync!,
+    );
+    _locationAnimationController = controller;
+
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.fastOutSlowIn,
+    );
+
+    controller.addListener(() {
+      _userLocation = LatLng(
+        latTween.evaluate(animation),
+        lngTween.evaluate(animation),
+      );
+      notifyListeners();
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        controller.dispose();
+        if (_locationAnimationController == controller) {
+          _locationAnimationController = null;
+        }
+      }
+    });
+
+    controller.forward();
   }
 
   /// Function to move the map to coordinates, change zoom and rotation
@@ -172,17 +232,18 @@ class MapModel extends ChangeNotifier {
     }
   }
 
+  /// Stop listening to location updates
+  void stopLocationUpdates() {
+    _positionSubscription?.cancel();
+    _positionSubscription = null;
+  }
+
   /// Stream is cancelled when MapModel is disposed
   @override
   void dispose() {
     stopLocationUpdates();
     _activeAnimationController?.dispose();
+    _locationAnimationController?.dispose();
     super.dispose();
-  }
-
-  /// Stop listening to location updates
-  void stopLocationUpdates() {
-    _positionSubscription?.cancel();
-    _positionSubscription = null;
   }
 }
