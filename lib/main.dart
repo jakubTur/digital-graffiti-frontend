@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(path: '/', builder: (context, state) => LoginUi()),
       GoRoute(path: '/map', builder: (context, state) => MapScreen()),
-      GoRoute(path: '/canvas', builder: (context, state) => PaintScreen()),
+      GoRoute(path: '/canvas', builder: (context,state) => PaintScreen()),
       // TODO: put other routes here!!!
     ],
   );
