@@ -15,11 +15,13 @@ class DisplayMap extends StatefulWidget {
 }
 
 /// State of the test map. Contains information about where the posts are.
-class _DisplayMapState extends State<DisplayMap> {
+class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    Provider.of<MapModel>(context, listen: false).updateUserLocation();
+    final mapModel = Provider.of<MapModel>(context, listen: false);
+    mapModel.vsync = this;
+    mapModel.startUserLocationUpdates();
   }
 
   // Quick and dirty marker maker
@@ -65,6 +67,7 @@ class _DisplayMapState extends State<DisplayMap> {
           builder: (context, map, child) {
             return MarkerLayer(
               markers: buildMarkers(map.userLocation, map.posts),
+              rotate: true,
             );
           },
         ),

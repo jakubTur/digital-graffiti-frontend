@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -13,11 +14,13 @@ import 'post_data.dart';
 class MapModel extends ChangeNotifier {
   final _mapController = MapController();
 
+  TickerProvider? vsync;
+
   MapController get mapController => _mapController;
 
   /// User location to be displayed on the map.
-  /// TODO: update periodically (right now updates just once)
   LatLng _userLocation = LatLng(0, 0);
+  bool _isFirstLocation = true;
 
   /// Posts downloaded from the backend will be stored here.
   /// Any posts added here will be displayed on the map
@@ -26,6 +29,15 @@ class MapModel extends ChangeNotifier {
     1: PostData(location: LatLng(50, 50), title: "Helo"),
     2: PostData(location: LatLng(51, 50), title: "Hiii"),
   };
+
+  /// Used to keep track of the user's location
+  StreamSubscription<Position>? _positionSubscription;
+
+  /// Active animation controller for map movement
+  AnimationController? _activeAnimationController;
+
+  /// Active animation controller for location movement
+  AnimationController? _locationAnimationController;
 
   /// Getter for user location
   LatLng get userLocation => _userLocation;
@@ -45,22 +57,157 @@ class MapModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Call to update the user's location
-  void updateUserLocation() async {
-    Position position = await _determinePosition();
-    _userLocation = LatLng(position.latitude, position.longitude);
-    notifyListeners();
+  /// Call to start updating the user's location
+  void startUserLocationUpdates() async {
+    // Avoid creating duplicate listeners
+    if (_positionSubscription != null) {
+      return;
+    }
+
+    try {
+      await _ensureLocationPermissions();
+      _positionSubscription =
+          Geolocator.getPositionStream(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.best,
+              distanceFilter: 1,
+            ),
+          ).listen((Position position) {
+            LatLng coordinates = LatLng(position.latitude, position.longitude);
+            if (_isFirstLocation) {
+              _userLocation = coordinates;
+              _isFirstLocation = false;
+              recenterMap(coordinates, 19.4, 0.0);
+              notifyListeners();
+            } else {
+              _animateUserLocation(coordinates);
+              moveMap(coordinates, 19.4, 0.0);
+            }
+
+            debugPrint(
+              "New location: ${position.latitude} ${position.longitude}",
+            );
+          });
+    } catch (e) {
+      debugPrint(e.toString());
+      return;
+    }
   }
 
-  // Function to move the map to coordinates, change zoom and rotation
-  void moveMap(LatLng center, double zoom, double degree) {
+  void _animateUserLocation(LatLng targetLocation) {
+    if (vsync == null) {
+      _userLocation = targetLocation;
+      notifyListeners();
+      return;
+    }
+    _locationAnimationController?.dispose();
+    _locationAnimationController = null;
+
+    final startLocation = _userLocation;
+    final latTween = Tween<double>(
+      begin: startLocation.latitude,
+      end: targetLocation.latitude,
+    );
+    final lngTween = Tween<double>(
+      begin: startLocation.longitude,
+      end: targetLocation.longitude,
+    );
+
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: vsync!,
+    );
+    _locationAnimationController = controller;
+
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.fastOutSlowIn,
+    );
+
+    controller.addListener(() {
+      _userLocation = LatLng(
+        latTween.evaluate(animation),
+        lngTween.evaluate(animation),
+      );
+      notifyListeners();
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        controller.dispose();
+        if (_locationAnimationController == controller) {
+          _locationAnimationController = null;
+        }
+      }
+    });
+
+    controller.forward();
+  }
+
+  /// Function to move the map to coordinates, change zoom and rotation
+  void recenterMap(LatLng center, [double zoom = 19.4, double degree = 0.0]) {
     _mapController.moveAndRotate(center, zoom, degree);
     notifyListeners();
   }
 
-  /// Determine the current position of the device.
+  /// Function to move the map to coordinates smoothly
+  void moveMap(LatLng center, double zoom, double rotation) {
+    if (vsync == null) {
+      _mapController.move(center, zoom);
+      return;
+    }
+    _activeAnimationController?.dispose();
+    _activeAnimationController = null;
+
+    final camera = _mapController.camera;
+    final latTween = Tween<double>(
+      begin: camera.center.latitude,
+      end: center.latitude,
+    );
+    final lngTween = Tween<double>(
+      begin: camera.center.longitude,
+      end: center.longitude,
+    );
+    final zoomTween = Tween<double>(begin: camera.zoom, end: zoom);
+
+    final rotationTween = Tween<double>(begin: camera.rotation, end: rotation);
+
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: vsync!,
+    );
+    _activeAnimationController = controller;
+
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.fastOutSlowIn,
+    );
+
+    controller.addListener(() {
+      _mapController.moveAndRotate(
+        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+        zoomTween.evaluate(animation),
+        rotationTween.evaluate(animation),
+      );
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        controller.dispose();
+        if (_activeAnimationController == controller) {
+          _activeAnimationController = null;
+        }
+      }
+    });
+
+    controller.forward();
+  }
+
+  /// Checks the location permissions, throws an exception if unavailable
   /// CODE PASTED FROM GEOLOCATOR TUTORIAL: https://pub.dev/packages/geolocator
-  Future<Position> _determinePosition() async {
+  Future<void> _ensureLocationPermissions() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -83,7 +230,20 @@ class MapModel extends ChangeNotifier {
         'Location permissions are permanently denied, we cannot request permissions.',
       );
     }
+  }
 
-    return await Geolocator.getCurrentPosition();
+  /// Stop listening to location updates
+  void stopLocationUpdates() {
+    _positionSubscription?.cancel();
+    _positionSubscription = null;
+  }
+
+  /// Stream is cancelled when MapModel is disposed
+  @override
+  void dispose() {
+    stopLocationUpdates();
+    _activeAnimationController?.dispose();
+    _locationAnimationController?.dispose();
+    super.dispose();
   }
 }
