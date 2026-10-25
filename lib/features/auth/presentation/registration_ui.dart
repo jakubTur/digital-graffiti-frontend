@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
+import 'package:go_router/go_router.dart';
+
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
-import '../data/repositories/user_repository_impl.dart';
 
 class FakeUserRepository implements UserRepository {
   const FakeUserRepository();
@@ -12,8 +12,6 @@ class FakeUserRepository implements UserRepository {
     await Future.delayed(const Duration(seconds: 1)); // fake network delay
   }
 }
-
-
 
 class RegistrationUi extends StatefulWidget {
   final UserRepository repo;
@@ -38,30 +36,30 @@ class RegistrationUiState extends State<RegistrationUi> {
     super.dispose();
   }
 
-  void returnClicked(){
+  void returnClicked() {
     Navigator.of(context).pop();
   }
-  Future<void> registerClicked() async{
+
+  Future<void> registerClicked() async {
     debugPrint('registerClicked');
-    if(!formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) return;
     debugPrint('2: valid');
     final User user = User(
       nickname: nicknameController.text,
       password: passwordController.text,
       active: true,
       verified: false,
-      email: emailController.text
+      email: emailController.text,
     );
     debugPrint('3: user built');
     try {
       await widget.repo.registerUser(user);
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed('/login');
+      context.go('/');
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration failed')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Registration failed')));
     }
   }
 
@@ -95,7 +93,12 @@ class RegistrationUiState extends State<RegistrationUi> {
                   child: Text(
                     'Create an       account',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: Colors.black, fontFamily: 'Inter'),
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                      fontFamily: 'Inter',
+                    ),
                   ),
                 ),
               ),
@@ -167,8 +170,9 @@ class RegistrationUiState extends State<RegistrationUi> {
                                 borderSide: BorderSide(color: Colors.black),
                               ),
                             ),
-                            validator: (v) =>
-                            v != passwordController.text ? 'Passwords do not match' : null,
+                            validator: (v) => v != passwordController.text
+                                ? 'Passwords do not match'
+                                : null,
                           ),
                         ],
                       ),
@@ -188,8 +192,8 @@ class RegistrationUiState extends State<RegistrationUi> {
                     ),
                     onPressed: registerClicked,
                     child: const Text(
-                        'Register',
-                        style: TextStyle(fontSize: 18, color: Colors.white)
+                      'Register',
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ),
