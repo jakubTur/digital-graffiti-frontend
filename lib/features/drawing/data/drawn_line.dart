@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
 // Data structure for paint strokes on the canvas.
+// Data structure for paint strokes already drawn on the canvas.
 class DrawnLine {
   Path path = Path();
   Paint paint = Paint();
