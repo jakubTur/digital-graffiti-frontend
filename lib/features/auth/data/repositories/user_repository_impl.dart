@@ -16,12 +16,9 @@ class UserRepositoryImpl implements UserRepository{
     debugPrint('registerUser');
     final userRequest = UserRequest(
         nickname: user.nickname,
-        active: true,
-        verified: false,
-        email: user.email,
-        role: 'user');
+        email: user.email);
     final credential = CredentialRequest(
-        login: user.nickname,
+        email: user.email,
         password: user.password);
     await remoteDataSource.postUser(userRequest);
     await remoteDataSource.postCredential(credential);

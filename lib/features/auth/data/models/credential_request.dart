@@ -1,15 +1,15 @@
 
 class CredentialRequest {
-  final String login;
+  final String email;
   final String password;
   CredentialRequest({
-    required this.login,
+    required this.email,
     required this.password
   });
 
   Map<String, dynamic> toJson(){
     return {
-      'login' : login,
+      'email' : email,
       'password' : password,
     };
   }

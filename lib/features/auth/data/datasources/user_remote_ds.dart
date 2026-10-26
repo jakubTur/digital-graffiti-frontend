@@ -7,7 +7,7 @@ class UserRemoteDataSource {
   UserRemoteDataSource(this.api);
 
   Future<void> postUser(UserRequest user) async {
-    await api.post('/users/create', body: user.toJson());
+    await api.post('/api/users/register', body: user.toJson());
   }
   Future<void> postCredential(CredentialRequest credential) async {
     await api.post('/api/credentials', body: credential.toJson());
