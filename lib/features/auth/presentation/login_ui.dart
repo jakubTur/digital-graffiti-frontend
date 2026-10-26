@@ -231,7 +231,7 @@ class _LoginUiState extends State<LoginUi> {
                     ),
                     TextButton(
                       onPressed: () {
-                        //TODO: add redirection to registration form
+                        context.push('/register');
                       },
                       child: Text(
                         'Create an account',

@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 import 'package:frontend/features/drawing/presentation/graffiti_painter.dart';
 
 class PaintScreen extends StatefulWidget {
-  const PaintScreen({super.key});
+  final String? imagePath;
+
+  const PaintScreen({super.key, this.imagePath});
 
   @override
   State<PaintScreen> createState() => _PaintScreenState();
@@ -21,15 +24,40 @@ class _PaintScreenState extends State<PaintScreen> {
   List<DrawnLine> lines = [];
 
   @override
+  void dispose() {
+    linesStreamController.close();
+    currentLineStreamController.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: Container(
-        color: Colors.green[100],
-        child: Stack(
-          children: [buildAllPaths(context), buildCurrentPath(context)],
-        ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          if (widget.imagePath != null && widget.imagePath!.isNotEmpty)
+            Positioned.fill(
+              child: Image.file(File(widget.imagePath!), fit: BoxFit.cover),
+            )
+          else
+            Positioned.fill(child: Container(color: Colors.green[100])),
+          buildAllPaths(context),
+          buildCurrentPath(context),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: IconButton(
+                iconSize: 40,
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

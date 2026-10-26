@@ -8,6 +8,59 @@ import 'package:provider/provider.dart';
 class MapUi extends StatelessWidget {
   const MapUi({super.key});
 
+  void _showCanvasOptions(BuildContext context, MapModel map) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Choose Graffiti Type',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontFamily: 'Inter',
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actions: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.brush),
+              label: const Text('Drawing'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.push('/canvas');
+                map.upload(
+                  PostData(location: map.userLocation, title: "new post"),
+                );
+              },
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Photo'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.push('/camera');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -27,10 +80,7 @@ class MapUi extends StatelessWidget {
                     heroTag: 'upload_button',
                     backgroundColor: Colors.deepPurple,
                     onPressed: () {
-                      context.go('/canvas');
-                      map.upload(
-                        PostData(location: map.userLocation, title: "new post"),
-                      ); // TODO replace this with local post UI
+                      _showCanvasOptions(context, map);
                     },
                     child: const Icon(
                       Icons.add_circle,
