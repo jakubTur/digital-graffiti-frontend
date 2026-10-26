@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
-
-class FakeUserRepository implements UserRepository {
-  const FakeUserRepository();
-
-  @override
-  Future<void> registerUser(User user) async {
-    await Future.delayed(const Duration(seconds: 1)); // fake network delay
-  }
-}
 
 class RegistrationUi extends StatefulWidget {
   final UserRepository repo;
@@ -55,12 +47,23 @@ class RegistrationUiState extends State<RegistrationUi> {
     try {
       await widget.repo.registerUser(user);
       if (!mounted) return;
-      context.go('/');
+      context.push('/registration_successful');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Registration failed')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Registration failed')));
+    } finally {
+      await saveUserDataToPreferences(user);
     }
+  }
+
+  Future<void> saveUserDataToPreferences(User user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('nickname', user.nickname);
+    prefs.setString('email', user.email);
+    prefs.setString('password', user.password);
   }
 
   @override

@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'core/network/api_client.dart';
 import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
+import 'features/auth/presentation/registration_successful.dart';
 import 'features/auth/presentation/registration_ui.dart';
 
 void main() async {
@@ -46,6 +47,10 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/register',
         builder: (context, state) => RegistrationUi(repo: userRepository),
+      ),
+      GoRoute(
+        path: '/registration_successful',
+        builder: (context, state) => const RegistrationSuccessful(),
       ),
       // TODO: put other routes here!!!
     ],
