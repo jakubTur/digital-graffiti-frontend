@@ -115,10 +115,8 @@ class MapUi extends StatelessWidget {
               );
             },
           ),
-          // TODO: add other UI buttons here
         ],
       ),
     );
-    // TODO: add other columns / rows / aligners with buttons here
   }
 }
