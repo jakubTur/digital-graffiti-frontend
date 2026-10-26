@@ -32,7 +32,13 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(path: '/', builder: (context, state) => LoginUi()),
       GoRoute(path: '/map', builder: (context, state) => MapScreen()),
-      GoRoute(path: '/canvas', builder: (context, state) => PaintScreen()),
+      GoRoute(
+        path: '/canvas',
+        builder: (context, state) {
+          final imagePath = state.extra as String?;
+          return PaintScreen(imagePath: imagePath);
+        },
+      ),
       GoRoute(
         path: '/camera',
         builder: (context, state) => const CameraScreen(),
