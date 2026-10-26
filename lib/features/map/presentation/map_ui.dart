@@ -37,7 +37,7 @@ class MapUi extends StatelessWidget {
               ),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                context.go('/canvas');
+                context.push('/canvas');
                 map.upload(
                   PostData(location: map.userLocation, title: "new post"),
                 );
@@ -50,8 +50,9 @@ class MapUi extends StatelessWidget {
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
               ),
-              onPressed: () async {
-                // TODO: camera integration
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.push('/camera');
               },
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/core/camera/camera.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
@@ -32,6 +33,10 @@ class MyApp extends StatelessWidget {
       GoRoute(path: '/', builder: (context, state) => LoginUi()),
       GoRoute(path: '/map', builder: (context, state) => MapScreen()),
       GoRoute(path: '/canvas', builder: (context, state) => PaintScreen()),
+      GoRoute(
+        path: '/camera',
+        builder: (context, state) => const CameraScreen(),
+      ),
       GoRoute(
         path: '/register',
         builder: (context, state) => RegistrationUi(repo: userRepository),
