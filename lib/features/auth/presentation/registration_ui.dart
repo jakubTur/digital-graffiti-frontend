@@ -47,7 +47,7 @@ class RegistrationUiState extends State<RegistrationUi> {
     try {
       await widget.repo.registerUser(user);
       if (!mounted) return;
-      context.go('/');
+      context.push('/registration_successful');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
