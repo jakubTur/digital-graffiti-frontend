@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../map/presentation/map_screen.dart';
 
 @Preview(name: 'Login - phone', size: Size(390, 844))
 Widget loginPreview() => const LoginUi();
@@ -20,20 +23,45 @@ class _LoginUiState extends State<LoginUi> {
   bool _passwordHidden = true;
   bool _rememberUser = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  void _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (!mounted) return;
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MapScreen()),
+      );
+    }
+  }
+
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
     //TODO: integrate with backend
 
     //TODO: update _credentialsError if login failed
-    context.go('/map'); // this routes to login screen
+    context.go('/map');
 
     setState(() {
       _credentialsError = "E-mail or password is incorrect";
     });
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     if (_rememberUser) {
-      //TODO: implement remember me functionality
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('savedEmail', _emailController.text);
+    } else {
+      await prefs.setBool('isLoggedIn', false);
+      await prefs.remove('savedEmail');
     }
   }
 

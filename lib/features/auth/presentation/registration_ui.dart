@@ -4,17 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
-import '../data/repositories/user_repository_impl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-class FakeUserRepository implements UserRepository {
-  const FakeUserRepository();
-
-  @override
-  Future<void> registerUser(User user) async {
-    await Future.delayed(const Duration(seconds: 1)); // fake network delay
-  }
-}
 
 class RegistrationUi extends StatefulWidget {
   final UserRepository repo;
