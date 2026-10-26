@@ -1,20 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/drawn_line.dart';
+import 'package:frontend/features/drawing/data/paint_model.dart';
 
 class GraffitiPainter extends CustomPainter {
-  final List<DrawnLine> lines;
+  final PaintModel paintModel;
 
-  GraffitiPainter(this.lines);
+  GraffitiPainter(this.paintModel) : super(repaint: paintModel.linesRepaint);
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (int lineNo = 0; lineNo < lines.length; lineNo++) {
-      canvas.drawPath(lines[lineNo].path, lines[lineNo].getPaint());
+    for (final line in paintModel.lines) {
+      canvas.drawPath(line.path, line.getPaint());
     }
   }
 
   @override
   bool shouldRepaint(GraffitiPainter oldDelegate) {
-    return (oldDelegate.lines != lines);
+    return !identical(oldDelegate.paintModel, paintModel);
+  }
+}
+
+class CurrentLinePainter extends CustomPainter {
+  final PaintModel paintModel;
+
+  CurrentLinePainter(this.paintModel)
+    : super(repaint: paintModel.currentLineRepaint);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final line = paintModel.currentLine;
+    if (line != null) {
+      canvas.drawPath(line.path, line.getPaint());
+    }
+  }
+
+  @override
+  bool shouldRepaint(CurrentLinePainter oldDelegate) {
+    return !identical(oldDelegate.paintModel, paintModel);
   }
 }

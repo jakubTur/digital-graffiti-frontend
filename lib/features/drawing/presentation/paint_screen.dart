@@ -20,10 +20,8 @@ class PaintScreen extends StatelessWidget {
             if (imagePath != null && imagePath!.isNotEmpty)
               Positioned.fill(
                 child: Image.file(File(imagePath!), fit: BoxFit.cover),
-              )
-            else
-              Positioned.fill(child: Container(color: Colors.green[100])),
-            const PaintCanvas(),
+              ),
+            const Align(alignment: Alignment.center, child: PaintCanvas()),
             const PaintUi(),
           ],
         ),

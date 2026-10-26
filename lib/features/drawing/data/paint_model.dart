@@ -1,13 +1,20 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 
 class PaintModel extends ChangeNotifier {
   final List<DrawnLine> _lines = [];
+  late final List<DrawnLine> _linesView = UnmodifiableListView(_lines);
+  final ChangeNotifier _linesRepaint = ChangeNotifier();
+  final ChangeNotifier _currentLineRepaint = ChangeNotifier();
   DrawnLine? _currentLine;
   Color _brushColor = Colors.black;
   double _brushWidth = 10;
 
-  List<DrawnLine> get lines => List<DrawnLine>.unmodifiable(_lines);
+  List<DrawnLine> get lines => _linesView;
+  Listenable get linesRepaint => _linesRepaint;
+  Listenable get currentLineRepaint => _currentLineRepaint;
   DrawnLine? get currentLine => _currentLine;
   Color get brushColor => _brushColor;
   double get brushWidth => _brushWidth;
@@ -36,6 +43,7 @@ class PaintModel extends ChangeNotifier {
   void beginStroke(Offset point) {
     final path = Path()..moveTo(point.dx, point.dy);
     _currentLine = DrawnLine(path, _brushColor, _brushWidth);
+    _currentLineRepaint.notifyListeners();
     notifyListeners();
   }
 
@@ -43,7 +51,7 @@ class PaintModel extends ChangeNotifier {
     final line = _currentLine;
     if (line == null) return;
     line.path.lineTo(point.dx, point.dy);
-    notifyListeners();
+    _currentLineRepaint.notifyListeners();
   }
 
   void finishStroke() {
@@ -51,18 +59,22 @@ class PaintModel extends ChangeNotifier {
     if (line == null) return;
     _lines.add(line);
     _currentLine = null;
+    _linesRepaint.notifyListeners();
+    _currentLineRepaint.notifyListeners();
     notifyListeners();
   }
 
   void cancelStroke() {
     if (_currentLine == null) return;
     _currentLine = null;
+    _currentLineRepaint.notifyListeners();
     notifyListeners();
   }
 
   void undo() {
     if (!canUndo) return;
     _lines.removeLast();
+    _linesRepaint.notifyListeners();
     notifyListeners();
   }
 
@@ -70,6 +82,15 @@ class PaintModel extends ChangeNotifier {
     if (!hasStrokes) return;
     _lines.clear();
     _currentLine = null;
+    _linesRepaint.notifyListeners();
+    _currentLineRepaint.notifyListeners();
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _linesRepaint.dispose();
+    _currentLineRepaint.dispose();
+    super.dispose();
   }
 }
