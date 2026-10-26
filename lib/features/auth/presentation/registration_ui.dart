@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
+import '../data/repositories/user_repository_impl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FakeUserRepository implements UserRepository {
   const FakeUserRepository();
