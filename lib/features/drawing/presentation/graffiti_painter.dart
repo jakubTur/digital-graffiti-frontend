@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/paint_model.dart';
 
+// painter for all already-drawn strokes.
+// updates when a stroke is added/removed.
 class GraffitiPainter extends CustomPainter {
   final PaintModel paintModel;
 
@@ -15,26 +17,6 @@ class GraffitiPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(GraffitiPainter oldDelegate) {
-    return !identical(oldDelegate.paintModel, paintModel);
-  }
-}
-
-class CurrentLinePainter extends CustomPainter {
-  final PaintModel paintModel;
-
-  CurrentLinePainter(this.paintModel)
-    : super(repaint: paintModel.currentLineRepaint);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final line = paintModel.currentLine;
-    if (line != null) {
-      canvas.drawPath(line.path, line.getPaint());
-    }
-  }
-
-  @override
-  bool shouldRepaint(CurrentLinePainter oldDelegate) {
     return !identical(oldDelegate.paintModel, paintModel);
   }
 }

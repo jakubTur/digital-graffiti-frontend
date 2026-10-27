@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/paint_model.dart';
-import 'package:provider/provider.dart';
 
+// UI for the paint screen.
 class PaintUi extends StatelessWidget {
-  const PaintUi({super.key});
+  // callbacks for UI buttons; if you add any buttons pass their callbacks here.
+  // this level of abstraction may be unnecessary but to keep things consistent try not to reference the model directly.
+  final bool canUndo;
+  final bool hasStrokes;
+  final VoidCallback onUndo;
+  final VoidCallback onClear;
+
+  const PaintUi({
+    super.key,
+    required this.canUndo,
+    required this.hasStrokes,
+    required this.onUndo,
+    required this.onClear,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final paintModel = context.watch<PaintModel>();
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Stack(
           children: [
             IconButton(
+              tooltip: 'Back',
               iconSize: 40,
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
@@ -31,13 +43,13 @@ class PaintUi extends StatelessWidget {
                     tooltip: 'Undo',
                     icon: const Icon(Icons.undo),
                     iconSize: 40,
-                    onPressed: paintModel.canUndo ? paintModel.undo : null,
+                    onPressed: canUndo ? onUndo : null,
                   ),
                   IconButton(
                     tooltip: 'Clear canvas',
                     icon: const Icon(Icons.delete_outline),
                     iconSize: 40,
-                    onPressed: paintModel.hasStrokes ? paintModel.clear : null,
+                    onPressed: hasStrokes ? onClear : null,
                   ),
                 ],
               ),
