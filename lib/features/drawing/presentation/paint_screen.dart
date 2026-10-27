@@ -30,6 +30,7 @@ class PaintScreen extends StatelessWidget {
                     onStrokeStart: paintModel.beginStroke,
                     onStrokeUpdate: paintModel.extendStroke,
                     onStrokeEnd: paintModel.finishStroke,
+                    onStrokeCancel: paintModel.cancelStroke,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [

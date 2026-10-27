@@ -13,6 +13,7 @@ class PaintGestureSurface extends StatefulWidget {
   final ValueChanged<Offset> onStrokeStart;
   final ValueChanged<Offset> onStrokeUpdate;
   final VoidCallback onStrokeEnd;
+  final VoidCallback onStrokeCancel;
 
   const PaintGestureSurface({
     super.key,
@@ -21,6 +22,7 @@ class PaintGestureSurface extends StatefulWidget {
     required this.onStrokeStart,
     required this.onStrokeUpdate,
     required this.onStrokeEnd,
+    required this.onStrokeCancel,
   });
 
   @override
@@ -29,10 +31,18 @@ class PaintGestureSurface extends StatefulWidget {
 
 class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   final _transform = TransformationController();
-  final _pointers = <int>{};
+  final _pointers = <int>{}; // fingers
   int? _paintPointer;
+  
+  // for preventing accidental strokes being created if the user actually wants to zoom/pan
+  Stopwatch? _strokeTimer;
+  
   bool _multiPointerGesture = false;
   bool _panEnabled = false;
+
+  // if user adds a second finger within this timeframe,
+  // the gesture is changed to a pan and the stroke is canceled.
+  static const _accidentalStrokeWindow = Duration(milliseconds: 250);
 
   Rect get _sceneBounds => Offset.zero & widget.sceneSize;
 
@@ -41,12 +51,21 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
     if (!_sceneBounds.contains(point)) return;
     widget.onStrokeStart(point);
     _paintPointer = _pointers.first;
+    _strokeTimer = Stopwatch()..start();
   }
 
   void _finishStroke() {
     if (_paintPointer == null) return;
     widget.onStrokeEnd();
     _paintPointer = null;
+    _strokeTimer = null;
+  }
+
+  void _cancelStroke() {
+    if (_paintPointer == null) return;
+    widget.onStrokeCancel();
+    _paintPointer = null;
+    _strokeTimer = null;
   }
 
   // pan needs to be set explicitly to avoid
@@ -62,7 +81,10 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
       _setPanEnabled(false, rebuild: true);
     } else {
       _multiPointerGesture = true;
-      _finishStroke();
+      if (_strokeTimer != null &&
+          _strokeTimer!.elapsed <= _accidentalStrokeWindow) {
+        _cancelStroke();
+      }
       _setPanEnabled(true, rebuild: true);
     }
   }
@@ -70,7 +92,7 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   void _onPointerMove(PointerMoveEvent event) {
     if (_pointers.length != 1 ||
         _multiPointerGesture ||
-        _paintPointer == null) {
+        _paintPointer != event.pointer) {
       return;
     }
 
@@ -88,6 +110,11 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
     if (_pointers.isEmpty) {
       _multiPointerGesture = false;
       _setPanEnabled(false, rebuild: true);
+    } else if (_multiPointerGesture &&
+        _paintPointer != null &&
+        _pointers.contains(_paintPointer)) {
+      _multiPointerGesture = false;
+      _setPanEnabled(false, rebuild: true);
     } else if (_multiPointerGesture) {
       _setPanEnabled(true, rebuild: true);
     }
@@ -96,7 +123,6 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   void _onInteractionUpdate(ScaleUpdateDetails details) {
     if (details.pointerCount > 1) {
       _multiPointerGesture = true;
-      _finishStroke();
     }
   }
 

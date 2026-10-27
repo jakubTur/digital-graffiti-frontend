@@ -7,7 +7,8 @@ class DrawnLine {
   late final Paint _paint = Paint()
     ..color = color
     ..strokeWidth = strokeWidth
-    ..style = PaintingStyle.stroke;
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round;
 
   DrawnLine(this.path, this.color, this.strokeWidth);
 
