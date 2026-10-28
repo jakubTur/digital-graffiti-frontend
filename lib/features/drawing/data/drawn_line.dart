@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 
-// Data structure for paint strokes on the canvas.
-// Data structure for paint strokes already drawn on the canvas.
 class DrawnLine {
-  Path path = Path();
-  Paint paint = Paint();
-  DrawnLine(this.path, Color color, double width) {
-    paint.color = color;
-    paint.strokeWidth = width;
-    paint.style = PaintingStyle.stroke;
-  }
+  final Path path;
+  final Color color;
+  final double strokeWidth;
+  late final Paint _paint = Paint()
+    ..color = color
+    ..strokeWidth = strokeWidth
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round;
+
+  DrawnLine(this.path, this.color, this.strokeWidth);
+
+  Paint getPaint() => _paint;
 }

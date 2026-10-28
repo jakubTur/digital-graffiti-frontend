@@ -1,124 +1,60 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/drawn_line.dart';
-import 'package:frontend/features/drawing/presentation/graffiti_painter.dart';
+import 'package:frontend/features/drawing/data/paint_model.dart';
+import 'package:frontend/features/drawing/presentation/canvas_background_image.dart';
+import 'package:frontend/features/drawing/presentation/paint_canvas.dart';
+import 'package:frontend/features/drawing/presentation/paint_gesture_surface.dart';
+import 'package:frontend/features/drawing/presentation/paint_ui.dart';
+import 'package:provider/provider.dart';
 
-class PaintScreen extends StatefulWidget {
+// main class for the paint screen.
+// wires together all the other paint-related widgets with the model that manages their state.
+class PaintScreen extends StatelessWidget {
   final String? imagePath;
-
   const PaintScreen({super.key, this.imagePath});
 
   @override
-  State<PaintScreen> createState() => _PaintScreenState();
-}
-
-class _PaintScreenState extends State<PaintScreen> {
-  final linesStreamController = StreamController<List<DrawnLine>>.broadcast();
-  final currentLineStreamController = StreamController<DrawnLine>.broadcast();
-
-  Color graffitiColor = Colors.black;
-  double graffitiWidth = 10;
-  DrawnLine currentLine = DrawnLine(Path(), Colors.black, 10);
-  List<DrawnLine> lines = [];
-
-  @override
-  void dispose() {
-    linesStreamController.close();
-    currentLineStreamController.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          if (widget.imagePath != null && widget.imagePath!.isNotEmpty)
-            Positioned.fill(
-              child: Image.file(File(widget.imagePath!), fit: BoxFit.cover),
-            )
-          else
-            Positioned.fill(child: Container(color: Colors.green[100])),
-          buildAllPaths(context),
-          buildCurrentPath(context),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: IconButton(
-                iconSize: 40,
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
+    return ChangeNotifierProvider(
+      key: ValueKey(imagePath),
+      create: (_) => PaintModel(), // << use this model in a widget to interact with canvas state
+      child: Builder(
+        builder: (context) {
+          final paintModel = context.read<PaintModel>();
+          return Scaffold(
+            body: Stack(
+              children: [
+                Selector<PaintModel, Size>(
+                  selector: (_, model) => model.canvasSize,
+                  builder: (context, canvasSize, _) => PaintGestureSurface(
+                    sceneSize: canvasSize,
+                    onStrokeStart: paintModel.beginStroke,
+                    onStrokeUpdate: paintModel.extendStroke,
+                    onStrokeEnd: paintModel.finishStroke,
+                    onStrokeCancel: paintModel.cancelStroke,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CanvasBackgroundImage(
+                          imagePath: imagePath,
+                          paintModel: paintModel,
+                        ),
+                        PaintCanvas(paintModel: paintModel, size: canvasSize),
+                      ],
+                    ),
+                  ),
+                ),
+                Consumer<PaintModel>(
+                  builder: (context, model, _) => PaintUi(
+                    canUndo: model.canUndo,
+                    hasStrokes: model.hasStrokes,
+                    onUndo: model.undo,
+                    onClear: model.clear,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Builds all lines that have already been drawn.
-  // Does not build the currently-drawn line.
-  Widget buildAllPaths(BuildContext context) {
-    return RepaintBoundary(
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: StreamBuilder<List<DrawnLine>>(
-          stream: linesStreamController.stream,
-          builder: (context, snapshot) {
-            return CustomPaint(painter: GraffitiPainter(lines));
-          },
-        ),
-      ),
-    );
-  }
-
-  // Builds the line that is currently being drawn.
-  // Separate from buildAllPaths for performance (you don't want to rebuild lines that were already painted).
-  GestureDetector buildCurrentPath(BuildContext context) {
-    void onPanStart(DragStartDetails details) {
-      final box = context.findRenderObject() as RenderBox;
-      final point = box.globalToLocal(details.globalPosition);
-      var path = Path();
-      path.moveTo(point.dx, point.dy);
-      currentLine = DrawnLine(path, graffitiColor, graffitiWidth);
-      currentLineStreamController.add(currentLine);
-    }
-
-    void onPanUpdate(DragUpdateDetails details) {
-      final box = context.findRenderObject() as RenderBox;
-      final point = box.globalToLocal(details.globalPosition);
-      currentLine.path.lineTo(point.dx, point.dy);
-      currentLineStreamController.add(currentLine);
-    }
-
-    void onPanEnd(DragEndDetails details) {
-      lines = List.from(lines)..add(currentLine);
-      linesStreamController.add(lines);
-    }
-
-    return GestureDetector(
-      onPanStart: onPanStart,
-      onPanUpdate: onPanUpdate,
-      onPanEnd: onPanEnd,
-      child: RepaintBoundary(
-        child: Container(
-          color: Colors.transparent,
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: StreamBuilder<DrawnLine>(
-            stream: currentLineStreamController.stream,
-            builder: (context, snapshot) {
-              return CustomPaint(painter: GraffitiPainter([currentLine]));
-            },
-          ),
-        ),
+          );
+        },
       ),
     );
   }
