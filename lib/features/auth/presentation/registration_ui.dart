@@ -4,15 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
 
-class FakeUserRepository implements UserRepository {
-  const FakeUserRepository();
-
-  @override
-  Future<void> registerUser(User user) async {
-    await Future.delayed(const Duration(seconds: 1)); // fake network delay
-  }
-}
-
 class RegistrationUi extends StatefulWidget {
   final UserRepository repo;
   const RegistrationUi({super.key, required this.repo});
@@ -41,9 +32,7 @@ class RegistrationUiState extends State<RegistrationUi> {
   }
 
   Future<void> registerClicked() async {
-    debugPrint('registerClicked');
     if (!formKey.currentState!.validate()) return;
-    debugPrint('2: valid');
     final User user = User(
       nickname: nicknameController.text,
       password: passwordController.text,
@@ -51,7 +40,6 @@ class RegistrationUiState extends State<RegistrationUi> {
       verified: false,
       email: emailController.text,
     );
-    debugPrint('3: user built');
     try {
       await widget.repo.registerUser(user);
       if (!mounted) return;

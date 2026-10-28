@@ -6,6 +6,8 @@ import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'core/storage/auth_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'core/network/api_client.dart';
 import 'features/auth/data/datasources/user_remote_ds.dart';
@@ -16,17 +18,19 @@ void main() async {
   // App locked into vertical mode
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
-  final api = ApiClient();
+  const secureStorage = FlutterSecureStorage();
+  final authStorage = AuthStorage(secureStorage);
+  final api = ApiClient(tokenProvider: authStorage.readAccessToken, refreshTokenProvider: authStorage.readRefreshToken, updateTokens: authStorage.updateTokens);
   final repo = UserRepositoryImpl(UserRemoteDataSource(api));
 
-  runApp(MyApp(userRepository: repo));
+  runApp(MyApp(userRepository: repo, authStorage: authStorage));
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key, required this.userRepository});
+  MyApp({super.key, required this.userRepository, required this.authStorage});
 
   final UserRepository userRepository;
+  final AuthStorage authStorage;
 
   late final GoRouter router = GoRouter(
     routes: [
