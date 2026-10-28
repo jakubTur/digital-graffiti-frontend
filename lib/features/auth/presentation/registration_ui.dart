@@ -33,9 +33,7 @@ class RegistrationUiState extends State<RegistrationUi> {
   }
 
   Future<void> registerClicked() async {
-    debugPrint('registerClicked');
     if (!formKey.currentState!.validate()) return;
-    debugPrint('2: valid');
     final User user = User(
       nickname: nicknameController.text,
       password: passwordController.text,
@@ -43,7 +41,6 @@ class RegistrationUiState extends State<RegistrationUi> {
       verified: false,
       email: emailController.text,
     );
-    debugPrint('3: user built');
     try {
       await widget.repo.registerUser(user);
       if (!mounted) return;

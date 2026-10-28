@@ -8,7 +8,9 @@ import '../errors/api_exception.dart';
 class ApiClient {
   final http.Client _client;
   final Future<String?> Function()? tokenProvider;
-  ApiClient({http.Client? client, Future<String?> Function()? tokenProvider}) : _client = client ?? http.Client(), this.tokenProvider = tokenProvider;
+  final Future<String?> Function()? refreshTokenProvider;
+  final Future<void> Function(String, String)? updateTokens;
+  ApiClient({http.Client? client, this.tokenProvider, this.refreshTokenProvider, this.updateTokens}) : _client = client ?? http.Client();
 
   Map<String, String> get _headers => {
     'Content-Type': 'application/json; charset=UTF-8',
@@ -21,7 +23,7 @@ class ApiClient {
   Future<dynamic> delete(String path, {Map<String, String>? queryParameters}) => send('DELETE', path, queryParameters: queryParameters, expectedStatusCode: 200);
 
 
-  Future<dynamic> send(String method, String path, {Map<String, String>? queryParameters, Map<String, dynamic>? body, required int expectedStatusCode}) async {
+  Future<dynamic> send(String method, String path, {Map<String, String>? queryParameters, Map<String, dynamic>? body, required int expectedStatusCode, bool refreshed = false}) async {
     final uri = Uri.parse('${Config.baseUrl}$path').replace(queryParameters: queryParameters);
     debugPrint('$method $uri body=$body');
     final headers = await buildHeaders();
@@ -42,6 +44,30 @@ class ApiClient {
     final text = utf8.decode(response.bodyBytes);
     debugPrint('-> ${response.statusCode} $text');
     if (response.statusCode != expectedStatusCode) {
+      if (response.statusCode == 401 && !refreshed && refreshTokenProvider != null) {
+        final refreshToken = await refreshTokenProvider?.call();
+        if (refreshToken == null) {
+          throw ApiException(response.statusCode, text);
+        }
+        final http.Response refreshResponse = await _client.post(
+          Uri.parse('${Config.baseUrl}/auth/refresh'),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Accept': 'application/json'
+          },
+          body: jsonEncode({'refreshToken': refreshToken})
+        );
+        if (refreshResponse.statusCode != 200) {
+          throw ApiException(refreshResponse.statusCode, refreshResponse.body);
+        }
+        final refreshData = jsonDecode(refreshResponse.body);
+        final accessToken = refreshData['accessToken'];
+        final newRefreshToken = refreshData['refreshToken'];
+        if (updateTokens != null) {
+          await updateTokens?.call(accessToken, newRefreshToken);
+        }
+        return send(method, path, queryParameters: queryParameters, body: body, expectedStatusCode: expectedStatusCode, refreshed: true);
+      }
       throw ApiException(response.statusCode, text);
     }
     return text.isEmpty ? null : jsonDecode(text);
@@ -51,7 +77,7 @@ class ApiClient {
     return {
       'Content-Type': 'application/json; charset=UTF-8',
       'Accept': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token'
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token'
     };
   }
 }
