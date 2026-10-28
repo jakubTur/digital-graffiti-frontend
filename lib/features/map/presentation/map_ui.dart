@@ -66,9 +66,37 @@ class MapUi extends StatelessWidget {
     return Container(
       alignment: Alignment(1, 1),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        verticalDirection: VerticalDirection.up,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Consumer<MapModel>(
+                builder: (context, map, child) {
+                  return Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: FloatingActionButton(
+                        heroTag: 'profile_button',
+                        backgroundColor: Colors.deepPurple,
+                        onPressed: () {
+                          _showProfile(context, map);
+                        },
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 65,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          Spacer(),
           Consumer<MapModel>(
             builder: (context, map, child) {
               return Padding(
@@ -119,4 +147,6 @@ class MapUi extends StatelessWidget {
       ),
     );
   }
+
+  void _showProfile(BuildContext context, MapModel map) {}
 }
