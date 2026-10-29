@@ -29,6 +29,10 @@ class AuthStorage {
   Future<void> clear() async {
     await storage.deleteAll();
   }
+  Future<void> clearPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
   Future<void> updateTokens(String accessToken, String refreshToken) async {
     await storage.write(key: accessTokenKey, value: accessToken);
     await storage.write(key: refreshTokenKey, value: refreshToken);
