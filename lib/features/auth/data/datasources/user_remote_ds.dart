@@ -17,7 +17,7 @@ class UserRemoteDataSource {
   }
 
   Future<LoginResponse> login(LoginRequest loginRequest) async {
-    final response = await api.post('/auth/login', body: loginRequest.toJson());
+    final response = await api.post('/auth/login', body: loginRequest.toJson(), expectedStatusCode: 200);
     return LoginResponse.fromJson(Map<String, dynamic>.from(response as Map));
   }
 }

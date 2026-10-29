@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/models/login_request.dart';
 import '../../map/presentation/map_screen.dart';
+import '../domain/repositories/user_repository.dart';
+import '../../../core/storage/auth_storage.dart';
 
-@Preview(name: 'Login - phone', size: Size(390, 844))
-Widget loginPreview() => const LoginUi();
 
 class LoginUi extends StatefulWidget {
-  const LoginUi({super.key});
+  final UserRepository repo;
+  final AuthStorage authStorage;
+  const LoginUi({super.key, required this.repo, required this.authStorage});
 
   @override
   State<StatefulWidget> createState() => _LoginUiState();
@@ -45,23 +47,30 @@ class _LoginUiState extends State<LoginUi> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    //TODO: integrate with backend
-
-    //TODO: update _credentialsError if login failed
-    context.go('/map');
+    FocusScope.of(context).unfocus();
 
     setState(() {
-      _credentialsError = "E-mail or password is incorrect";
+      _credentialsError = null;
     });
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      final response = await widget.repo.login(
+        LoginRequest(
+          email: _emailController.text,
+          password: _passwordController.text,
+        ),
+      );
+      await widget.authStorage.saveLogin(response);
 
-    if (_rememberUser) {
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('savedEmail', _emailController.text);
-    } else {
-      await prefs.setBool('isLoggedIn', false);
-      await prefs.remove('savedEmail');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', _rememberUser);
+      if (!mounted) return;
+      context.go('/map');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _credentialsError = 'Email or password is incorrect';
+      });
     }
   }
 

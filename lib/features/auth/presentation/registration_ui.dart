@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
 
 class RegistrationUi extends StatefulWidget {
   final UserRepository repo;
-  const RegistrationUi({super.key, required this.repo});
+  final AuthStorage authStorage;
+  const RegistrationUi({super.key, required this.repo, required this.authStorage});
   @override
   State<RegistrationUi> createState() => RegistrationUiState();
 }
@@ -34,6 +35,7 @@ class RegistrationUiState extends State<RegistrationUi> {
 
   Future<void> registerClicked() async {
     if (!formKey.currentState!.validate()) return;
+    widget.authStorage.clear();
     final User user = User(
       nickname: nicknameController.text,
       password: passwordController.text,
@@ -52,15 +54,8 @@ class RegistrationUiState extends State<RegistrationUi> {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Registration failed')));
     } finally {
-      await saveUserDataToPreferences(user);
-    }
-  }
 
-  Future<void> saveUserDataToPreferences(User user) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('nickname', user.nickname);
-    prefs.setString('email', user.email);
-    prefs.setString('password', user.password);
+    }
   }
 
   @override

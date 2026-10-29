@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
 
   late final GoRouter router = GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (context, state) => LoginUi()),
+      GoRoute(path: '/', builder: (context, state) => LoginUi(repo: userRepository, authStorage: authStorage)),
       GoRoute(path: '/map', builder: (context, state) => MapScreen()),
       GoRoute(
         path: '/canvas',
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => RegistrationUi(repo: userRepository),
+        builder: (context, state) => RegistrationUi(repo: userRepository, authStorage: authStorage),
       ),
       GoRoute(
         path: '/registration_successful',

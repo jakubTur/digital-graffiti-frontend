@@ -18,7 +18,7 @@ class ApiClient {
     if (tokenProvider != null) 'Authorization': 'Bearer $tokenProvider'
   };
   Future<dynamic> get(String path, {Map<String, String>? queryParameters}) => send('GET', path, queryParameters: queryParameters, expectedStatusCode: 200);
-  Future<dynamic> post(String path, {Map<String, String>? queryParameters, required Map<String, dynamic> body}) => send('POST', path, queryParameters: queryParameters, body: body, expectedStatusCode: 201);
+  Future<dynamic> post(String path, {Map<String, String>? queryParameters, required Map<String, dynamic> body, int expectedStatusCode = 201}) => send('POST', path, queryParameters: queryParameters, body: body, expectedStatusCode: expectedStatusCode);
   Future<dynamic> put(String path, {Map<String, String>? queryParameters, required Map<String, dynamic> body}) => send('PUT', path, queryParameters: queryParameters, body: body, expectedStatusCode: 200);
   Future<dynamic> delete(String path, {Map<String, String>? queryParameters}) => send('DELETE', path, queryParameters: queryParameters, expectedStatusCode: 200);
 
