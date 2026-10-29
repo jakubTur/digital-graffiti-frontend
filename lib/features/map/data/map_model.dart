@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -22,13 +23,8 @@ class MapModel extends ChangeNotifier {
   LatLng _userLocation = LatLng(0, 0);
   bool _isFirstLocation = true;
 
-  /// Posts downloaded from the backend will be stored here.
-  /// Any posts added here will be displayed on the map
-  /// Right now it's just 2 sample posts
-  final Map<int, PostData> _posts = {
-    1: PostData(location: LatLng(50, 50), title: "Helo"),
-    2: PostData(location: LatLng(51, 50), title: "Hiii"),
-  };
+  final Map<int, PostData> _posts = {};
+  PostDraft? _currentlyMadePost;
 
   /// Used to keep track of the user's location
   StreamSubscription<Position>? _positionSubscription;
@@ -45,15 +41,31 @@ class MapModel extends ChangeNotifier {
   /// Getter for posts
   UnmodifiableMapView<int, PostData> get posts => UnmodifiableMapView(_posts);
 
-  /// Tempoerary post-creation method
-  /// Call to upload a new post (keeping it locally on the frontend)
-  /// TODO: make this send a post creation request to the backend instead
-  void upload(PostData newPost) {
+  PostDraft? get currentlyMadePost => _currentlyMadePost;
+
+  PostDraft beginPost(LatLng location) {
+    final post = PostDraft(location: location);
+    _currentlyMadePost = post;
+    notifyListeners();
+    return post;
+  }
+
+  void completePost(Uint8List image) {
+    final draft = _currentlyMadePost;
+    if (draft == null) throw StateError('There is no post in progress.');
+
     var postId = 1;
     while (_posts.containsKey(postId)) {
       postId++;
     }
-    _posts[postId] = newPost;
+    _posts[postId] = draft.complete(image);
+    _currentlyMadePost = null;
+    notifyListeners();
+  }
+
+  void cancelPost() {
+    if (_currentlyMadePost == null) return;
+    _currentlyMadePost = null;
     notifyListeners();
   }
 

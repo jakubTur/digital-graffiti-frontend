@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/data/post_data.dart';
@@ -7,6 +9,25 @@ import 'package:provider/provider.dart';
 /// UI containing buttons that display above the map.
 class MapUi extends StatelessWidget {
   const MapUi({super.key});
+
+  Future<void> _createPost(BuildContext context, MapModel map, String path) async {
+    final post = map.beginPost(map.userLocation);
+    try {
+      final image = await context.push<Uint8List>(path, extra: post);
+      if (image == null) {
+        map.cancelPost();
+      } else {
+        map.completePost(image);
+      }
+    } catch (error) {
+      map.cancelPost();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create post: $error')),
+        );
+      }
+    }
+  }
 
   void _showCanvasOptions(BuildContext context, MapModel map) {
     showDialog(
@@ -37,10 +58,7 @@ class MapUi extends StatelessWidget {
               ),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                context.push('/canvas');
-                map.upload(
-                  PostData(location: map.userLocation, title: "new post"),
-                );
+                _createPost(context, map, '/post/draw');
               },
             ),
             ElevatedButton.icon(
@@ -52,7 +70,7 @@ class MapUi extends StatelessWidget {
               ),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                context.push('/camera');
+                _createPost(context, map, '/post/camera');
               },
             ),
           ],

@@ -43,8 +43,10 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
     markers.add(createMarkerFromData(userLocation, Icons.man, Colors.blue));
 
     for (PostData post in postData.values) {
+      final location = post.location;
+      if (location == null) continue;
       markers.add(
-        createMarkerFromData(post.location, Icons.location_pin, Colors.green),
+        createMarkerFromData(location, Icons.location_pin, Colors.green),
       );
     }
     return markers;

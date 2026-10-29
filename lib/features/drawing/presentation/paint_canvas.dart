@@ -5,6 +5,7 @@ import 'package:frontend/features/drawing/presentation/current_line_painter.dart
 
 // paint canvas.
 // displays strokes.
+// uses two painters: one for the currently-drawn stroke and one for all finished strokes (to minimize needless updates).
 class PaintCanvas extends StatelessWidget {
   final PaintModel paintModel;
   final Size size;

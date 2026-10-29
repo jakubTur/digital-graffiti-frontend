@@ -1,4 +1,7 @@
 import 'dart:collection';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
@@ -8,6 +11,13 @@ import 'package:frontend/features/drawing/data/drawn_line.dart';
 // and exposes methods for safely managing said state.
 // in order to use this in a widget, use a Consumer.
 class PaintModel extends ChangeNotifier {
+  PaintModel({this.backgroundImagePath});
+
+  // background image is stored here for export funcitonality to work correctly
+  final String? backgroundImagePath;
+  bool _isExporting = false;
+  bool get isExporting => _isExporting;
+
   Size _canvasSize = const Size(800, 800); // overridden by background image size; otherwise this value is used as default
   Size get canvasSize => _canvasSize;
 
@@ -116,6 +126,56 @@ class PaintModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // exports the image as a future containing raw bytes using PictureRecorder.
+  // TODO: verify if this is really the correct export format.
+  Future<Uint8List> exportImage() async {
+    if (_isExporting) throw StateError('Image export is already in progress.');
+    _isExporting = true;
+    notifyListeners();
+    try {
+      finishStroke();
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      final size = _canvasSize;
+
+      if (backgroundImagePath != null && backgroundImagePath!.isNotEmpty) {
+        final codec = await ui.instantiateImageCodec(
+          await File(backgroundImagePath!).readAsBytes(),
+        );
+        final frame = await codec.getNextFrame();
+        canvas.drawImageRect(
+          frame.image,
+          Rect.fromLTWH(
+            0,
+            0,
+            frame.image.width.toDouble(),
+            frame.image.height.toDouble(),
+          ),
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Paint(),
+        );
+        frame.image.dispose();
+        codec.dispose();
+      }
+
+      for (final line in _lines) {
+        canvas.drawPath(line.path, line.getPaint());
+      }
+
+      final image = await recorder.endRecording().toImage(
+        size.width.ceil(),
+        size.height.ceil(),
+      );
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      if (bytes == null) throw StateError('Could not encode the canvas image.');
+      return bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
+    } finally {
+      _isExporting = false;
+      notifyListeners();
+    }
+  }
+
   @override
   void dispose() {
     _linesRepaint.dispose();
@@ -123,5 +183,4 @@ class PaintModel extends ChangeNotifier {
     super.dispose();
   }
 
-  // TODO: exporting current canvas state to image
 }

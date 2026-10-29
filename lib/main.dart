@@ -6,7 +6,9 @@ import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:go_router/go_router.dart';
+
 import 'core/storage/auth_storage.dart';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'core/network/api_client.dart';
@@ -21,7 +23,11 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   const secureStorage = FlutterSecureStorage();
   final authStorage = AuthStorage(secureStorage);
-  final api = ApiClient(tokenProvider: authStorage.readAccessToken, refreshTokenProvider: authStorage.readRefreshToken, updateTokens: authStorage.updateTokens);
+  final api = ApiClient(
+    tokenProvider: authStorage.readAccessToken,
+    refreshTokenProvider: authStorage.readRefreshToken,
+    updateTokens: authStorage.updateTokens,
+  );
   final repo = UserRepositoryImpl(UserRemoteDataSource(api));
 
   runApp(MyApp(userRepository: repo, authStorage: authStorage));
@@ -35,22 +41,40 @@ class MyApp extends StatelessWidget {
 
   late final GoRouter router = GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (context, state) => LoginUi(repo: userRepository, authStorage: authStorage)),
+      GoRoute(
+        path: '/',
+        builder: (context, state) =>
+            LoginUi(repo: userRepository, authStorage: authStorage),
+      ),
       GoRoute(path: '/map', builder: (context, state) => MapScreen()),
       GoRoute(
-        path: '/canvas',
-        builder: (context, state) {
-          final imagePath = state.extra as String?;
-          return PaintScreen(imagePath: imagePath);
-        },
+        path: '/post/draw',
+        builder: (context, _) =>
+            PaintScreen(onImageCreated: (image) => context.pop(image)),
       ),
       GoRoute(
-        path: '/camera',
-        builder: (context, state) => const CameraScreen(),
+        path: '/post/camera',
+        builder: (context, _) => CameraScreen(
+          onPhotoCaptured: (path) async {
+            final image = await context.push<Uint8List>(
+              '/post/photo-edit',
+              extra: path,
+            );
+            if (context.mounted) context.pop(image);
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/post/photo-edit',
+        builder: (context, state) => PaintScreen(
+          imagePath: state.extra as String,
+          onImageCreated: (image) => context.pop(image),
+        ),
       ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => RegistrationUi(repo: userRepository, authStorage: authStorage),
+        builder: (context, state) =>
+            RegistrationUi(repo: userRepository, authStorage: authStorage),
       ),
       GoRoute(
         path: '/registration_successful',

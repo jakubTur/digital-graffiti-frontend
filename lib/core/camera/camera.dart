@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  final Future<void> Function(String path) onPhotoCaptured;
+
+  const CameraScreen({super.key, required this.onPhotoCaptured});
 
   @override
   State<StatefulWidget> createState() => _CameraScreenState();
@@ -42,7 +44,7 @@ class _CameraScreenState extends State<CameraScreen> {
       final XFile image = await cameraController!.takePicture();
 
       if (mounted) {
-        context.push('/canvas', extra: image.path);
+        await widget.onPhotoCaptured(image.path);
       }
     } catch (e) {
       debugPrint('Error taking photo: $e');
