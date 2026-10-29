@@ -127,7 +127,7 @@ class PaintModel extends ChangeNotifier {
   }
 
   // exports the image as a future containing raw bytes using PictureRecorder.
-  // TODO: verify if this is really the correct export format.
+  // TODO: decide if this is really the correct export format.
   Future<Uint8List> exportImage() async {
     if (_isExporting) throw StateError('Image export is already in progress.');
     _isExporting = true;
@@ -142,6 +142,7 @@ class PaintModel extends ChangeNotifier {
         final codec = await ui.instantiateImageCodec(
           await File(backgroundImagePath!).readAsBytes(),
         );
+        // overlays the painting on top of the background using a codec: first frame = background, second frame = first frame + drawing.
         final frame = await codec.getNextFrame();
         canvas.drawImageRect(
           frame.image,

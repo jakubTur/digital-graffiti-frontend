@@ -31,7 +31,7 @@ class PaintGestureSurface extends StatefulWidget {
 
 class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   final _transform = TransformationController();
-  final _pointers = <int>{}; // fingers
+  final _pointers = <int>{}; // fingers currently touching the screen
   int? _paintPointer;
   
   // for preventing accidental strokes being created if the user actually wants to zoom/pan
