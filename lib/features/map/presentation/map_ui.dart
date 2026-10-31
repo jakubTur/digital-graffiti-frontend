@@ -148,5 +148,7 @@ class MapUi extends StatelessWidget {
     );
   }
 
-  void _showProfile(BuildContext context, MapModel map) {}
+  void _showProfile(BuildContext context, MapModel map) {
+    context.push('/profile');
+  }
 }
