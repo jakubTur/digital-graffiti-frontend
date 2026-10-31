@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class PurpleButton extends StatelessWidget {
-  const PurpleButton(this.text, this.onPressed, {super.key});
+class ProfileButton extends StatelessWidget {
+  const ProfileButton(this.text, this.onPressed, this.color, {super.key});
 
   final String text;
 
@@ -11,12 +11,14 @@ class PurpleButton extends StatelessWidget {
 
   final double height = 70;
 
+  final MaterialColor color;
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         fixedSize: const Size(214, 70),
-        backgroundColor: const Color(0xFF6750A4),
+        backgroundColor: color,
       ),
       onPressed: onPressed,
       child: Text(

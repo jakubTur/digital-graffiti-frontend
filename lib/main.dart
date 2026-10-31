@@ -6,6 +6,7 @@ import 'package:frontend/features/auth/domain/repositories/user_repository.dart'
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
+import 'package:frontend/features/profile/data/user_relation_status.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/network/api_client.dart';
@@ -61,7 +62,10 @@ class MyApp extends StatelessWidget {
         path: '/registration_successful',
         builder: (context, state) => const RegistrationSuccessful(),
       ),
-      GoRoute(path: '/profile', builder: (context, state) => ProfileUi(true)),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => ProfileUi(UserRelationStatus.SELF),
+      ),
       // TODO: put other routes here!!!
     ],
   );
