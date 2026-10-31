@@ -6,6 +6,7 @@ import 'package:frontend/features/auth/domain/repositories/user_repository.dart'
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
+import 'package:frontend/features/profile/data/user_relation_initiator.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
 import 'package:go_router/go_router.dart';
 
@@ -64,7 +65,10 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/profile',
-        builder: (context, state) => ProfileUi(UserRelationStatus.SELF),
+        builder: (context, state) => ProfileUi(
+          UserRelationStatus.PENDING,
+          UserRelationInitiator.OTHER_USER,
+        ),
       ),
       // TODO: put other routes here!!!
     ],

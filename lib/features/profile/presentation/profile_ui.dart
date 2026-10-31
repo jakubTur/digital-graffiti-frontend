@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/data/user_relation_initiator.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
+import 'package:frontend/features/profile/presentation/profile_button.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfileUi extends StatelessWidget {
-  const ProfileUi(this._relationStatus, {super.key, this._relationInitiator});
+  const ProfileUi(this._relationStatus, [this._relationInitiator]);
 
   final UserRelationStatus _relationStatus;
 
   final UserRelationInitiator? _relationInitiator;
 
-  //TODO: implement the placeholder funtions
+  //TODO: implement the placeholder functions
 
   void _blockUser() {}
 
@@ -53,7 +54,7 @@ class ProfileUi extends StatelessWidget {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   spacing: 10,
                   children: [
                     Row(
@@ -70,6 +71,8 @@ class ProfileUi extends StatelessWidget {
                             icon: const Icon(Icons.block, color: Colors.black),
                           ),
                         ],
+
+                        ///TODO: change exemplary values to ones taken from the backend
                         const Spacer(),
                         IconButton(
                           onPressed: () {
@@ -118,24 +121,77 @@ class ProfileUi extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       ...[
-                        switch (_relationStatus) {
-                          UserRelationStatus.PENDING =>
-                            throw UnimplementedError(),
-                          // TODO: Handle this case.
-                          UserRelationStatus.ACCEPTED =>
-                            throw UnimplementedError(),
-                          // TODO: Handle this case.
-                          UserRelationStatus.DECLINED =>
-                            throw UnimplementedError(),
-                          // TODO: Handle this case.
+                        ...switch (_relationStatus) {
+                          UserRelationStatus.PENDING => [
+                            if (_relationInitiator ==
+                                UserRelationInitiator.SELF)
+                              ...[]
+                            else ...[
+                              Row(
+                                children: [
+                                  ProfileButton(
+                                    'Accept friend request',
+                                    _acceptFriendRequest,
+                                    Colors.green,
+                                  ),
+                                  const SizedBox(width: 20),
+                                  ProfileButton(
+                                    'Decline friend request',
+                                    _declineFriendRequest,
+                                    Colors.red,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+
+                          UserRelationStatus.ACCEPTED => [
+                            ProfileButton(
+                              'Remove from friends',
+                              _removeFriend,
+                              Colors.red,
+                            ),
+                          ],
+
+                          UserRelationStatus.DECLINED ||
+                          UserRelationStatus.NONE => [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ProfileButton(
+                                  'Send friend request',
+                                  _sendFriendRequest,
+                                  Colors.purple,
+                                ),
+                              ],
+                            ),
+                          ],
+
                           UserRelationStatus.BLOCKED =>
                             throw UnimplementedError(),
-                          // TODO: Handle this case.
-                          UserRelationStatus.SELF => throw UnimplementedError(),
+
+                          ///TODO: routing
+                          UserRelationStatus.SELF => [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ProfileButton(
+                                  'Edit profile',
+                                  () {},
+                                  Colors.purple,
+                                ),
+                                const SizedBox(width: 20),
+                                ProfileButton(
+                                  'Account settings',
+                                  () {},
+                                  Colors.purple,
+                                ),
+                              ],
+                            ),
+                          ],
                         },
                       ],
 
-                      //TODO: other options if not the owner
                       const SizedBox(height: 24),
                       const Align(
                         alignment: Alignment.centerLeft,
@@ -149,7 +205,39 @@ class ProfileUi extends StatelessWidget {
                           ),
                         ),
                       ),
+
                       //TODO: List of posts
+                    ] else ...[
+                      ...switch (_relationInitiator) {
+                        null => throw UnimplementedError(),
+
+                        UserRelationInitiator.SELF => [
+                          Text(
+                            'This user has been blocked',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          ProfileButton(
+                            'Unblock user',
+                            _unblockUser,
+                            Colors.red,
+                          ),
+                        ],
+
+                        UserRelationInitiator.OTHER_USER => [
+                          const Text(
+                            'This user has blocked you',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      },
                     ],
                   ],
                 ),

@@ -22,6 +22,7 @@ class ProfileButton extends StatelessWidget {
       ),
       onPressed: onPressed,
       child: Text(
+        textAlign: TextAlign.center,
         text,
         style: const TextStyle(fontSize: 18, color: Colors.white),
       ),
