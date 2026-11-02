@@ -10,6 +10,10 @@ import 'package:frontend/features/profile/data/user_relation_status.dart';
 import 'package:frontend/features/profile/presentation/account_settings.dart';
 import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
 import 'package:go_router/go_router.dart';
+
+import 'core/storage/auth_storage.dart';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/api_client.dart';
@@ -67,15 +71,28 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(path: '/map', builder: (context, state) => const MapScreen()),
       GoRoute(
-        path: '/canvas',
-        builder: (context, state) {
-          final imagePath = state.extra as String?;
-          return PaintScreen(imagePath: imagePath);
-        },
+        path: '/post/draw',
+        builder: (context, _) =>
+            PaintScreen(onImageCreated: (image) => context.pop(image)),
       ),
       GoRoute(
-        path: '/camera',
-        builder: (context, state) => const CameraScreen(),
+        path: '/post/camera',
+        builder: (context, _) => CameraScreen(
+          onPhotoCaptured: (path) async {
+            final image = await context.push<Uint8List>(
+              '/post/photo-edit',
+              extra: path,
+            );
+            if (context.mounted) context.pop(image);
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/post/photo-edit',
+        builder: (context, state) => PaintScreen(
+          imagePath: state.extra as String,
+          onImageCreated: (image) => context.pop(image),
+        ),
       ),
       GoRoute(
         path: '/register',

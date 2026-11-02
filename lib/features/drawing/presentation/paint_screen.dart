@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/paint_model.dart';
 import 'package:frontend/features/drawing/presentation/canvas_background_image.dart';
@@ -9,14 +11,23 @@ import 'package:provider/provider.dart';
 // main class for the paint screen.
 // wires together all the other paint-related widgets with the model that manages their state.
 class PaintScreen extends StatelessWidget {
+
   final String? imagePath;
-  const PaintScreen({super.key, this.imagePath});
+
+  // updates the canvas with the created image stored as raw bytes.
+  final ValueChanged<Uint8List> onImageCreated;
+
+  const PaintScreen({
+    super.key,
+    this.imagePath,
+    required this.onImageCreated,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       key: ValueKey(imagePath),
-      create: (_) => PaintModel(), // << use this model in a widget to interact with canvas state
+      create: (_) => PaintModel(backgroundImagePath: imagePath),
       child: Builder(
         builder: (context) {
           final paintModel = context.read<PaintModel>();
@@ -34,10 +45,7 @@ class PaintScreen extends StatelessWidget {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        CanvasBackgroundImage(
-                          imagePath: imagePath,
-                          paintModel: paintModel,
-                        ),
+                        CanvasBackgroundImage(paintModel: paintModel),
                         PaintCanvas(paintModel: paintModel, size: canvasSize),
                       ],
                     ),
@@ -49,6 +57,9 @@ class PaintScreen extends StatelessWidget {
                     hasStrokes: model.hasStrokes,
                     onUndo: model.undo,
                     onClear: model.clear,
+                    isExporting: model.isExporting,
+                    onDone: () =>
+                        _exportImage(context, paintModel, onImageCreated),
                   ),
                 ),
               ],
@@ -57,5 +68,22 @@ class PaintScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _exportImage(
+    BuildContext context,
+    PaintModel model,
+    ValueChanged<Uint8List> onImageCreated,
+  ) async {
+    try {
+      final image = await model.exportImage();
+      if (context.mounted) onImageCreated(image);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to export post: $error')),
+        );
+      }
+    }
   }
 }

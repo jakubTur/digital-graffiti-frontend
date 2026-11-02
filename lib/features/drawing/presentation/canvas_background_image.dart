@@ -5,23 +5,24 @@ import 'package:frontend/features/drawing/data/paint_model.dart';
 
 // simple widget for displaying the background image.
 // this is just here to keep PaintScreen clean and concise really.
+// image is stored in paintModel because it's required for  the export functionality.
 class CanvasBackgroundImage extends StatelessWidget {
-  final String? imagePath;
   final PaintModel paintModel;
 
   const CanvasBackgroundImage({
     super.key,
-    required this.imagePath,
     required this.paintModel,
   });
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
     size: paintModel.canvasSize,
-    child: imagePath == null || imagePath!.isEmpty
+    child:
+        paintModel.backgroundImagePath == null ||
+            paintModel.backgroundImagePath!.isEmpty
         ? null
         : Image.file(
-            File(imagePath!),
+            File(paintModel.backgroundImagePath!),
             fit: BoxFit.cover,
             excludeFromSemantics: true,
             frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // UI for the paint screen.
 class PaintUi extends StatelessWidget {
@@ -8,6 +9,8 @@ class PaintUi extends StatelessWidget {
   final bool hasStrokes;
   final VoidCallback onUndo;
   final VoidCallback onClear;
+  final bool isExporting;
+  final VoidCallback onDone;
 
   const PaintUi({
     super.key,
@@ -15,6 +18,8 @@ class PaintUi extends StatelessWidget {
     required this.hasStrokes,
     required this.onUndo,
     required this.onClear,
+    required this.isExporting,
+    required this.onDone,
   });
 
   @override
@@ -29,8 +34,8 @@ class PaintUi extends StatelessWidget {
               iconSize: 40,
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
+                if (context.canPop()) {
+                  context.pop();
                 }
               },
             ),
@@ -59,9 +64,7 @@ class PaintUi extends StatelessWidget {
               child: IconButton(
                 icon: const Icon(Icons.done),
                 iconSize: 40,
-                onPressed: () {
-                  // TODO: export image
-                },
+                onPressed: isExporting ? null : onDone,
               ),
             ),
           ],
