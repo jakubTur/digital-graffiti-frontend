@@ -32,6 +32,8 @@ class PaintGestureSurface extends StatefulWidget {
 class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   final _transform = TransformationController();
   final _pointers = <int>{}; // fingers currently touching the screen
+  Size? _lastSceneSize;
+  Size? _lastViewportSize;
   int? _paintPointer;
   
   // for preventing accidental strokes being created if the user actually wants to zoom/pan
@@ -45,6 +47,19 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   static const _accidentalStrokeWindow = Duration(milliseconds: 250);
 
   Rect get _sceneBounds => Offset.zero & widget.sceneSize;
+
+  /// centers the canvas in the center of the screen.
+  void _fitScene(Size sceneSize, Size viewportSize) {
+    final scale = (viewportSize.width / sceneSize.width)
+        .clamp(0.0, viewportSize.height / sceneSize.height)
+        .toDouble();
+    _transform.value = Matrix4.identity()
+      ..translate(
+        (viewportSize.width - sceneSize.width * scale) / 2,
+        (viewportSize.height - sceneSize.height * scale) / 2,
+      )
+      ..scale(scale);
+  }
 
   void _startStroke(Offset position) {
     final point = _transform.toScene(position);
@@ -136,23 +151,49 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   @override
   Widget build(BuildContext context) => Align(
     alignment: Alignment.center,
-    child: SizedBox.fromSize(
-      size: widget.sceneSize,
-      child: Listener(
-        onPointerDown: _onPointerDown,
-        onPointerMove: _onPointerMove,
-        onPointerUp: _onPointerUp,
-        onPointerCancel: _onPointerUp,
-        child: InteractiveViewer(
-          transformationController: _transform,
-          constrained: false,
-          boundaryMargin: const EdgeInsets.all(double.infinity),
-          minScale: 0.001,
-          panEnabled: _panEnabled,
-          onInteractionUpdate: _onInteractionUpdate,
-          child: SizedBox.fromSize(size: widget.sceneSize, child: widget.child),
-        ),
-      ),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportSize = constraints.biggest;
+        final sceneSize = widget.sceneSize;
+
+        if (_lastSceneSize != sceneSize || _lastViewportSize != viewportSize) {
+          _lastSceneSize = sceneSize;
+          _lastViewportSize = viewportSize;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted &&
+                _lastSceneSize == sceneSize &&
+                _lastViewportSize == viewportSize &&
+                sceneSize.width > 0 &&
+                sceneSize.height > 0 &&
+                viewportSize.width > 0 &&
+                viewportSize.height > 0) {
+              _fitScene(sceneSize, viewportSize);
+            }
+          });
+        }
+
+        return SizedBox.fromSize(
+          size: viewportSize,
+          child: Listener(
+            onPointerDown: _onPointerDown,
+            onPointerMove: _onPointerMove,
+            onPointerUp: _onPointerUp,
+            onPointerCancel: _onPointerUp,
+            child: InteractiveViewer(
+              transformationController: _transform,
+              constrained: false,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              minScale: 0.001,
+              panEnabled: _panEnabled,
+              onInteractionUpdate: _onInteractionUpdate,
+              child: SizedBox.fromSize(
+                size: widget.sceneSize,
+                child: widget.child,
+              ),
+            ),
+          ),
+        );
+      },
     ),
   );
 }
