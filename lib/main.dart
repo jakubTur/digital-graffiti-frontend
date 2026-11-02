@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/camera/camera.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
+import 'package:frontend/features/profile/data/user_relation_status.dart';
 import 'package:go_router/go_router.dart';
-import 'core/storage/auth_storage.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'core/network/api_client.dart';
+import 'core/storage/auth_storage.dart';
 import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
 import 'features/auth/presentation/registration_ui.dart';
+import 'features/profile/presentation/profile_ui.dart';
 
 void main() async {
   // App locked into vertical mode
@@ -21,7 +23,11 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   const secureStorage = FlutterSecureStorage();
   final authStorage = AuthStorage(secureStorage);
-  final api = ApiClient(tokenProvider: authStorage.readAccessToken, refreshTokenProvider: authStorage.readRefreshToken, updateTokens: authStorage.updateTokens);
+  final api = ApiClient(
+    tokenProvider: authStorage.readAccessToken,
+    refreshTokenProvider: authStorage.readRefreshToken,
+    updateTokens: authStorage.updateTokens,
+  );
   final repo = UserRepositoryImpl(UserRemoteDataSource(api));
 
   runApp(MyApp(userRepository: repo, authStorage: authStorage));
@@ -35,8 +41,12 @@ class MyApp extends StatelessWidget {
 
   late final GoRouter router = GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (context, state) => LoginUi(repo: userRepository, authStorage: authStorage)),
-      GoRoute(path: '/map', builder: (context, state) => MapScreen()),
+      GoRoute(
+        path: '/',
+        builder: (context, state) =>
+            LoginUi(repo: userRepository, authStorage: authStorage),
+      ),
+      GoRoute(path: '/map', builder: (context, state) => const MapScreen()),
       GoRoute(
         path: '/canvas',
         builder: (context, state) {
@@ -50,11 +60,24 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => RegistrationUi(repo: userRepository, authStorage: authStorage),
+        builder: (context, state) =>
+            RegistrationUi(repo: userRepository, authStorage: authStorage),
       ),
       GoRoute(
         path: '/registration_successful',
         builder: (context, state) => const RegistrationSuccessful(),
+      ),
+      GoRoute(
+        path: '/profile',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          opaque: false, // makes the map visible behind the screen
+          // screen transition animation
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child: const ProfileUi(UserRelationStatus.SELF),
+        ),
       ),
       // TODO: put other routes here!!!
     ],
