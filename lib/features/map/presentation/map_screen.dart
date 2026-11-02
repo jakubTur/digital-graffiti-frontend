@@ -11,11 +11,10 @@ class MapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Map',
-      home: ChangeNotifierProvider(
+    return Scaffold(
+      body: ChangeNotifierProvider(
         create: (context) => MapModel(), // Map-wide state
-        child: Stack(children: [DisplayMap(), MapUi()]), // Map widget
+        child: const Stack(children: [DisplayMap(), MapUi()]), // Map widget
       ),
     );
   }

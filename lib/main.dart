@@ -6,7 +6,6 @@ import 'package:frontend/features/auth/domain/repositories/user_repository.dart'
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
-import 'package:frontend/features/profile/data/user_relation_initiator.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
 import 'package:go_router/go_router.dart';
 
@@ -42,8 +41,12 @@ class MyApp extends StatelessWidget {
 
   late final GoRouter router = GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (context, state) => LoginUi(repo: userRepository, authStorage: authStorage)),
-      GoRoute(path: '/map', builder: (context, state) => MapScreen()),
+      GoRoute(
+        path: '/',
+        builder: (context, state) =>
+            LoginUi(repo: userRepository, authStorage: authStorage),
+      ),
+      GoRoute(path: '/map', builder: (context, state) => const MapScreen()),
       GoRoute(
         path: '/canvas',
         builder: (context, state) {
@@ -57,7 +60,8 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => RegistrationUi(repo: userRepository, authStorage: authStorage),
+        builder: (context, state) =>
+            RegistrationUi(repo: userRepository, authStorage: authStorage),
       ),
       GoRoute(
         path: '/registration_successful',
@@ -65,9 +69,14 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/profile',
-        builder: (context, state) => ProfileUi(
-          UserRelationStatus.PENDING,
-          UserRelationInitiator.OTHER_USER,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          opaque: false, // makes the map visible behind the screen
+          // screen transition animation
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child: const ProfileUi(UserRelationStatus.SELF),
         ),
       ),
       // TODO: put other routes here!!!

@@ -7,24 +7,21 @@ class ProfileButton extends StatelessWidget {
 
   final void Function() onPressed;
 
-  final double width = 214;
-
-  final double height = 70;
-
-  final MaterialColor color;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        fixedSize: const Size(214, 70),
+        minimumSize: const Size(0, 54),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
         backgroundColor: color,
       ),
       onPressed: onPressed,
       child: Text(
-        textAlign: TextAlign.center,
         text,
-        style: const TextStyle(fontSize: 18, color: Colors.white),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
       ),
     );
   }
