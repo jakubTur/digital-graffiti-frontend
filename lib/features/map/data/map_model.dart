@@ -26,6 +26,11 @@ class MapModel extends ChangeNotifier {
   final Map<int, PostData> _posts = {};
   PostDraft? _currentlyMadePost;
 
+  /// which post is currently being viewed.
+  /// this is slightly messy coupling with MapUi, but it's not a massive issue,
+  /// and keeping it here allows for easier routing during post viewing.
+  PostData? _postToView;
+
   /// Used to keep track of the user's location
   StreamSubscription<Position>? _positionSubscription;
 
@@ -42,6 +47,23 @@ class MapModel extends ChangeNotifier {
   UnmodifiableMapView<int, PostData> get posts => UnmodifiableMapView(_posts);
 
   PostDraft? get currentlyMadePost => _currentlyMadePost;
+
+  PostData? get postToView => _postToView;
+
+  /// post viewing handler.
+  /// slightly messy coupling (pedantically this should be in the ui), but it works.
+  void requestPostView(PostData post) {
+    _postToView = post;
+    notifyListeners();
+  }
+
+  /// post viewing callback.
+  /// slightly messy coupling (pedantically this should be in the ui), but it works.
+  void clearPostToView() {
+    if (_postToView == null) return;
+    _postToView = null;
+    notifyListeners();
+  }
 
   PostDraft beginPost(LatLng location) {
     final post = PostDraft(location: location);

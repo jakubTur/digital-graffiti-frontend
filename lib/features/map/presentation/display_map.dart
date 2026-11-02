@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/data/post_data.dart';
+import 'package:frontend/features/map/presentation/post_pin.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -38,15 +39,19 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
   List<Marker> buildMarkers(
     LatLng userLocation,
     MapView<int, PostData> postData,
+    ValueChanged<PostData> onViewPost,
   ) {
     List<Marker> markers = [];
     markers.add(createMarkerFromData(userLocation, Icons.man, Colors.blue));
 
     for (PostData post in postData.values) {
-      final location = post.location;
-      if (location == null) continue;
       markers.add(
-        createMarkerFromData(location, Icons.location_pin, Colors.green),
+        Marker(
+          point: post.location,
+          width: 80,
+          height: 80,
+          child: PostPin(post: post, onViewPost: onViewPost),
+        ),
       );
     }
     return markers;
@@ -68,7 +73,11 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
         Consumer<MapModel>(
           builder: (context, map, child) {
             return MarkerLayer(
-              markers: buildMarkers(map.userLocation, map.posts),
+              markers: buildMarkers(
+                map.userLocation,
+                map.posts,
+                map.requestPostView,
+              ),
               rotate: true,
             );
           },
