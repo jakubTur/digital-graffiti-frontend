@@ -7,7 +7,10 @@ import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
+import 'package:frontend/features/profile/presentation/account_settings.dart';
+import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/api_client.dart';
 import 'core/storage/auth_storage.dart';
@@ -30,16 +33,32 @@ void main() async {
   );
   final repo = UserRepositoryImpl(UserRemoteDataSource(api));
 
-  runApp(MyApp(userRepository: repo, authStorage: authStorage));
+  final prefs = await SharedPreferences.getInstance();
+  final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  runApp(
+    MyApp(
+      userRepository: repo,
+      authStorage: authStorage,
+      isLoggedIn: isLoggedIn,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key, required this.userRepository, required this.authStorage});
+  MyApp({
+    super.key,
+    required this.userRepository,
+    required this.authStorage,
+    required this.isLoggedIn,
+  });
 
   final UserRepository userRepository;
   final AuthStorage authStorage;
+  final bool isLoggedIn;
 
   late final GoRouter router = GoRouter(
+    initialLocation: isLoggedIn ? '/map' : '/',
     routes: [
       GoRoute(
         path: '/',
@@ -79,6 +98,15 @@ class MyApp extends StatelessWidget {
           child: const ProfileUi(UserRelationStatus.SELF),
         ),
       ),
+      GoRoute(
+        path: '/account-settings',
+        builder: (context, state) => const AccountSettings(),
+      ),
+      GoRoute(
+        path: '/edit-profile',
+        builder: (context, state) => const EditProfileUi(),
+      ),
+
       // TODO: put other routes here!!!
     ],
   );
