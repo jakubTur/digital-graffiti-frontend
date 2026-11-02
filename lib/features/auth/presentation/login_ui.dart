@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/models/login_request.dart';
-import '../../map/presentation/map_screen.dart';
-import '../domain/repositories/user_repository.dart';
 import '../../../core/storage/auth_storage.dart';
-
+import '../data/models/login_request.dart';
+import '../domain/repositories/user_repository.dart';
 
 class LoginUi extends StatefulWidget {
   final UserRepository repo;
@@ -24,25 +22,6 @@ class _LoginUiState extends State<LoginUi> {
   String? _credentialsError;
   bool _passwordHidden = true;
   bool _rememberUser = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus();
-  }
-
-  void _checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-
-    if (!mounted) return;
-    if (isLoggedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MapScreen()),
-      );
-    }
-  }
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;

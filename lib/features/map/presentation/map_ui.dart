@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/data/post_data.dart';
 import 'package:frontend/features/map/presentation/post_view_widget.dart';
+import 'package:frontend/features/map/presentation/map_ui_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -142,60 +143,52 @@ class _MapUiState extends State<MapUi> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment(1, 1),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        verticalDirection: VerticalDirection.up,
-        children: [
-          Consumer<MapModel>(
-            builder: (context, map, child) {
-              return Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: FloatingActionButton(
-                    heroTag: 'upload_button',
-                    backgroundColor: Colors.deepPurple,
-                    onPressed: () {
-                      _showCanvasOptions(context, map);
-                    },
-                    child: const Icon(
-                      Icons.add_circle,
-                      color: Colors.white,
-                      size: 65,
-                    ),
-                  ),
+    return SafeArea(
+      child: Container(
+        alignment: const Alignment(1, 1),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Consumer<MapModel>(
+                  builder: (context, map, child) {
+                    return MapUiButton(
+                      onTap: () => _showProfile(context, map),
+                      icon: Icons.person,
+                      heroTag: 'profile_button',
+                    );
+                  },
                 ),
-              ); // post
-            },
-          ),
-          Consumer<MapModel>(
-            builder: (context, map, child) {
-              return Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: FloatingActionButton(
-                    heroTag: 'location_button',
-                    backgroundColor: Colors.deepPurple,
-                    onPressed: () {
-                      map.moveMap(map.userLocation, 19.4, 0.0);
-                    },
-                    child: const Icon(
-                      Icons.my_location,
-                      color: Colors.white,
-                      size: 65,
-                    ),
-                  ), // location
-                ),
-              );
-            },
-          ),
-        ],
+              ],
+            ),
+            const Spacer(),
+            Consumer<MapModel>(
+              builder: (context, map, child) {
+                return MapUiButton(
+                  onTap: () => _showCanvasOptions(context, map),
+                  icon: Icons.add_circle,
+                  heroTag: 'upload_button',
+                );
+              },
+            ),
+            Consumer<MapModel>(
+              builder: (context, map, child) {
+                return MapUiButton(
+                  onTap: () => map.moveMap(map.userLocation, 19.4, 0.0),
+                  icon: Icons.my_location,
+                  heroTag: 'location_button',
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void _showProfile(BuildContext context, MapModel map) {
+    context.push('/profile');
   }
 }

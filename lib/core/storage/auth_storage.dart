@@ -20,19 +20,28 @@ class AuthStorage {
     await prefs.setString('nickname', response.nickname);
     await prefs.setString('email', response.email);
   }
+
   Future<String?> readAccessToken() {
     return storage.read(key: accessTokenKey);
   }
+
   Future<String?> readRefreshToken() {
     return storage.read(key: refreshTokenKey);
   }
+
   Future<void> clear() async {
     await storage.deleteAll();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+    await prefs.remove('nickname');
+    await prefs.remove('email');
   }
+
   Future<void> clearPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }
+
   Future<void> updateTokens(String accessToken, String refreshToken) async {
     await storage.write(key: accessTokenKey, value: accessToken);
     await storage.write(key: refreshTokenKey, value: refreshToken);
