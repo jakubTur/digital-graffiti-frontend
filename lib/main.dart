@@ -10,10 +10,6 @@ import 'package:frontend/features/profile/data/user_relation_status.dart';
 import 'package:frontend/features/profile/presentation/account_settings.dart';
 import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
 import 'package:go_router/go_router.dart';
-
-import 'core/storage/auth_storage.dart';
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/api_client.dart';
@@ -22,7 +18,7 @@ import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
 import 'features/auth/presentation/registration_ui.dart';
-import 'features/profile/presentation/profile_ui.dart';
+import 'features/profile/presentation/profile_popup.dart';
 
 void main() async {
   // App locked into vertical mode
@@ -112,7 +108,7 @@ class MyApp extends StatelessWidget {
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
-          child: const ProfileUi(UserRelationStatus.SELF),
+          child: const ProfilePopup(UserRelationStatus.SELF),
         ),
       ),
       GoRoute(

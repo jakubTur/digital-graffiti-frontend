@@ -6,6 +6,13 @@ class EditProfileUi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [ProfileButton("jajo", () {}, Colors.deepPurple)]);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [ProfileButton("jajo", () {}, Colors.deepPurple)],
+      ),
+    );
   }
 }
