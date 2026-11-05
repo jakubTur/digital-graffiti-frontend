@@ -33,7 +33,13 @@ class _ProfilePopupState extends State<ProfilePopup> {
         },
       );
     } else if (_showEditProfile) {
-      return EditProfileUi();
+      return EditProfileUi(
+        onBackPressed: () => {
+          setState(() {
+            _showEditProfile = false;
+          }),
+        },
+      );
     } else {
       return ProfileUi(
         widget._relationStatus,
