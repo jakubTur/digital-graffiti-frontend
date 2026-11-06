@@ -1,17 +1,25 @@
 import 'dart:collection';
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:frontend/features/drawing/data/brush_settings.dart';
+import 'package:frontend/features/drawing/data/canvas_exporter.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 
 // main class for managing canvas state and making it accessible to child widgets.
-// stores basically all state related to the painting itself, the current brush, strokes,
+// stores basically all state related to the painting itself, strokes,
 // and exposes methods for safely managing said state.
 // in order to use this in a widget, use a Consumer.
 class PaintModel extends ChangeNotifier {
-  PaintModel({this.backgroundImagePath});
+  PaintModel({
+    required this.brush,
+    required this.exporter,
+    this.backgroundImagePath,
+  });
+
+  // settings of currently used brush.
+  final BrushSettings brush;
+  final CanvasExporter exporter;
 
   // background image is stored here for export funcitonality to work correctly
   final String? backgroundImagePath;
@@ -43,40 +51,13 @@ class PaintModel extends ChangeNotifier {
   Listenable get linesRepaint => _linesRepaint;
   Listenable get currentLineRepaint => _currentLineRepaint;
 
-  // brush state:
-  Color _brushColor = Colors.black;
-  double _brushWidth = 10;
-  Color get brushColor => _brushColor;
-  double get brushWidth => _brushWidth;
-
   bool get canUndo => _lines.isNotEmpty;
   bool get hasStrokes => _lines.isNotEmpty || _currentLine != null;
-
-  // currently unused, but will be used when multiple brushes are added.
-  void setBrushColor(Color color) {
-    if (_brushColor == color) return;
-    _brushColor = color;
-    notifyListeners();
-  }
-
-  // currently unused, but will be used when multiple brushes are added.
-  void setBrushWidth(double width) {
-    if (!width.isFinite || width <= 0) {
-      throw ArgumentError.value(
-        width,
-        'width',
-        'Must be a finite value greater than zero.',
-      );
-    }
-    if (_brushWidth == width) return;
-    _brushWidth = width;
-    notifyListeners();
-  }
 
   // call based on gestures
   void beginStroke(Offset point) {
     final path = Path()..moveTo(point.dx, point.dy);
-    _currentLine = DrawnLine(path, _brushColor, _brushWidth);
+    _currentLine = DrawnLine(path, brush.color, brush.width);
     _currentLineRepaint.notifyListeners();
     notifyListeners();
   }
@@ -134,43 +115,11 @@ class PaintModel extends ChangeNotifier {
     notifyListeners();
     try {
       finishStroke();
-      final recorder = ui.PictureRecorder();
-      final canvas = ui.Canvas(recorder);
-      final size = _canvasSize;
-
-      if (backgroundImagePath != null && backgroundImagePath!.isNotEmpty) {
-        final codec = await ui.instantiateImageCodec(
-          await File(backgroundImagePath!).readAsBytes(),
-        );
-        // overlays the painting on top of the background using a codec: first frame = background, second frame = first frame + drawing.
-        final frame = await codec.getNextFrame();
-        canvas.drawImageRect(
-          frame.image,
-          Rect.fromLTWH(
-            0,
-            0,
-            frame.image.width.toDouble(),
-            frame.image.height.toDouble(),
-          ),
-          Rect.fromLTWH(0, 0, size.width, size.height),
-          Paint(),
-        );
-        frame.image.dispose();
-        codec.dispose();
-      }
-
-      for (final line in _lines) {
-        canvas.drawPath(line.path, line.getPaint());
-      }
-
-      final image = await recorder.endRecording().toImage(
-        size.width.ceil(),
-        size.height.ceil(),
+      return await exporter.export(
+        lines: lines,
+        size: _canvasSize,
+        backgroundImagePath: backgroundImagePath,
       );
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      image.dispose();
-      if (bytes == null) throw StateError('Could not encode the canvas image.');
-      return bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
     } finally {
       _isExporting = false;
       notifyListeners();

@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/features/drawing/data/brush_settings.dart';
+import 'package:frontend/features/drawing/data/canvas_exporter.dart';
 import 'package:frontend/features/drawing/data/paint_model.dart';
+import 'package:frontend/features/drawing/presentation/brush_controls.dart';
 import 'package:frontend/features/drawing/presentation/canvas_background_image.dart';
 import 'package:frontend/features/drawing/presentation/paint_canvas.dart';
 import 'package:frontend/features/drawing/presentation/paint_gesture_surface.dart';
@@ -25,9 +28,18 @@ class PaintScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return MultiProvider(
       key: ValueKey(imagePath),
-      create: (_) => PaintModel(backgroundImagePath: imagePath),
+      providers: [
+        ChangeNotifierProvider(create: (_) => BrushSettings()),
+        ChangeNotifierProvider(
+          create: (context) => PaintModel(
+            brush: context.read<BrushSettings>(),
+            exporter: CanvasExporter(),
+            backgroundImagePath: imagePath,
+          ),
+        ),
+      ],
       child: Builder(
         builder: (context) {
           final paintModel = context.read<PaintModel>();
@@ -49,6 +61,14 @@ class PaintScreen extends StatelessWidget {
                         PaintCanvas(paintModel: paintModel, size: canvasSize),
                       ],
                     ),
+                  ),
+                ),
+                Consumer<BrushSettings>(
+                  builder: (context, brush, _) => BrushControls(
+                    color: brush.color,
+                    width: brush.width,
+                    onColorChanged: brush.setColor,
+                    onWidthChanged: brush.setWidth,
                   ),
                 ),
                 Consumer<PaintModel>(
