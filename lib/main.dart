@@ -7,6 +7,7 @@ import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
+import 'package:frontend/features/profile/presentation/logout_form.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -109,7 +110,10 @@ class MyApp extends StatelessWidget {
           child: const ProfilePopup(UserRelationStatus.SELF),
         ),
       ),
-
+      GoRoute(
+        path: '/logout',
+        builder: (context, state) => LogoutForm(authStorage: authStorage),
+      ),
       // TODO: put other routes here!!!
     ],
   );
