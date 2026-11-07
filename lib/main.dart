@@ -7,8 +7,6 @@ import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
-import 'package:frontend/features/profile/presentation/account_settings.dart';
-import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -110,14 +108,6 @@ class MyApp extends StatelessWidget {
           },
           child: const ProfilePopup(UserRelationStatus.SELF),
         ),
-      ),
-      GoRoute(
-        path: '/account-settings',
-        builder: (context, state) => const AccountSettings(),
-      ),
-      GoRoute(
-        path: '/edit-profile',
-        builder: (context, state) => const EditProfileUi(),
       ),
 
       // TODO: put other routes here!!!

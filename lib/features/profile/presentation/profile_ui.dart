@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/presentation/profile_button.dart';
 import 'package:go_router/go_router.dart';
@@ -14,13 +16,19 @@ class ProfileUi extends StatefulWidget {
 
   final VoidCallback onEditProfilePressed;
 
+  final String nickname;
+  final String bio;
+  final Uint8List? profileImage;
+
   const ProfileUi(
     this._relationStatus,
     this._relationInitiator,
     this.onAccountSettingsPressed,
-    this.onEditProfilePressed, {
-    super.key,
-  });
+    this.onEditProfilePressed,
+    this.nickname,
+    this.bio,
+    this.profileImage,
+  );
 
   @override
   State<StatefulWidget> createState() {
@@ -83,17 +91,33 @@ class _ProfileUiState extends State<ProfileUi> {
               ),
             ],
           ),
-          const Align(
+          Align(
             alignment: Alignment.center,
-            child: Icon(Icons.person, size: 120, color: Colors.deepPurple),
+            child: ClipOval(
+              child: Container(
+                width: 120,
+                height: 120,
+                color: Colors.deepPurple.shade50,
+                child: widget.profileImage != null
+                    ? Image.memory(
+                        widget.profileImage!,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 120,
+                        color: Colors.deepPurple,
+                      ),
+              ),
+            ),
           ),
-
-          ///TODO: change exemplary values to ones taken from the backend
-          const Align(
+          Align(
             alignment: Alignment.center,
             child: Text(
-              'Nickname',
-              style: TextStyle(
+              widget.nickname,
+              style: const TextStyle(
                 fontSize: 28,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -102,11 +126,11 @@ class _ProfileUiState extends State<ProfileUi> {
           ),
           const SizedBox(height: 12),
           if (widget._relationStatus != UserRelationStatus.BLOCKED) ...[
-            const Align(
+            Align(
               alignment: Alignment.center,
               child: Text(
-                'bio bio bi bio bo ibo ibo bio bio bio bo bio bio bio bio bio bio',
-                style: TextStyle(fontSize: 20, color: Colors.black87),
+                widget.bio,
+                style: const TextStyle(fontSize: 20, color: Colors.black87),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -162,7 +186,6 @@ class _ProfileUiState extends State<ProfileUi> {
 
                 UserRelationStatus.BLOCKED => throw UnimplementedError(),
 
-                ///TODO: routing
                 UserRelationStatus.SELF => [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
