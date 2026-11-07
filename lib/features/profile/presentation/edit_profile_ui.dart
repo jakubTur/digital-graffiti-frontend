@@ -64,6 +64,7 @@ class EditProfileUi extends StatelessWidget {
           TextFormField(
             keyboardType: TextInputType.text,
             style: const TextStyle(color: Colors.black),
+            maxLength: 20,
             decoration: InputDecoration(
               labelText: 'Nickname',
               labelStyle: const TextStyle(color: Colors.black),
@@ -74,6 +75,9 @@ class EditProfileUi extends StatelessWidget {
           TextFormField(
             keyboardType: TextInputType.name,
             style: const TextStyle(color: Colors.black),
+            maxLength: 160,
+            minLines: 3,
+            maxLines: 5,
             decoration: InputDecoration(
               labelText: 'Bio',
               labelStyle: const TextStyle(color: Colors.black),

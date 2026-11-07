@@ -12,7 +12,7 @@ class AccountSettings extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
-        spacing: 20,
+        spacing: 40,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -46,6 +46,7 @@ class AccountSettings extends StatelessWidget {
           ProfileButton('Change email', () {}, Colors.deepPurple),
           ProfileButton('Log out', () {}, Colors.deepPurple),
           ProfileButton('Delete account', () {}, Colors.deepPurple),
+          SizedBox(height: 5),
         ],
       ),
     );
