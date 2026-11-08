@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -79,5 +80,23 @@ class ApiClient {
       'Accept': 'application/json',
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token'
     };
+  }
+  Future<dynamic> uploadFile(String path, {required String filePath, required String fileField, Map<String, String> fields = const {}, int expectedStatusCode = 200}) async {
+    final uri = Uri.parse('${Config.baseUrl}$path');
+    final request = http.MultipartRequest('POST', uri);
+    final token = await tokenProvider?.call();
+    request.headers['Accept'] = 'application/json';
+    if (token != null && token.isNotEmpty) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+    request.fields.addAll(fields);
+    request.files.add(await http.MultipartFile.fromPath(fileField, filePath),);
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    final text = utf8.decode(response.bodyBytes);
+    if (response.statusCode != expectedStatusCode) {
+      throw ApiException(response.statusCode, text);
+    }
+    return text.isEmpty ? null : jsonDecode(text);
   }
 }
