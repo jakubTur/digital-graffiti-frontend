@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/widgets/custom_button.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/widgets/form_main_text.dart';
+import '../../../core/widgets/form_secondary_text.dart';
 
 class RegistrationSuccessful extends StatelessWidget {
   const RegistrationSuccessful({super.key});
@@ -24,39 +28,25 @@ class RegistrationSuccessful extends StatelessWidget {
                         // Title
                         const Column(
                           children: [
-                            Text(
-                              'Account created!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.black,
-                                fontFamily: 'Inter',
-                              ),
+                            FormMainText(
+                              text: 'Account created!',
+                              fontWeight: FontWeight.w900,
                             ),
-                            Text(
+                            FormSecondaryText(
                               'Please verify your account by clicking the link sent to your e-mail address',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.black,
-                                fontFamily: 'Inter',
-                              ),
                             ),
                           ],
                         ),
                         const Spacer(),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: const Size(214, 70),
-                            backgroundColor: const Color(0xFF6750A4),
-                          ),
-                          onPressed: () {
-                            context.go('/');
-                          },
-                          child: const Text(
-                            'Log in',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
+                        Center(
+                          child: CustomButton(
+                            text: 'Log in',
+                            width: 214,
+                            height: 70,
+                            fontSize: 18,
+                            onPressed: () {
+                              context.go('/');
+                            },
                           ),
                         ),
                         const Spacer(),

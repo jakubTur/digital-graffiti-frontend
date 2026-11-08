@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
-import 'package:frontend/features/profile/presentation/profile_button.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/form_main_text.dart';
+import '../../../../core/widgets/screen_header.dart';
 
 class LogoutForm extends StatelessWidget {
   const LogoutForm({super.key, required this.authStorage});
@@ -13,42 +16,53 @@ class LogoutForm extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 80,
           children: [
-            Text(
-              'Are you sure you want to log out?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.w800,
-                color: Colors.black,
-                fontFamily: 'Inter',
+            Align(alignment: Alignment.topRight, child: ScreenHeader()),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 80,
+                  children: [
+                    FormMainText(
+                      text: 'Are you sure you want to log out?',
+                      fontWeight: FontWeight.w800,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Spacer(),
+                        Expanded(
+                          child: CustomButton(
+                            text: 'Yes',
+                            onPressed: () {
+                              authStorage.clear();
+                              context.go("/");
+                            },
+                            backgroundColor: Colors.green,
+                          ),
+                        ),
+                        SizedBox(width: 30),
+                        Expanded(
+                          child: CustomButton(
+                            text: 'No',
+                            onPressed: () {
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go("/map");
+                              }
+                            },
+                            backgroundColor: Colors.red,
+                          ),
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Spacer(),
-                Expanded(
-                  child: ProfileButton('Yes', () {
-                    authStorage.clear();
-                    context.go("/");
-                  }, Colors.green),
-                ),
-                SizedBox(width: 30),
-                Expanded(
-                  child: ProfileButton('No', () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.go("/map");
-                    }
-                  }, Colors.red),
-                ),
-                Spacer(),
-              ],
             ),
           ],
         ),

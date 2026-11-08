@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/storage/auth_storage.dart';
+import '../../../core/widgets/custom_button.dart';
+import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/widgets/form_main_text.dart';
 import '../data/models/login_request.dart';
 import '../domain/repositories/user_repository.dart';
 
@@ -73,25 +76,9 @@ class _LoginUiState extends State<LoginUi> {
                         // Title
                         const Column(
                           children: [
-                            Text(
-                              'Welcome to',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.black,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                            Text(
-                              'Digital Graffiti!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.black,
-                                fontFamily: 'Inter',
-                              ),
+                            FormMainText(
+                              text: 'Welcome to Digital Graffiti!',
+                              fontWeight: FontWeight.w900,
                             ),
                           ],
                         ),
@@ -104,32 +91,11 @@ class _LoginUiState extends State<LoginUi> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              TextFormField(
-                                keyboardType: TextInputType.emailAddress,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  labelText: 'Email',
-                                  labelStyle: const TextStyle(
-                                    color: Colors.black,
-                                  ),
-                                  fillColor: const Color(0xFFE6E0E9),
-                                  filled: true,
-                                  focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: _credentialsError != null
-                                          ? Colors.red
-                                          : Colors.deepPurple,
-                                    ),
-                                  ),
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: _credentialsError != null
-                                          ? Colors.red
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ),
+                              CustomTextField(
                                 controller: _emailController,
+                                labelText: 'Email',
+                                keyboardType: TextInputType.emailAddress,
+                                hasError: _credentialsError != null,
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
                                     return 'Please enter an email';
@@ -144,36 +110,22 @@ class _LoginUiState extends State<LoginUi> {
                                 },
                               ),
                               const SizedBox(height: 12),
-                              TextFormField(
-                                obscureText: _passwordHidden,
+                              CustomTextField(
                                 controller: _passwordController,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  labelStyle: const TextStyle(
-                                    color: Colors.black,
+                                labelText: 'Password',
+                                obscureText: _passwordHidden,
+                                errorText: _credentialsError,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _passwordHidden
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                   ),
-                                  fillColor: const Color(0xFFE6E0E9),
-                                  filled: true,
-                                  enabledBorder: const UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _passwordHidden
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _passwordHidden = !_passwordHidden;
-                                      });
-                                    },
-                                  ),
-                                  errorBorder: const UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.red),
-                                  ),
-                                  errorText: _credentialsError,
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordHidden = !_passwordHidden;
+                                    });
+                                  },
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -233,21 +185,12 @@ class _LoginUiState extends State<LoginUi> {
 
                         // Log in button space
                         Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: const Size(214, 70),
-                              backgroundColor: const Color(0xFF6750A4),
-                            ),
-                            onPressed: () {
-                              _handleLogin();
-                            },
-                            child: const Text(
-                              'Log in',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
+                          child: CustomButton(
+                            text: 'Log in',
+                            width: 214,
+                            height: 70,
+                            fontSize: 18,
+                            onPressed: _handleLogin,
                           ),
                         ),
                         const SizedBox(height: 16),

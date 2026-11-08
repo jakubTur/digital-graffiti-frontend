@@ -3,9 +3,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/camera/camera.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
-import 'package:frontend/features/profile/presentation/profile_button.dart';
 import 'package:frontend/features/profile/presentation/square_crop_screen.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/widgets/confirmation_dialog.dart';
+import '../../../core/widgets/custom_button.dart';
+import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/widgets/screen_header.dart';
+import '../../../core/widgets/user_avatar.dart';
 
 class EditProfileUi extends StatefulWidget {
   final String initialNickname;
@@ -68,32 +73,17 @@ class _EditProfileUiState extends State<EditProfileUi> {
         _profileImageBytes != widget.initialProfileImage;
   }
 
-  //TODO: refactor and reuse for closing the drawing screen
   Future<bool> _confirmDiscardChanges() async {
     if (!_hasUnsavedChanges) return true;
 
-    final shouldDiscard = await showDialog<bool>(
+    return ConfirmationDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Discard changes?'),
-        content: const Text(
+      title: 'Discard changes?',
+      content:
           'You have unsaved changes. Are you sure you want to discard them?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Discard'),
-          ),
-        ],
-      ),
+      confirmText: 'Discard',
+      isDestructive: true,
     );
-
-    return shouldDiscard ?? false;
   }
 
   void _handleBackNavigation() async {
@@ -184,47 +174,15 @@ class _EditProfileUiState extends State<EditProfileUi> {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 30,
           children: [
-            Row(
-              children: [
-                const Text(
-                  'Edit profile',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: _handleBackNavigation,
-                  iconSize: 60,
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                ),
-              ],
+            ScreenHeader(
+              title: 'Edit profile',
+              onBackPressed: _handleBackNavigation,
             ),
             Row(
               spacing: 30,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ClipOval(
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    color: Colors.deepPurple.shade50,
-                    child: _profileImageBytes != null
-                        ? Image.memory(
-                            _profileImageBytes!,
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          )
-                        : const Icon(
-                            Icons.person,
-                            size: 120,
-                            color: Colors.deepPurple,
-                          ),
-                  ),
-                ),
+                UserAvatar(imageBytes: _profileImageBytes),
                 IconButton(
                   onPressed: _onPaintButtonPressed,
                   icon: const Icon(Icons.draw),
@@ -239,50 +197,42 @@ class _EditProfileUiState extends State<EditProfileUi> {
                 ),
               ],
             ),
-            TextFormField(
+            CustomTextField(
               controller: _nicknameController,
+              labelText: 'Nickname',
               keyboardType: TextInputType.text,
-              style: const TextStyle(color: Colors.black),
               maxLength: 20,
-              decoration: const InputDecoration(
-                labelText: 'Nickname',
-                labelStyle: TextStyle(color: Colors.black),
-                fillColor: Color(0xFFE6E0E9),
-                filled: true,
-              ),
             ),
-            TextFormField(
+            CustomTextField(
               controller: _bioController,
+              labelText: 'Bio',
               keyboardType: TextInputType.name,
-              style: const TextStyle(color: Colors.black),
               maxLength: 160,
               minLines: 3,
               maxLines: 5,
-              decoration: const InputDecoration(
-                labelText: 'Bio',
-                labelStyle: TextStyle(color: Colors.black),
-                fillColor: Color(0xFFE6E0E9),
-                filled: true,
-              ),
             ),
             // TODO: remove parameters
-            ProfileButton('Save changes', () {
-              if (widget.onSave != null) {
-                widget.onSave!(
-                  _nicknameController.text,
-                  _bioController.text,
-                  _profileImageBytes,
-                );
-              } else if (context.canPop()) {
-                context.pop({
-                  'nickname': _nicknameController.text,
-                  'bio': _bioController.text,
-                  'image': _profileImageBytes,
-                });
-              } else {
-                context.go('/map');
-              }
-            }, Colors.green),
+            CustomButton(
+              text: 'Save changes',
+              backgroundColor: Colors.green,
+              onPressed: () {
+                if (widget.onSave != null) {
+                  widget.onSave!(
+                    _nicknameController.text,
+                    _bioController.text,
+                    _profileImageBytes,
+                  );
+                } else if (context.canPop()) {
+                  context.pop({
+                    'nickname': _nicknameController.text,
+                    'bio': _bioController.text,
+                    'image': _profileImageBytes,
+                  });
+                } else {
+                  context.go('/map');
+                }
+              },
+            ),
           ],
         ),
       ),
