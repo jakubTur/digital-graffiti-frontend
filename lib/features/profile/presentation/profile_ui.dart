@@ -12,22 +12,22 @@ class ProfileUi extends StatefulWidget {
 
   final UserRelationInitiator? _relationInitiator;
 
-  final VoidCallback onAccountSettingsPressed;
+  final VoidCallback _onAccountSettingsPressed;
 
-  final VoidCallback onEditProfilePressed;
+  final VoidCallback _onEditProfilePressed;
 
-  final String nickname;
-  final String bio;
-  final Uint8List? profileImage;
+  final String _nickname;
+  final String _bio;
+  final Uint8List? _profileImage;
 
   const ProfileUi(
     this._relationStatus,
     this._relationInitiator,
-    this.onAccountSettingsPressed,
-    this.onEditProfilePressed,
-    this.nickname,
-    this.bio,
-    this.profileImage,
+    this._onAccountSettingsPressed,
+    this._onEditProfilePressed,
+    this._nickname,
+    this._bio,
+    this._profileImage,
   );
 
   @override
@@ -98,9 +98,9 @@ class _ProfileUiState extends State<ProfileUi> {
                 width: 120,
                 height: 120,
                 color: Colors.deepPurple.shade50,
-                child: widget.profileImage != null
+                child: widget._profileImage != null
                     ? Image.memory(
-                        widget.profileImage!,
+                        widget._profileImage!,
                         width: 120,
                         height: 120,
                         fit: BoxFit.cover,
@@ -116,7 +116,7 @@ class _ProfileUiState extends State<ProfileUi> {
           Align(
             alignment: Alignment.center,
             child: Text(
-              widget.nickname,
+              widget._nickname,
               style: const TextStyle(
                 fontSize: 28,
                 color: Colors.black,
@@ -129,7 +129,7 @@ class _ProfileUiState extends State<ProfileUi> {
             Align(
               alignment: Alignment.center,
               child: Text(
-                widget.bio,
+                widget._bio,
                 style: const TextStyle(fontSize: 20, color: Colors.black87),
                 textAlign: TextAlign.center,
               ),
@@ -193,7 +193,7 @@ class _ProfileUiState extends State<ProfileUi> {
                       Expanded(
                         child: ProfileButton(
                           'Edit profile',
-                          widget.onEditProfilePressed,
+                          widget._onEditProfilePressed,
                           Colors.deepPurple,
                         ),
                       ),
@@ -201,7 +201,7 @@ class _ProfileUiState extends State<ProfileUi> {
                       Expanded(
                         child: ProfileButton(
                           'Account settings',
-                          widget.onAccountSettingsPressed,
+                          widget._onAccountSettingsPressed,
                           Colors.deepPurple,
                         ),
                       ),

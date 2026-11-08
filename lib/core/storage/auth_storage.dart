@@ -29,6 +29,11 @@ class AuthStorage {
     return storage.read(key: refreshTokenKey);
   }
 
+  Future<int?> readId() async {
+    String? stringId = await storage.read(key: userIdKey);
+    return int.tryParse(stringId ?? '');
+  }
+
   Future<void> clear() async {
     await storage.deleteAll();
     final prefs = await SharedPreferences.getInstance();

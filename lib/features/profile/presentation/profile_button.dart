@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class ProfileButton extends StatelessWidget {
-  const ProfileButton(this.text, this.onPressed, this.color, {super.key});
+  const ProfileButton(this._text, this._onPressed, this._color, {super.key});
 
-  final String text;
+  final String _text;
 
-  final void Function() onPressed;
+  final void Function() _onPressed;
 
-  final Color color;
+  final Color _color;
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +15,11 @@ class ProfileButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(0, 54),
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-        backgroundColor: color,
+        backgroundColor: _color,
       ),
-      onPressed: onPressed,
+      onPressed: _onPressed,
       child: Text(
-        text,
+        _text,
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 16, color: Colors.white),
       ),

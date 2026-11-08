@@ -6,4 +6,5 @@ import '../entities/user.dart';
 abstract class UserRepository {
   Future<void> registerUser(User user);
   Future<LoginResponse> login(LoginRequest request);
+  Future<void> deleteUser(int id);
 }

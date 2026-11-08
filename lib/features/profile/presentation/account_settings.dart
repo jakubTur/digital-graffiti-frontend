@@ -47,7 +47,9 @@ class AccountSettings extends StatelessWidget {
           ProfileButton('Log out', () {
             context.push('/logout');
           }, Colors.deepPurple),
-          ProfileButton('Delete account', () {}, Colors.deepPurple),
+          ProfileButton('Delete account', () {
+            context.push('/delete-account');
+          }, Colors.deepPurple),
           SizedBox(height: 5),
         ],
       ),
