@@ -121,11 +121,11 @@ class _DeleteAccountState extends State<DeleteAccountForm> {
                               await widget._userRepository.updateUser(
                                 userId,
                                 UserUpdateRequest(
-                                  nickname: null,
-                                  email: null,
+                                  nickname: '',
+                                  email: '',
                                   verified: false,
                                   active: false,
-                                  bio: null,
+                                  bio: '',
                                 ),
                               );
                               widget._authStorage.clear();
