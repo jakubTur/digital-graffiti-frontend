@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/camera/camera.dart';
+import 'package:frontend/core/widgets/success_screen.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
+import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
 import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,7 @@ import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
 import 'features/auth/presentation/registration_ui.dart';
 import 'features/profile/presentation/profile_popup.dart';
+import 'features/profile/presentation/settings/change_password_form.dart';
 
 void main() async {
   // App locked into vertical mode
@@ -119,6 +122,24 @@ class MyApp extends StatelessWidget {
         path: '/delete-account',
         builder: (context, state) =>
             DeleteAccountForm(authStorage, userRepository),
+      ),
+      GoRoute(
+        path: '/change-email',
+        builder: (context, state) => ChangeEmailForm(),
+      ),
+      GoRoute(
+        path: '/change-password',
+        builder: (context, state) => ChangePasswordForm(userRepository),
+      ),
+      GoRoute(
+        path: '/email-changed',
+        builder: (context, state) =>
+            SuccessScreen('Your email was changed', 'Please login again'),
+      ),
+      GoRoute(
+        path: '/email-changed',
+        builder: (context, state) =>
+            SuccessScreen('Your password was changed', 'Please login again'),
       ),
       // TODO: put other routes here!!!
     ],

@@ -21,12 +21,16 @@ class AccountSettings extends StatelessWidget {
           ScreenHeader(title: 'Settings', onBackPressed: onBackPressed),
           CustomButton(
             text: 'Change password',
-            onPressed: () {},
+            onPressed: () {
+              context.push('/change-password');
+            },
             backgroundColor: Colors.deepPurple,
           ),
           CustomButton(
             text: 'Change email',
-            onPressed: () {},
+            onPressed: () {
+              context.push('/change-email');
+            },
             backgroundColor: Colors.deepPurple,
           ),
           CustomButton(
