@@ -20,6 +20,10 @@ import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
 import 'features/auth/presentation/registration_ui.dart';
+import 'features/posts/data/datasources/posts_remote_ds.dart';
+import 'features/posts/data/repositories/posts_repository_impl.dart';
+import 'features/posts/domain/repositories/posts_repository.dart';
+import 'features/profile/presentation/profile_ui.dart';
 import 'features/profile/presentation/profile_popup.dart';
 import 'features/profile/presentation/settings/change_password_form.dart';
 
@@ -34,14 +38,16 @@ void main() async {
     refreshTokenProvider: authStorage.readRefreshToken,
     updateTokens: authStorage.updateTokens,
   );
-  final repo = UserRepositoryImpl(UserRemoteDataSource(api));
+  final usersRepo = UserRepositoryImpl(UserRemoteDataSource(api));
+  final postsRepo = PostsRepositoryImpl(PostsRemoteDataSource(api));
 
   final prefs = await SharedPreferences.getInstance();
   final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
   runApp(
     MyApp(
-      userRepository: repo,
+      userRepository: usersRepo,
+      postsRepository: postsRepo,
       authStorage: authStorage,
       isLoggedIn: isLoggedIn,
     ),
@@ -52,11 +58,13 @@ class MyApp extends StatelessWidget {
   MyApp({
     super.key,
     required this.userRepository,
+    required this.postsRepository,
     required this.authStorage,
     required this.isLoggedIn,
   });
 
   final UserRepository userRepository;
+  final PostsRepository postsRepository;
   final AuthStorage authStorage;
   final bool isLoggedIn;
 
@@ -70,7 +78,11 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/map',
-        builder: (context, state) => MapScreen(userRepository),
+        builder: (context, state) => MapScreen(
+          userRepository,
+          postsRepository: postsRepository,
+          authStorage: authStorage,
+        ),
       ),
       GoRoute(
         path: '/post/draw',

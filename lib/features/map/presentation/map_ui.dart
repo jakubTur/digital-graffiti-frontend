@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/map/data/map_model.dart';
+import 'package:frontend/features/map/presentation/post_view_widget.dart';
 import 'package:frontend/features/map/presentation/map_ui_button.dart';
 import 'package:frontend/features/map/presentation/post_view_widget.dart';
 import 'package:go_router/go_router.dart';
@@ -83,7 +84,7 @@ class _MapUiState extends State<MapUi> {
       if (image == null) {
         map.cancelPost();
       } else {
-        map.completePost(image);
+        await map.completePost(image);
       }
     } catch (error) {
       map.cancelPost();

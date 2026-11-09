@@ -1,18 +1,32 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/features/posts/domain/entities/post.dart';
+import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'post_data.dart';
+import 'post_draft.dart';
 
-/// Data class storing state local to map (user location and posts).
+/// Data class storing state local to map (user location and posts) pulled from backend.
 /// Made with help of state management tutorial: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
-/// Stores data locally for now. Will be dependant on backend later.
 class MapModel extends ChangeNotifier {
+  MapModel({required this._postsRepository, required this._authStorage});
+
+  /// How far from the user posts are fetched, in meters.
+  static const double postSearchRadius = 50;
+
+  /// How often nearby posts are fetched.
+  static const Duration postPollInterval = Duration(seconds: 10);
+
+  final PostsRepository _postsRepository;
+  final AuthStorage _authStorage;
+
   final _mapController = MapController();
 
   TickerProvider? vsync;
@@ -23,16 +37,25 @@ class MapModel extends ChangeNotifier {
   LatLng _userLocation = LatLng(0, 0);
   bool _isFirstLocation = true;
 
-  final Map<int, PostData> _posts = {};
+  List<Post> _posts = const [];
   PostDraft? _currentlyMadePost;
 
   /// which post is currently being viewed.
   /// this is slightly messy coupling with MapUi, but it's not a massive issue,
   /// and keeping it here allows for easier routing during post viewing.
-  PostData? _postToView;
+  Post? _postToView;
 
   /// Used to keep track of the user's location
   StreamSubscription<Position>? _positionSubscription;
+
+  /// Periodically fetches nearby posts. Started once the user's location is known.
+  Timer? _postPollTimer;
+
+  /// Prevents a slow fetch from overlapping with the next one.
+  bool _isFetchingPosts = false;
+
+  /// Network calls can finish after the model is disposed.
+  bool _isDisposed = false;
 
   /// Active animation controller for map movement
   AnimationController? _activeAnimationController;
@@ -44,15 +67,15 @@ class MapModel extends ChangeNotifier {
   LatLng get userLocation => _userLocation;
 
   /// Getter for posts
-  UnmodifiableMapView<int, PostData> get posts => UnmodifiableMapView(_posts);
+  UnmodifiableListView<Post> get posts => UnmodifiableListView(_posts);
 
   PostDraft? get currentlyMadePost => _currentlyMadePost;
 
-  PostData? get postToView => _postToView;
+  Post? get postToView => _postToView;
 
   /// post viewing handler.
   /// slightly messy coupling (pedantically this should be in the ui), but it works.
-  void requestPostView(PostData post) {
+  void requestPostView(Post post) {
     _postToView = post;
     notifyListeners();
   }
@@ -72,23 +95,73 @@ class MapModel extends ChangeNotifier {
     return post;
   }
 
-  void completePost(Uint8List image) {
+  /// Uploads the in-progress post to the backend, then refreshes nearby posts.
+  /// Throws if the upload fails; the draft is kept so the caller can cancel it.
+  Future<void> completePost(Uint8List image) async {
     final draft = _currentlyMadePost;
     if (draft == null) throw StateError('There is no post in progress.');
 
-    var postId = 1;
-    while (_posts.containsKey(postId)) {
-      postId++;
+    final userId = await _authStorage.readUserId();
+    if (userId == null) throw StateError('No logged in user.');
+    final username = await _authStorage.readNickname() ?? '';
+
+    // the backend client uploads images from disk
+    final tempDirectory = await Directory.systemTemp.createTemp('post_upload');
+    try {
+      final imageFile = File('${tempDirectory.path}/post.png');
+      await imageFile.writeAsBytes(image);
+      await _postsRepository.postPost(
+        Post(
+          postedAt: DateTime.now(),
+          username: username,
+          latitude: draft.location.latitude,
+          longitude: draft.location.longitude,
+          imagePath: imageFile.path,
+          imageUrl: null,
+        ),
+        userId,
+      );
+    } finally {
+      await tempDirectory.delete(recursive: true);
     }
-    _posts[postId] = draft.complete(image);
+
     _currentlyMadePost = null;
     notifyListeners();
+    await refreshPosts();
   }
 
   void cancelPost() {
     if (_currentlyMadePost == null) return;
     _currentlyMadePost = null;
     notifyListeners();
+  }
+
+  /// Replaces the stored posts with those currently near the user.
+  /// On failure the previous posts stay visible until the next successful fetch.
+  Future<void> refreshPosts() async {
+    if (_isFetchingPosts || _isFirstLocation) return;
+
+    _isFetchingPosts = true;
+    try {
+      _posts = await _postsRepository.getPostsByRadius(
+        _userLocation.latitude,
+        _userLocation.longitude,
+        postSearchRadius,
+      );
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to fetch posts: $e');
+    } finally {
+      _isFetchingPosts = false;
+    }
+  }
+
+  void _startPostPolling() {
+    unawaited(refreshPosts());
+    _postPollTimer = Timer.periodic(
+      postPollInterval,
+      (_) => unawaited(refreshPosts()),
+    );
   }
 
   /// Call to start updating the user's location
@@ -113,6 +186,7 @@ class MapModel extends ChangeNotifier {
               _isFirstLocation = false;
               recenterMap(coordinates, 19.4, 0.0);
               notifyListeners();
+              _startPostPolling();
             } else {
               _animateUserLocation(coordinates);
               moveMap(coordinates, 19.4, 0.0);
@@ -274,8 +348,15 @@ class MapModel extends ChangeNotifier {
 
   /// Stream is cancelled when MapModel is disposed
   @override
+  void notifyListeners() {
+    if (!_isDisposed) super.notifyListeners();
+  }
+
+  @override
   void dispose() {
+    _isDisposed = true;
     stopLocationUpdates();
+    _postPollTimer?.cancel();
     _activeAnimationController?.dispose();
     _locationAnimationController?.dispose();
     super.dispose();

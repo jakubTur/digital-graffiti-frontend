@@ -1,15 +1,18 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/features/map/data/post_data.dart';
+import 'package:frontend/features/posts/domain/entities/post.dart';
 
 /// widget that displays a post's data.
 /// pops up from the bottom of the screen.
 class PostViewWidget extends StatelessWidget {
   const PostViewWidget({super.key, required this.post});
 
-  final PostData post;
+  final Post post;
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = post.imageUrl;
+
     return SafeArea(
       top: false,
       child: LayoutBuilder(
@@ -29,20 +32,38 @@ class PostViewWidget extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   child: Column(
                     children: [
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: IconButton(
-                          tooltip: 'Close',
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.close),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              post.username,
+                              style: Theme.of(context).textTheme.titleMedium,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Close',
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
                       ),
                       Expanded(
-                        child: Image.memory(
-                          post.image,
-                          width: double.infinity,
-                          fit: BoxFit.contain,
-                        ),
+                        // a post has no image until its upload has finished
+                        child: imageUrl == null
+                            ? const Center(child: Icon(Icons.broken_image))
+                            : CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                                placeholder: (_, _) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                errorWidget: (_, _, _) => const Center(
+                                  child: Icon(Icons.broken_image),
+                                ),
+                              ),
                       ),
                     ],
                   ),

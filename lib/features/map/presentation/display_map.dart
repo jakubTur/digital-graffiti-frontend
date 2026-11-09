@@ -1,10 +1,8 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:frontend/features/map/data/map_model.dart';
-import 'package:frontend/features/map/data/post_data.dart';
 import 'package:frontend/features/map/presentation/post_pin.dart';
+import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -38,16 +36,16 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
   /// Builds a list of markers from post data.
   List<Marker> buildMarkers(
     LatLng userLocation,
-    MapView<int, PostData> postData,
-    ValueChanged<PostData> onViewPost,
+    List<Post> posts,
+    ValueChanged<Post> onViewPost,
   ) {
     List<Marker> markers = [];
     markers.add(createMarkerFromData(userLocation, Icons.man, Colors.blue));
 
-    for (PostData post in postData.values) {
+    for (Post post in posts) {
       markers.add(
         Marker(
-          point: post.location,
+          point: LatLng(post.latitude, post.longitude),
           width: 80,
           height: 80,
           child: PostPin(post: post, onViewPost: onViewPost),
