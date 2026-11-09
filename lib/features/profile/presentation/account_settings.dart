@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/profile/presentation/profile_button.dart';
+import 'package:frontend/core/widgets/screen_header.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/widgets/custom_button.dart';
 
 class AccountSettings extends StatelessWidget {
   final VoidCallback? onBackPressed;
@@ -12,40 +14,36 @@ class AccountSettings extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
-        spacing: 20,
+        spacing: 40,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Text(
-                'Settings',
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Spacer(),
-              IconButton(
-                onPressed: () {
-                  if (onBackPressed != null) {
-                    onBackPressed!();
-                  } else if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/map');
-                  }
-                },
-                iconSize: 60,
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-              ),
-            ],
+          ScreenHeader(title: 'Settings', onBackPressed: onBackPressed),
+          CustomButton(
+            text: 'Change password',
+            onPressed: () {},
+            backgroundColor: Colors.deepPurple,
           ),
-          ProfileButton('Change password', () {}, Colors.deepPurple),
-          ProfileButton('Change email', () {}, Colors.deepPurple),
-          ProfileButton('Log out', () {}, Colors.deepPurple),
-          ProfileButton('Delete account', () {}, Colors.deepPurple),
+          CustomButton(
+            text: 'Change email',
+            onPressed: () {},
+            backgroundColor: Colors.deepPurple,
+          ),
+          CustomButton(
+            text: 'Log out',
+            onPressed: () {
+              context.push('/logout');
+            },
+            backgroundColor: Colors.deepPurple,
+          ),
+          CustomButton(
+            text: 'Delete account',
+            onPressed: () {
+              context.push('/delete-account');
+            },
+            backgroundColor: Colors.deepPurple,
+          ),
+          SizedBox(height: 5),
         ],
       ),
     );

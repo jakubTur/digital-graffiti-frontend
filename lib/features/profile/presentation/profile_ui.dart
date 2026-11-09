@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:frontend/features/profile/presentation/profile_button.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/custom_button.dart';
+import '../../../core/widgets/user_avatar.dart';
 import '../data/user_relation_initiator.dart';
 import '../data/user_relation_status.dart';
 
@@ -10,15 +13,22 @@ class ProfileUi extends StatefulWidget {
 
   final UserRelationInitiator? _relationInitiator;
 
-  final VoidCallback onAccountSettingsPressed;
+  final VoidCallback _onAccountSettingsPressed;
 
-  final VoidCallback onEditProfilePressed;
+  final VoidCallback _onEditProfilePressed;
+
+  final String _nickname;
+  final String _bio;
+  final Uint8List? _profileImage;
 
   const ProfileUi(
     this._relationStatus,
     this._relationInitiator,
-    this.onAccountSettingsPressed,
-    this.onEditProfilePressed, {
+    this._onAccountSettingsPressed,
+    this._onEditProfilePressed,
+    this._nickname,
+    this._bio,
+    this._profileImage, {
     super.key,
   });
 
@@ -83,17 +93,15 @@ class _ProfileUiState extends State<ProfileUi> {
               ),
             ],
           ),
-          const Align(
+          Align(
             alignment: Alignment.center,
-            child: Icon(Icons.person, size: 120, color: Colors.deepPurple),
+            child: UserAvatar(imageBytes: widget._profileImage),
           ),
-
-          ///TODO: change exemplary values to ones taken from the backend
-          const Align(
+          Align(
             alignment: Alignment.center,
             child: Text(
-              'Nickname',
-              style: TextStyle(
+              widget._nickname,
+              style: const TextStyle(
                 fontSize: 28,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -102,11 +110,11 @@ class _ProfileUiState extends State<ProfileUi> {
           ),
           const SizedBox(height: 12),
           if (widget._relationStatus != UserRelationStatus.BLOCKED) ...[
-            const Align(
+            Align(
               alignment: Alignment.center,
               child: Text(
-                'bio bio bi bio bo ibo ibo bio bio bio bo bio bio bio bio bio bio',
-                style: TextStyle(fontSize: 20, color: Colors.black87),
+                widget._bio,
+                style: const TextStyle(fontSize: 20, color: Colors.black87),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -120,18 +128,18 @@ class _ProfileUiState extends State<ProfileUi> {
                     Row(
                       children: [
                         Expanded(
-                          child: ProfileButton(
-                            'Accept friend request',
-                            _acceptFriendRequest,
-                            Colors.green,
+                          child: CustomButton(
+                            text: 'Accept friend request',
+                            onPressed: _acceptFriendRequest,
+                            backgroundColor: Colors.green,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: ProfileButton(
-                            'Decline friend request',
-                            _declineFriendRequest,
-                            Colors.red,
+                          child: CustomButton(
+                            text: 'Decline friend request',
+                            onPressed: _declineFriendRequest,
+                            backgroundColor: Colors.red,
                           ),
                         ),
                       ],
@@ -140,10 +148,10 @@ class _ProfileUiState extends State<ProfileUi> {
                 ],
 
                 UserRelationStatus.ACCEPTED => [
-                  ProfileButton(
-                    'Remove from friends',
-                    _removeFriend,
-                    Colors.red,
+                  CustomButton(
+                    text: 'Remove from friends',
+                    onPressed: _removeFriend,
+                    backgroundColor: Colors.red,
                   ),
                 ],
 
@@ -151,10 +159,10 @@ class _ProfileUiState extends State<ProfileUi> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ProfileButton(
-                        'Send friend request',
-                        _sendFriendRequest,
-                        Colors.deepPurple,
+                      CustomButton(
+                        text: 'Send friend request',
+                        onPressed: _sendFriendRequest,
+                        backgroundColor: Colors.deepPurple,
                       ),
                     ],
                   ),
@@ -162,24 +170,23 @@ class _ProfileUiState extends State<ProfileUi> {
 
                 UserRelationStatus.BLOCKED => throw UnimplementedError(),
 
-                ///TODO: routing
                 UserRelationStatus.SELF => [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: ProfileButton(
-                          'Edit profile',
-                          widget.onEditProfilePressed,
-                          Colors.deepPurple,
+                        child: CustomButton(
+                          text: 'Edit profile',
+                          onPressed: widget._onEditProfilePressed,
+                          backgroundColor: Colors.deepPurple,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: ProfileButton(
-                          'Account settings',
-                          widget.onAccountSettingsPressed,
-                          Colors.deepPurple,
+                        child: CustomButton(
+                          text: 'Account settings',
+                          onPressed: widget._onAccountSettingsPressed,
+                          backgroundColor: Colors.deepPurple,
                         ),
                       ),
                     ],
@@ -219,10 +226,10 @@ class _ProfileUiState extends State<ProfileUi> {
                 Row(
                   children: [
                     Expanded(
-                      child: ProfileButton(
-                        'Unblock user',
-                        _unblockUser,
-                        Colors.red,
+                      child: CustomButton(
+                        text: 'Unblock user',
+                        onPressed: _unblockUser,
+                        backgroundColor: Colors.red,
                       ),
                     ),
                   ],

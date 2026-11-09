@@ -7,8 +7,8 @@ import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
-import 'package:frontend/features/profile/presentation/account_settings.dart';
-import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
+import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
+import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -112,14 +112,14 @@ class MyApp extends StatelessWidget {
         ),
       ),
       GoRoute(
-        path: '/account-settings',
-        builder: (context, state) => const AccountSettings(),
+        path: '/logout',
+        builder: (context, state) => LogoutForm(authStorage: authStorage),
       ),
       GoRoute(
-        path: '/edit-profile',
-        builder: (context, state) => const EditProfileUi(),
+        path: '/delete-account',
+        builder: (context, state) =>
+            DeleteAccountForm(authStorage, userRepository),
       ),
-
       // TODO: put other routes here!!!
     ],
   );

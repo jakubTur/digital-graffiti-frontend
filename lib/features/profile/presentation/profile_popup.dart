@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/data/user_relation_initiator.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
@@ -23,6 +25,11 @@ class _ProfilePopupState extends State<ProfilePopup> {
 
   bool _showEditProfile = false;
 
+  // TODO: get data from the backend
+  String _nickname = 'Nickname';
+  String _bio = 'example bio example bio example bio example bio';
+  Uint8List? _profileImage;
+
   Widget _selectScreen() {
     if (_showAccountSettings) {
       return AccountSettings(
@@ -33,7 +40,26 @@ class _ProfilePopupState extends State<ProfilePopup> {
         },
       );
     } else if (_showEditProfile) {
-      return EditProfileUi();
+      return EditProfileUi(
+        _nickname,
+        _bio,
+        initialProfileImage: _profileImage,
+        onSave: (newNickname, newBio, newImage) {
+          // TODO: get rid of this after backend integration ig?
+          //  profile should reload from backend after editing I think
+          setState(() {
+            _nickname = newNickname;
+            _bio = newBio;
+            _profileImage = newImage;
+            _showEditProfile = false;
+          });
+        },
+        onBackPressed: () => {
+          setState(() {
+            _showEditProfile = false;
+          }),
+        },
+      );
     } else {
       return ProfileUi(
         widget._relationStatus,
@@ -48,6 +74,9 @@ class _ProfilePopupState extends State<ProfilePopup> {
             _showEditProfile = true;
           });
         },
+        _nickname,
+        _bio,
+        _profileImage,
       );
     }
   }

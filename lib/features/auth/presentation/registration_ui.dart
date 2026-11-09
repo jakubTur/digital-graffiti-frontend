@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/custom_button.dart';
+import '../../../core/widgets/custom_text_field.dart';
 import '../domain/entities/user.dart';
 import '../domain/repositories/user_repository.dart';
 
 class RegistrationUi extends StatefulWidget {
   final UserRepository repo;
   final AuthStorage authStorage;
-  const RegistrationUi({super.key, required this.repo, required this.authStorage});
+  const RegistrationUi({
+    super.key,
+    required this.repo,
+    required this.authStorage,
+  });
   @override
   State<RegistrationUi> createState() => RegistrationUiState();
 }
@@ -53,9 +59,7 @@ class RegistrationUiState extends State<RegistrationUi> {
           .showSnackBar(const SnackBar(content: Text('Registration failed')));
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Registration failed')));
-    } finally {
-
-    }
+    } finally {}
   }
 
   @override
@@ -122,18 +126,9 @@ class RegistrationUiState extends State<RegistrationUi> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              TextFormField(
+                              CustomTextField(
                                 controller: nicknameController,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: const InputDecoration(
-                                  labelText: 'Nickname',
-                                  labelStyle: TextStyle(color: Colors.black),
-                                  fillColor: Color(0xFFE6E0E9),
-                                  filled: true,
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
-                                  ),
-                                ),
+                                labelText: 'Nickname',
                                 validator: (v) {
                                   if (v == null || v.trim().isEmpty) {
                                     return 'Please enter a nickname';
@@ -142,19 +137,10 @@ class RegistrationUiState extends State<RegistrationUi> {
                                 },
                               ),
                               const SizedBox(height: 12),
-                              TextFormField(
+                              CustomTextField(
                                 controller: emailController,
+                                labelText: 'Email',
                                 keyboardType: TextInputType.emailAddress,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: const InputDecoration(
-                                  labelText: 'Email',
-                                  labelStyle: TextStyle(color: Colors.black),
-                                  fillColor: Color(0xFFE6E0E9),
-                                  filled: true,
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
-                                  ),
-                                ),
                                 validator: (v) {
                                   if (v == null || v.trim().isEmpty) {
                                     return 'Please enter an email';
@@ -169,19 +155,10 @@ class RegistrationUiState extends State<RegistrationUi> {
                                 },
                               ),
                               const SizedBox(height: 12),
-                              TextFormField(
+                              CustomTextField(
                                 controller: passwordController,
+                                labelText: 'Password',
                                 obscureText: true,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: const InputDecoration(
-                                  labelText: 'Password',
-                                  labelStyle: TextStyle(color: Colors.black),
-                                  fillColor: Color(0xFFE6E0E9),
-                                  filled: true,
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
-                                  ),
-                                ),
                                 validator: (v) {
                                   if (v == null || v.isEmpty) {
                                     return 'Please enter a password';
@@ -209,19 +186,10 @@ class RegistrationUiState extends State<RegistrationUi> {
                                 },
                               ),
                               const SizedBox(height: 12),
-                              TextFormField(
+                              CustomTextField(
                                 controller: repeatPasswordController,
+                                labelText: 'Repeat Password',
                                 obscureText: true,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: const InputDecoration(
-                                  labelText: 'Repeat Password',
-                                  labelStyle: TextStyle(color: Colors.black),
-                                  fillColor: Color(0xFFE6E0E9),
-                                  filled: true,
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
-                                  ),
-                                ),
                                 validator: (v) {
                                   if (v == null || v.isEmpty) {
                                     return 'Please repeat your password';
@@ -240,19 +208,12 @@ class RegistrationUiState extends State<RegistrationUi> {
 
                         // Register button space
                         Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: const Size(200, 50),
-                              backgroundColor: const Color(0xFF6750A4),
-                            ),
+                          child: CustomButton(
+                            text: 'Register',
+                            width: 200,
+                            height: 50,
+                            fontSize: 18,
                             onPressed: registerClicked,
-                            child: const Text(
-                              'Register',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
