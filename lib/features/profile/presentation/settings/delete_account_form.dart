@@ -3,6 +3,7 @@ import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
 import 'package:frontend/core/widgets/form_secondary_text.dart';
 import 'package:frontend/core/widgets/screen_header.dart';
+import 'package:frontend/features/auth/data/models/user_update_request.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -117,7 +118,16 @@ class _DeleteAccountState extends State<DeleteAccountForm> {
                               );
                               int userId =
                                   await widget._authStorage.readId() ?? 0;
-                              await widget._userRepository.deleteUser(userId);
+                              await widget._userRepository.updateUser(
+                                userId,
+                                UserUpdateRequest(
+                                  nickname: null,
+                                  email: null,
+                                  verified: false,
+                                  active: false,
+                                  bio: null,
+                                ),
+                              );
                               widget._authStorage.clear();
                               if (context.mounted) {
                                 context.go('/');

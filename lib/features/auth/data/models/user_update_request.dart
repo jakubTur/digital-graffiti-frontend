@@ -1,9 +1,9 @@
 class UserUpdateRequest {
-  final String nickname;
-  final String email;
+  final String? nickname;
+  final String? email;
   final bool verified;
   final bool active;
-  final String bio;
+  final String? bio;
 
   const UserUpdateRequest({
     required this.nickname,
