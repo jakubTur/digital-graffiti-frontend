@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import '../../app/config/config.dart';
 import '../errors/api_exception.dart';
+import 'package:http_parser/http_parser.dart';
 
 class ApiClient {
   final http.Client _client;
@@ -83,6 +84,15 @@ class ApiClient {
   }
   Future<dynamic> uploadFile(String path, {required String filePath, required String fileField, Map<String, String> fields = const {}, int expectedStatusCode = 200}) async {
     final uri = Uri.parse('${Config.baseUrl}$path');
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      throw Exception('Image file does not exist: $filePath');
+    }
+    final fileLength = await file.length();
+    debugPrint('POST multipart $uri');
+    debugPrint('fileField: $fileField');
+    debugPrint('filePath: $filePath');
+    debugPrint('fileSize: $fileLength bytes');
     final request = http.MultipartRequest('POST', uri);
     final token = await tokenProvider?.call();
     request.headers['Accept'] = 'application/json';
@@ -90,13 +100,18 @@ class ApiClient {
       request.headers['Authorization'] = 'Bearer $token';
     }
     request.fields.addAll(fields);
-    request.files.add(await http.MultipartFile.fromPath(fileField, filePath),);
+    request.files.add(await http.MultipartFile.fromPath(fileField, filePath, contentType: MediaType('image', 'png')));
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
     final text = utf8.decode(response.bodyBytes);
+    debugPrint(
+      'photo upload response: '
+          '${response.statusCode} ${response.body}',
+    );
     if (response.statusCode != expectedStatusCode) {
       throw ApiException(response.statusCode, text);
     }
+    debugPrint('photo upload response: ${response.statusCode} $text');
     return text.isEmpty ? null : jsonDecode(text);
   }
 }
