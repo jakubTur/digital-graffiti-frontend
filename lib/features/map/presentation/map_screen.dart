@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/presentation/map_ui.dart';
 import 'package:provider/provider.dart';
@@ -7,14 +8,18 @@ import 'display_map.dart';
 
 /// Main screen of the app, containing the map and its model (aka state repository)
 class MapScreen extends StatelessWidget {
-  const MapScreen({super.key});
+  const MapScreen(this._userRepository, {super.key});
+
+  final UserRepository _userRepository;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChangeNotifierProvider(
         create: (context) => MapModel(), // Map-wide state
-        child: const Stack(children: [DisplayMap(), MapUi()]), // Map widget
+        child: Stack(
+          children: [DisplayMap(), MapUi(_userRepository)],
+        ), // Map widget
       ),
     );
   }

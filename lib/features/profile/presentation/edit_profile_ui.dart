@@ -12,12 +12,14 @@ import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/screen_header.dart';
 import '../../../core/widgets/user_avatar.dart';
 
+import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
+
 class EditProfileUi extends StatefulWidget {
   final String initialNickname;
   final String initialBio;
   final Uint8List? initialProfileImage;
+  final UserRepository? userRepository;
 
-  // TODO: like in profile_popup, the parameters are not required after the backend integration
   final void Function(
     String newNickname,
     String newBio,
@@ -31,6 +33,7 @@ class EditProfileUi extends StatefulWidget {
     this.initialNickname,
     this.initialBio, {
     this.initialProfileImage,
+    this.userRepository,
     this.onSave,
     this.onBackPressed,
     super.key,

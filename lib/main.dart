@@ -68,7 +68,10 @@ class MyApp extends StatelessWidget {
         builder: (context, state) =>
             LoginUi(repo: userRepository, authStorage: authStorage),
       ),
-      GoRoute(path: '/map', builder: (context, state) => const MapScreen()),
+      GoRoute(
+        path: '/map',
+        builder: (context, state) => MapScreen(userRepository),
+      ),
       GoRoute(
         path: '/post/draw',
         builder: (context, _) =>
@@ -104,15 +107,19 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/profile',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          opaque: false, // makes the map visible behind the screen
-          // screen transition animation
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          child: const ProfilePopup(UserRelationStatus.SELF),
-        ),
+        pageBuilder: (context, state) {
+          final repo = state.extra as UserRepository? ?? userRepository;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            opaque: false, // makes the map visible behind the screen
+            // screen transition animation
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            child: ProfilePopup(UserRelationStatus.SELF, null, repo),
+          );
+        },
       ),
       GoRoute(
         path: '/logout',
