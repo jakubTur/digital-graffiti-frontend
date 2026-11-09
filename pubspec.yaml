@@ -53,6 +53,7 @@ dependencies:
   vector_map_tiles: ^9.0.0-beta.9
   latlong2: ^0.9.0
   geolocator: ^14.1.1
+  flutter_launcher_icons: ^0.14.4
 
   # Local Persistence & Security
   flutter_secure_storage: ^11.2.0
@@ -140,3 +141,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_launcher_icons:
+  image_path: "lib/app/theme/assets/logo_render_test_1.png"
+  android: true
+  adaptive_icon_foreground: "lib/app/theme/assets/logo_render_test_1.png"

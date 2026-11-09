@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/camera/camera.dart';
+import 'package:frontend/core/widgets/success_screen.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
-import 'package:frontend/features/profile/presentation/account_settings.dart';
-import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
+import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
+import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
+import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
 import 'package:go_router/go_router.dart';
-
-import 'core/storage/auth_storage.dart';
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/api_client.dart';
@@ -26,6 +24,8 @@ import 'features/posts/data/datasources/posts_remote_ds.dart';
 import 'features/posts/data/repositories/posts_repository_impl.dart';
 import 'features/posts/domain/repositories/posts_repository.dart';
 import 'features/profile/presentation/profile_ui.dart';
+import 'features/profile/presentation/profile_popup.dart';
+import 'features/profile/presentation/settings/change_password_form.dart';
 
 void main() async {
   // App locked into vertical mode
@@ -79,6 +79,7 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/map',
         builder: (context, state) => MapScreen(
+          userRepository,
           postsRepository: postsRepository,
           authStorage: authStorage,
         ),
@@ -118,25 +119,47 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/profile',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          opaque: false, // makes the map visible behind the screen
-          // screen transition animation
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          child: const ProfileUi(UserRelationStatus.SELF),
-        ),
+        pageBuilder: (context, state) {
+          final repo = state.extra as UserRepository? ?? userRepository;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            opaque: false, // makes the map visible behind the screen
+            // screen transition animation
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            child: ProfilePopup(UserRelationStatus.SELF, null, repo),
+          );
+        },
       ),
       GoRoute(
-        path: '/account-settings',
-        builder: (context, state) => const AccountSettings(),
+        path: '/logout',
+        builder: (context, state) => LogoutForm(authStorage: authStorage),
       ),
       GoRoute(
-        path: '/edit-profile',
-        builder: (context, state) => const EditProfileUi(),
+        path: '/delete-account',
+        builder: (context, state) =>
+            DeleteAccountForm(authStorage, userRepository),
       ),
-
+      GoRoute(
+        path: '/change-email',
+        builder: (context, state) => ChangeEmailForm(),
+      ),
+      GoRoute(
+        path: '/change-password',
+        builder: (context, state) => ChangePasswordForm(userRepository),
+      ),
+      GoRoute(
+        path: '/email-changed',
+        builder: (context, state) =>
+            SuccessScreen('Your email was changed', 'Please login again'),
+      ),
+      GoRoute(
+        path: '/email-changed',
+        builder: (context, state) =>
+            SuccessScreen('Your password was changed', 'Please login again'),
+      ),
       // TODO: put other routes here!!!
     ],
   );

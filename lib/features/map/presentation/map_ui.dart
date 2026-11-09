@@ -2,15 +2,19 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/presentation/post_view_widget.dart';
 import 'package:frontend/features/map/presentation/map_ui_button.dart';
+import 'package:frontend/features/map/presentation/post_view_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 /// UI containing buttons that display above the map.
 class MapUi extends StatefulWidget {
-  const MapUi({super.key});
+  const MapUi(this._userRepository, {super.key});
+
+  final UserRepository _userRepository;
 
   @override
   State<MapUi> createState() => _MapUiState();
@@ -18,7 +22,6 @@ class MapUi extends StatefulWidget {
 
 /// contains UI-specific state that doesn't need to be in MapModel.
 class _MapUiState extends State<MapUi> {
-
   /// model containing map data.
   /// reference map state here.
   late final MapModel _map;
@@ -70,7 +73,11 @@ class _MapUiState extends State<MapUi> {
   // temporary dirty post creation method.
   // TODO: punt this method into orbit when converting to properly viewing the posts in backend.
   // or at the very least, find a more appropriate place for it.
-  Future<void> _createPost(BuildContext context, MapModel map, String path) async {
+  Future<void> _createPost(
+    BuildContext context,
+    MapModel map,
+    String path,
+  ) async {
     final post = map.beginPost(map.userLocation);
     try {
       final image = await context.push<Uint8List>(path, extra: post);
@@ -188,6 +195,6 @@ class _MapUiState extends State<MapUi> {
   }
 
   void _showProfile(BuildContext context, MapModel map) {
-    context.push('/profile');
+    context.push('/profile', extra: widget._userRepository);
   }
 }

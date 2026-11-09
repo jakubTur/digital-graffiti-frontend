@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +18,8 @@ class _CameraScreenState extends State<CameraScreen> {
   CameraController? cameraController;
   bool _isTakingPicture = false;
 
+  int _selectedCameraIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +30,33 @@ class _CameraScreenState extends State<CameraScreen> {
   void dispose() {
     cameraController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _setupCameraController() async {
+    List<CameraDescription> availableCams = await availableCameras();
+    if (availableCams.isNotEmpty) {
+      cameras = availableCams;
+      await _initCamera(_selectedCameraIndex);
+    }
+  }
+
+  Future<void> _initCamera(int index) async {
+    if (cameras.isEmpty) return;
+    await cameraController?.dispose();
+    final controller = CameraController(cameras[index], ResolutionPreset.high);
+    await controller.initialize();
+    if (mounted) {
+      setState(() {
+        cameraController = controller;
+        _selectedCameraIndex = index;
+      });
+    }
+  }
+
+  Future<void> _switchCamera() async {
+    if (cameras.length < 2) return;
+    int nextIndex = (_selectedCameraIndex + 1) % cameras.length;
+    await _initCamera(nextIndex);
   }
 
   Future<void> _takePhoto() async {
@@ -44,6 +75,7 @@ class _CameraScreenState extends State<CameraScreen> {
       final XFile image = await cameraController!.takePicture();
 
       if (mounted) {
+        await precacheImage(FileImage(File(image.path)), context);
         await widget.onPhotoCaptured(image.path);
       }
     } catch (e) {
@@ -70,7 +102,7 @@ class _CameraScreenState extends State<CameraScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          SizedBox.expand(
+          Center(
             child: isInitialized
                 ? CameraPreview(cameraController!)
                 : const Center(child: CircularProgressIndicator()),
@@ -78,19 +110,27 @@ class _CameraScreenState extends State<CameraScreen> {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: IconButton(
-                  iconSize: 50,
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.go('/map');
-                    }
-                  },
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    iconSize: 50,
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/map');
+                      }
+                    },
+                  ),
+                  if (cameras.length > 1)
+                    IconButton(
+                      iconSize: 40,
+                      icon: const Icon(Icons.cameraswitch, color: Colors.white),
+                      onPressed: _switchCamera,
+                    ),
+                ],
               ),
             ),
           ),
@@ -136,21 +176,5 @@ class _CameraScreenState extends State<CameraScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _setupCameraController() async {
-    List<CameraDescription> availableCams = await availableCameras();
-    if (availableCams.isNotEmpty) {
-      cameraController = CameraController(
-        availableCams.first,
-        ResolutionPreset.high,
-      );
-      await cameraController?.initialize();
-      if (mounted) {
-        setState(() {
-          cameras = availableCams;
-        });
-      }
-    }
   }
 }
