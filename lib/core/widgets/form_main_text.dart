@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class FormMainText extends StatelessWidget {
-  const FormMainText({
-    required this._text,
+  const FormMainText(
+    this._text, {
     this._fontSize = 40,
     this._fontWeight = FontWeight.w900,
     super.key,

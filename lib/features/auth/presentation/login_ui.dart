@@ -77,7 +77,7 @@ class _LoginUiState extends State<LoginUi> {
                         const Column(
                           children: [
                             FormMainText(
-                              text: 'Welcome to Digital Graffiti!',
+                              'Welcome to Digital Graffiti!',
                               fontWeight: FontWeight.w900,
                             ),
                           ],

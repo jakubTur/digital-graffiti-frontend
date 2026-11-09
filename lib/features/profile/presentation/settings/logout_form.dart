@@ -26,7 +26,7 @@ class LogoutForm extends StatelessWidget {
                   spacing: 80,
                   children: [
                     FormMainText(
-                      text: 'Are you sure you want to log out?',
+                      'Are you sure you want to log out?',
                       fontWeight: FontWeight.w800,
                     ),
                     Row(

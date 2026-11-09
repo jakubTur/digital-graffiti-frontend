@@ -57,7 +57,7 @@ class _DeleteAccountState extends State<DeleteAccountForm> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       spacing: 30,
                       children: [
-                        FormMainText(text: 'Are you sure?'),
+                        FormMainText('Are you sure?'),
                         FormSecondaryText(
                           'Your account and all related data will be deleted',
                         ),

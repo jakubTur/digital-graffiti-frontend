@@ -29,7 +29,7 @@ class RegistrationSuccessful extends StatelessWidget {
                         const Column(
                           children: [
                             FormMainText(
-                              text: 'Account created!',
+                              'Account created!',
                               fontWeight: FontWeight.w900,
                             ),
                             FormSecondaryText(
