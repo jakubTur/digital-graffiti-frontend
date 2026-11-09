@@ -19,6 +19,7 @@ class BrushWidthSlider extends StatelessWidget {
     quarterTurns: 3,
     child: SizedBox(
       width: 250,
+      height: 48,
       child: Slider(
         value: width,
         min: BrushSettings.minWidth,
