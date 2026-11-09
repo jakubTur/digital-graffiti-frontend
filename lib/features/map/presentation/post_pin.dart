@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/map/data/post_data.dart';
+import 'package:frontend/features/posts/domain/entities/post.dart';
 
 /// custom mini-widget describing a post's pin.
 /// it can be clicked on to trigger a callback (which will be used for displaying the post)
 class PostPin extends StatelessWidget {
   const PostPin({super.key, required this.post, required this.onViewPost});
 
-  final PostData post;
-  final ValueChanged<PostData> onViewPost;
+  final Post post;
+  final ValueChanged<Post> onViewPost;
 
   @override
   Widget build(BuildContext context) {
