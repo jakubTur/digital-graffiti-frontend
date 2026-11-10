@@ -3,8 +3,9 @@ import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
 import 'package:frontend/core/widgets/form_secondary_text.dart';
 import 'package:frontend/core/widgets/screen_header.dart';
+import 'package:frontend/features/auth/data/models/user_response.dart';
+import 'package:frontend/features/auth/data/models/user_update_request.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/form_main_text.dart';
@@ -24,7 +25,7 @@ class ChangeEmailForm extends StatefulWidget {
 }
 
 class _ChangeEmailFormState extends State<ChangeEmailForm> {
-  final TextEditingController _oldEmailController = TextEditingController();
+  final TextEditingController _currentEmailController = TextEditingController();
   final TextEditingController _newEmailController = TextEditingController();
   final TextEditingController _repeatEmailController = TextEditingController();
 
@@ -34,10 +35,57 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
 
   @override
   void dispose() {
-    _oldEmailController.dispose();
+    _currentEmailController.dispose();
     _newEmailController.dispose();
     _repeatEmailController.dispose();
     super.dispose();
+  }
+
+  void _onPressed() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _emailError = null;
+    });
+
+    try {
+      int? id = await widget._authStorage.readUserId();
+      if (id == null) {
+        throw Exception('User ID not found');
+      }
+
+      UserResponse userData = await widget._userRepository.getUser(id);
+      if (userData.email != _currentEmailController.text) {
+        throw Exception('Current email is incorrect');
+      }
+
+      String newEmail = _newEmailController.text;
+      CredentialRequest credentialsRequest = CredentialRequest(
+        email: newEmail,
+        password: '',
+      );
+      await widget._userRepository.updateEmail(id, credentialsRequest);
+
+      UserUpdateRequest userRequest = UserUpdateRequest(
+        nickname: userData.nickname,
+        email: newEmail,
+        verified: userData.verified,
+        active: userData.active,
+        bio: userData.bio,
+      );
+      await widget._userRepository.updateUser(id, userRequest);
+
+      widget._authStorage.clear();
+
+      if (context.mounted) {
+        context.go('/email-changed');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _emailError = 'Incorrect current email';
+      });
+    }
   }
 
   @override
@@ -64,15 +112,18 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                         spacing: 30,
                         children: [
                           CustomTextField(
-                            controller: _oldEmailController,
-                            labelText: 'Old email',
+                            controller: _currentEmailController,
+                            labelText: 'Current email',
                             errorText: _emailError,
                             validator: (v) {
                               if (v == null || v.isEmpty) {
-                                return 'Please enter your old email';
+                                return 'Please enter your current email';
                               }
-                              if (!v.contains('@')) {
-                                return 'Please enter a valid email';
+                              final emailRegex = RegExp(
+                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                              );
+                              if (!emailRegex.hasMatch(v.trim())) {
+                                return 'Please enter a valid email address';
                               }
                               return null;
                             },
@@ -84,10 +135,13 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                               if (v == null || v.isEmpty) {
                                 return 'Please enter a new email';
                               }
-                              if (!v.contains('@')) {
-                                return 'Please enter a valid email';
+                              final emailRegex = RegExp(
+                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                              );
+                              if (!emailRegex.hasMatch(v.trim())) {
+                                return 'Please enter a valid email address';
                               }
-                              if (v == _oldEmailController.text) {
+                              if (v == _currentEmailController.text) {
                                 return 'New email must be different';
                               }
                               return null;
@@ -111,44 +165,7 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                     ),
                     CustomButton(
                       text: 'Change email',
-                      onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
-
-                        setState(() {
-                          _emailError = null;
-                        });
-
-                        try {
-                          final prefs = await SharedPreferences.getInstance();
-                          String? email = prefs.getString("email");
-                          if (email != _oldEmailController.text) {
-                            throw Exception();
-                          }
-
-                          int? id = await widget._authStorage.readUserId();
-                          if (id == null) {
-                            throw Exception('User ID not found');
-                          }
-                          CredentialRequest request = CredentialRequest(
-                            email: _newEmailController.text,
-                            password: '',
-                          );
-                          await widget._userRepository.updateEmail(id, request);
-                          await prefs.setString(
-                            "email",
-                            _newEmailController.text,
-                          );
-
-                          if (context.mounted) {
-                            context.go('/email-changed');
-                          }
-                        } catch (e) {
-                          if (!mounted) return;
-                          setState(() {
-                            _emailError = 'Incorrect old email';
-                          });
-                        }
-                      },
+                      onPressed: _onPressed,
                       backgroundColor: Colors.red,
                     ),
                   ],

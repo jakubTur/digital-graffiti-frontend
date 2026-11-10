@@ -39,6 +39,11 @@ class AuthStorage {
     return prefs.getString('nickname');
   }
 
+  Future<String?> readEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('email');
+  }
+
   Future<int?> readId() async {
     String? stringId = await storage.read(key: userIdKey);
     return int.tryParse(stringId ?? '');

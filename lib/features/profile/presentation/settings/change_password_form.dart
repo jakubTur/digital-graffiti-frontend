@@ -4,7 +4,6 @@ import 'package:frontend/core/widgets/form_main_text.dart';
 import 'package:frontend/features/auth/data/models/credential_request.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -29,7 +28,8 @@ class ChangePasswordForm extends StatefulWidget {
 }
 
 class _ChangePasswordFormState extends State<ChangePasswordForm> {
-  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
 
   final TextEditingController _newPasswordController = TextEditingController();
 
@@ -42,10 +42,45 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
 
   @override
   void dispose() {
-    _oldPasswordController.dispose();
+    _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _repeatPasswordController.dispose();
     super.dispose();
+  }
+
+  void _onPressed() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _passwordError = null;
+    });
+
+    try {
+      String? email = await widget._authStorage.readEmail() ?? '';
+      final _ = await widget._userRepository.login(
+        LoginRequest(email: email, password: _currentPasswordController.text),
+      );
+
+      int? id = await widget._authStorage.readUserId();
+      if (id == null) {
+        throw Exception('User ID not found');
+      }
+      CredentialRequest request = CredentialRequest(
+        email: email,
+        password: _newPasswordController.text,
+      );
+      await widget._userRepository.updatePassword(id, request);
+      widget._authStorage.clear();
+      if (context.mounted) {
+        context.go('/password-changed');
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      if (!mounted) return;
+      setState(() {
+        _passwordError = 'Incorrect current password';
+      });
+    }
   }
 
   @override
@@ -72,13 +107,13 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                         spacing: 30,
                         children: [
                           CustomTextField(
-                            controller: _oldPasswordController,
-                            labelText: 'Old password',
+                            controller: _currentPasswordController,
+                            labelText: 'Current password',
                             obscureText: true,
                             errorText: _passwordError,
                             validator: (v) {
                               if (v == null || v.isEmpty) {
-                                return 'Please enter your old password';
+                                return 'Please enter your current password';
                               }
                               return null;
                             },
@@ -108,6 +143,9 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                               )) {
                                 return 'Password must contain at least one special character';
                               }
+                              if (v == _currentPasswordController.text) {
+                                return 'New password cannot be the same as your current password';
+                              }
                               return null;
                             },
                           ),
@@ -130,46 +168,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                     ),
                     CustomButton(
                       text: 'Change password',
-                      onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
-
-                        setState(() {
-                          _passwordError = null;
-                        });
-
-                        try {
-                          final prefs = await SharedPreferences.getInstance();
-                          String? email = prefs.getString("email");
-                          final _ = await widget._userRepository.login(
-                            LoginRequest(
-                              email: email ?? "",
-                              password: _oldPasswordController.text,
-                            ),
-                          );
-
-                          int? id = await widget._authStorage.readUserId();
-                          if (id == null) {
-                            throw Exception('User ID not found');
-                          }
-                          CredentialRequest request = CredentialRequest(
-                            email: email ?? "",
-                            password: _newPasswordController.text,
-                          );
-                          await widget._userRepository.updatePassword(
-                            id,
-                            request,
-                          );
-
-                          if (context.mounted) {
-                            context.go('/password-changed');
-                          }
-                        } catch (e) {
-                          if (!mounted) return;
-                          setState(() {
-                            _passwordError = 'Incorrect old password';
-                          });
-                        }
-                      },
+                      onPressed: _onPressed,
                       backgroundColor: Colors.red,
                     ),
                   ],
