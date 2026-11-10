@@ -23,7 +23,6 @@ import 'features/auth/presentation/registration_ui.dart';
 import 'features/posts/data/datasources/posts_remote_ds.dart';
 import 'features/posts/data/repositories/posts_repository_impl.dart';
 import 'features/posts/domain/repositories/posts_repository.dart';
-import 'features/profile/presentation/profile_ui.dart';
 import 'features/profile/presentation/profile_popup.dart';
 import 'features/profile/presentation/settings/change_password_form.dart';
 
@@ -144,11 +143,13 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/change-email',
-        builder: (context, state) => ChangeEmailForm(),
+        builder: (context, state) =>
+            ChangeEmailForm(authStorage, userRepository),
       ),
       GoRoute(
         path: '/change-password',
-        builder: (context, state) => ChangePasswordForm(userRepository),
+        builder: (context, state) =>
+            ChangePasswordForm(authStorage, userRepository),
       ),
       GoRoute(
         path: '/email-changed',
@@ -156,7 +157,7 @@ class MyApp extends StatelessWidget {
             SuccessScreen('Your email was changed', 'Please login again'),
       ),
       GoRoute(
-        path: '/email-changed',
+        path: '/password-changed',
         builder: (context, state) =>
             SuccessScreen('Your password was changed', 'Please login again'),
       ),

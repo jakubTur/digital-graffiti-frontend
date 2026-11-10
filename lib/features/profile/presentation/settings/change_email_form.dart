@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/core/widgets/custom_text_field.dart';
+import 'package:frontend/core/widgets/form_secondary_text.dart';
+import 'package:frontend/core/widgets/screen_header.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/widgets/custom_button.dart';
-import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/form_main_text.dart';
-import '../../../../core/widgets/form_secondary_text.dart';
-import '../../../../core/widgets/screen_header.dart';
+import '../../../auth/data/models/credential_request.dart';
+import '../../../auth/domain/repositories/user_repository.dart';
 
 class ChangeEmailForm extends StatefulWidget {
-  const ChangeEmailForm({super.key});
+  const ChangeEmailForm(this._authStorage, this._userRepository, {super.key});
+
+  final AuthStorage _authStorage;
+  final UserRepository _userRepository;
 
   @override
   State<StatefulWidget> createState() {
@@ -19,9 +25,7 @@ class ChangeEmailForm extends StatefulWidget {
 
 class _ChangeEmailFormState extends State<ChangeEmailForm> {
   final TextEditingController _oldEmailController = TextEditingController();
-
   final TextEditingController _newEmailController = TextEditingController();
-
   final TextEditingController _repeatEmailController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
@@ -121,10 +125,22 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                             throw Exception();
                           }
 
-                          ///TODO: update the email somehow
+                          int? id = await widget._authStorage.readUserId();
+                          if (id == null) {
+                            throw Exception('User ID not found');
+                          }
+                          CredentialRequest request = CredentialRequest(
+                            email: _newEmailController.text,
+                            password: '',
+                          );
+                          await widget._userRepository.updateEmail(id, request);
+                          await prefs.setString(
+                            "email",
+                            _newEmailController.text,
+                          );
 
                           if (context.mounted) {
-                            context.go('/password-changed');
+                            context.go('/email-changed');
                           }
                         } catch (e) {
                           if (!mounted) return;

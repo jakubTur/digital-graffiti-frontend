@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:frontend/core/widgets/form_main_text.dart';
+import 'package:frontend/features/auth/data/models/credential_request.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,8 +13,13 @@ import '../../../../core/widgets/screen_header.dart';
 import '../../../auth/data/models/login_request.dart';
 
 class ChangePasswordForm extends StatefulWidget {
-  const ChangePasswordForm(this._userRepository, {super.key});
+  const ChangePasswordForm(
+    this._authStorage,
+    this._userRepository, {
+    super.key,
+  });
 
+  final AuthStorage _authStorage;
   final UserRepository _userRepository;
 
   @override
@@ -140,7 +147,19 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                             ),
                           );
 
-                          ///TODO: update the password somehow
+                          int? id = await widget._authStorage.readUserId();
+                          if (id == null) {
+                            throw Exception('User ID not found');
+                          }
+                          CredentialRequest request = CredentialRequest(
+                            email: email ?? "",
+                            password: _newPasswordController.text,
+                          );
+                          await widget._userRepository.updatePassword(
+                            id,
+                            request,
+                          );
+
                           if (context.mounted) {
                             context.go('/password-changed');
                           }
