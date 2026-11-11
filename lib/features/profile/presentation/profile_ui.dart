@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,7 +17,7 @@ class ProfileUi extends StatefulWidget {
 
   final String _nickname;
   final String _bio;
-  final Uint8List? _profileImage;
+  final String? _imageUrl;
 
   const ProfileUi(
     this._relationStatus,
@@ -28,7 +26,7 @@ class ProfileUi extends StatefulWidget {
     this._onEditProfilePressed,
     this._nickname,
     this._bio,
-    this._profileImage, {
+    this._imageUrl, {
     super.key,
   });
 
@@ -95,7 +93,7 @@ class _ProfileUiState extends State<ProfileUi> {
           ),
           Align(
             alignment: Alignment.center,
-            child: UserAvatar(imageBytes: widget._profileImage),
+            child: UserAvatar(imageUrl: widget._imageUrl),
           ),
           Align(
             alignment: Alignment.center,

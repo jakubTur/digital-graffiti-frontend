@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/camera/camera.dart';
+import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/profile/presentation/square_crop_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -12,12 +13,10 @@ import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/screen_header.dart';
 import '../../../core/widgets/user_avatar.dart';
 
-import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
-
 class EditProfileUi extends StatefulWidget {
   final String initialNickname;
   final String initialBio;
-  final Uint8List? initialProfileImage;
+  final String? initialProfileImageUrl;
   final UserRepository? userRepository;
 
   final void Function(
@@ -32,7 +31,7 @@ class EditProfileUi extends StatefulWidget {
   const EditProfileUi(
     this.initialNickname,
     this.initialBio, {
-    this.initialProfileImage,
+    this.initialProfileImageUrl,
     this.userRepository,
     this.onSave,
     this.onBackPressed,
@@ -53,7 +52,6 @@ class _EditProfileUiState extends State<EditProfileUi> {
     super.initState();
     _nicknameController = TextEditingController(text: widget.initialNickname);
     _bioController = TextEditingController(text: widget.initialBio);
-    _profileImageBytes = widget.initialProfileImage;
 
     _nicknameController.addListener(_onTextChanged);
     _bioController.addListener(_onTextChanged);
@@ -73,7 +71,7 @@ class _EditProfileUiState extends State<EditProfileUi> {
   bool get _hasUnsavedChanges {
     return _nicknameController.text != widget.initialNickname ||
         _bioController.text != widget.initialBio ||
-        _profileImageBytes != widget.initialProfileImage;
+        _profileImageBytes != null;
   }
 
   Future<bool> _confirmDiscardChanges() async {
@@ -185,7 +183,10 @@ class _EditProfileUiState extends State<EditProfileUi> {
               spacing: 30,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                UserAvatar(imageBytes: _profileImageBytes),
+                UserAvatar(
+                  imageBytes: _profileImageBytes,
+                  imageUrl: widget.initialProfileImageUrl,
+                ),
                 IconButton(
                   onPressed: _onPaintButtonPressed,
                   icon: const Icon(Icons.draw),

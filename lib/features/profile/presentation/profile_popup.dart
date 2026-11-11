@@ -1,6 +1,7 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:frontend/features/auth/data/models/user_update_request.dart';
@@ -42,7 +43,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
   String _email = '';
   bool _verified = false;
   bool _active = true;
-  Uint8List? _profileImage;
+  String? _imageUrl;
 
   @override
   void initState() {
@@ -72,6 +73,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
             _verified = userResponse.verified;
             _active = userResponse.active;
             _isLoading = false;
+            _imageUrl = userResponse.imageUrl;
           });
         }
       } else {
@@ -110,7 +112,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
       return EditProfileUi(
         _nickname,
         _bio,
-        initialProfileImage: _profileImage,
+        initialProfileImageUrl: _imageUrl,
         userRepository: widget._userRepository,
         onSave: (newNickname, newBio, newImage) async {
           if (widget._userRepository != null) {
@@ -129,9 +131,26 @@ class _ProfilePopupState extends State<ProfilePopup> {
                   userId,
                   req,
                 );
+                if (newImage != null) {
+                  final tempDirectory = await Directory.systemTemp.createTemp(
+                    'profile_picture_upload',
+                  );
+                  try {
+                    final imageFile = File('${tempDirectory.path}/picture.png');
+                    await imageFile.writeAsBytes(newImage);
+                    await widget._userRepository!.uploadProfilePicture(
+                      userId,
+                      imageFile.path,
+                    );
+                  } finally {
+                    await tempDirectory.delete(recursive: true);
+                  }
+                }
+
                 _email = updatedUser.email;
                 _verified = updatedUser.verified;
                 _active = updatedUser.active;
+                await _loadUserProfile();
               }
             } catch (e) {
               if (mounted) {
@@ -145,7 +164,6 @@ class _ProfilePopupState extends State<ProfilePopup> {
             setState(() {
               _nickname = newNickname;
               _bio = newBio;
-              _profileImage = newImage;
               _showEditProfile = false;
             });
           }
@@ -172,7 +190,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
         },
         _nickname,
         _bio,
-        _profileImage,
+        _imageUrl,
       );
     }
   }
