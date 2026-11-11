@@ -23,7 +23,6 @@ import 'features/auth/presentation/registration_ui.dart';
 import 'features/posts/data/datasources/posts_remote_ds.dart';
 import 'features/posts/data/repositories/posts_repository_impl.dart';
 import 'features/posts/domain/repositories/posts_repository.dart';
-import 'features/profile/presentation/profile_ui.dart';
 import 'features/profile/presentation/profile_popup.dart';
 import 'features/profile/presentation/settings/change_password_form.dart';
 
@@ -129,7 +128,7 @@ class MyApp extends StatelessWidget {
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-            child: ProfilePopup(UserRelationStatus.SELF, null, repo),
+            child: ProfilePopup(UserRelationStatus.SELF, repo),
           );
         },
       ),

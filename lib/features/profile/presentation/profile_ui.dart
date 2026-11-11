@@ -19,14 +19,14 @@ class ProfileUi extends StatefulWidget {
   final String _bio;
   final String? _imageUrl;
 
-  const ProfileUi(
-    this._relationStatus,
+  const ProfileUi({
+    required this._relationStatus,
     this._relationInitiator,
-    this._onAccountSettingsPressed,
-    this._onEditProfilePressed,
-    this._nickname,
-    this._bio,
-    this._imageUrl, {
+    required this._onAccountSettingsPressed,
+    required this._onEditProfilePressed,
+    required this._nickname,
+    required this._bio,
+    this._imageUrl,
     super.key,
   });
 
