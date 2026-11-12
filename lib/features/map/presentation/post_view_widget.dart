@@ -16,14 +16,20 @@ class PostViewWidget extends StatelessWidget {
     final imageUrl = post.imageUrl;
     final drawingUrl = drawing?.imageUrl;
 
+    if (drawingUrl == null) {
+      print("Drawing URL null");
+    } else {
+      print("Drawing URL not null");
+    }
+
     // a post/drawing has no image until its upload has finished.
     // this is a helper method for displaying them null-safely.
     Expanded expanded_image(String? url) {
       return Expanded(
-        child: imageUrl == null
+        child: url == null
             ? const Center(child: Icon(Icons.broken_image))
             : CachedNetworkImage(
-                imageUrl: imageUrl,
+                imageUrl: url,
                 width: double.infinity,
                 fit: BoxFit.contain,
                 placeholder: (_, _) =>
@@ -33,6 +39,7 @@ class PostViewWidget extends StatelessWidget {
               ),
       );
     }
+
     return SafeArea(
       top: false,
       child: LayoutBuilder(
@@ -72,9 +79,9 @@ class PostViewWidget extends StatelessWidget {
                       Stack(
                         children: [
                           expanded_image(imageUrl),
-                          if (drawing != null) expanded_image(drawingUrl)
+                          if (drawing != null) expanded_image(drawingUrl),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),

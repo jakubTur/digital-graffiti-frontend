@@ -1,7 +1,7 @@
 class Drawing {
 
   /// ID of this drawing.
-  final int id;
+  final int? id;
 
   /// username of the person who created this drawing.
   final String username;
@@ -23,7 +23,7 @@ class Drawing {
   final DateTime postedAt;
 
   const Drawing ({
-    required this.id,
+    this.id,
     required this.username,
     required this.parent_id,
     required this.post_id,

@@ -18,13 +18,20 @@ class PostCreationFlow {
   Future<bool> run(BuildContext context, LatLng location) async {
     final source = await _chooseSource(context);
     if (source == null || !context.mounted) return false;
-    final image = await switch (source) {
-      _PostSource.drawing => context.push<Uint8List>('/post/draw'),
-      _PostSource.photo => _takePhoto(context),
-    };
+    String? backgroundPath;
+    if (source == _PostSource.photo) {
+      backgroundPath = await context.push<String>('/post/camera');
+      if (backgroundPath == null || !context.mounted) return false;
+    }
+    final image = await context.push<Uint8List>(
+      backgroundPath == null ? '/post/draw' : '/post/photo-edit',
+      extra: backgroundPath,
+    );
     if (image == null) return false;
     try {
-      await _publisher.publish(PostDraft(location: location, image: image));
+      await _publisher.publish(
+        PostDraft(location: location, image: image, backgroundPath: backgroundPath),
+      );
       return true;
     } catch (error) {
       if (context.mounted) {
@@ -34,12 +41,6 @@ class PostCreationFlow {
       }
       return false;
     }
-  }
-
-  Future<Uint8List?> _takePhoto(BuildContext context) async {
-    final path = await context.push<String>('/post/camera');
-    if (path == null || !context.mounted) return null;
-    return context.push<Uint8List>('/post/photo-edit', extra: path);
   }
 
   /// shows options: create post from drawing, or from photo.

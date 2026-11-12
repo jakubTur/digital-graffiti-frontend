@@ -118,7 +118,6 @@ class PaintModel extends ChangeNotifier {
       return await exporter.export(
         lines: lines,
         size: _canvasSize,
-        backgroundImagePath: backgroundImagePath,
       );
     } finally {
       _isExporting = false;

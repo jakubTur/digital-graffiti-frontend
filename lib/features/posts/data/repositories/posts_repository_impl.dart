@@ -14,13 +14,13 @@ class PostsRepositoryImpl implements PostsRepository {
   PostsRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<void> postPost(Post post, int userId) async {
+  Future<int> postPost(Post post, int userId) async {
     final postRequest = PostRequest(
       userId: userId,
       latitude: post.latitude,
       longitude: post.longitude
     );
-    await remoteDataSource.postPost(postRequest, post.imagePath!);
+    return remoteDataSource.postPost(postRequest, post.imagePath);
   }
   @override
   Future<List<Post>> getPosts() async {
@@ -33,11 +33,11 @@ class PostsRepositoryImpl implements PostsRepository {
     return response.map(toPost).toList();
   }
   @override
-  Future<void> postDrawing(Drawing drawing) async {
+  Future<void> postDrawing(Drawing drawing, int userId) async {
     final drawingRequest = DrawingRequest(
-      userId: drawing.id,
+      userId: userId,
       postId: drawing.post_id,
-      parentId: drawing.parent_id
+      parentId: drawing.parent_id > 0 ? drawing.parent_id : null
     );
     await remoteDataSource.postDrawing(drawingRequest, drawing.imagePath!);
   }

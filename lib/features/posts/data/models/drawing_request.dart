@@ -2,7 +2,7 @@
 class DrawingRequest {
   final int userId;
   final int postId;
-  final int parentId;
+  final int? parentId;
   DrawingRequest ({
     required this.userId,
     required this.postId,
