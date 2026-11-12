@@ -9,12 +9,12 @@ class PostViewWidget extends StatelessWidget {
   const PostViewWidget({super.key, required this.post, required this.drawing});
 
   final Post post;
-  final Drawing drawing;
+  final Drawing? drawing;
 
   @override
   Widget build(BuildContext context) {
     final imageUrl = post.imageUrl;
-    final drawingUrl = drawing.imageUrl;
+    final drawingUrl = drawing?.imageUrl;
 
     // a post/drawing has no image until its upload has finished.
     // this is a helper method for displaying them null-safely.
@@ -72,7 +72,7 @@ class PostViewWidget extends StatelessWidget {
                       Stack(
                         children: [
                           expanded_image(imageUrl),
-                          expanded_image(drawingUrl)
+                          if (drawing != null) expanded_image(drawingUrl)
                         ],
                       )
                     ],
