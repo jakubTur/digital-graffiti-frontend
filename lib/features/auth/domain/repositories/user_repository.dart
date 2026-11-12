@@ -11,4 +11,5 @@ abstract class UserRepository {
   Future<void> deleteUser(int id);
   Future<UserResponse> getUser(int id);
   Future<UserResponse> updateUser(int id, UserUpdateRequest request);
+  Future<void> uploadProfilePicture(int id, String imagePath);
 }

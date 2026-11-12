@@ -44,4 +44,13 @@ class UserRemoteDataSource {
     );
     return LoginResponse.fromJson(Map<String, dynamic>.from(response as Map));
   }
+
+  Future<void> postProfilePicture(int userId, String imagePath) async {
+    await api.uploadFile(
+      '/api/users/$userId/photo',
+      filePath: imagePath,
+      fileField: 'file',
+      expectedStatusCode: 200,
+    );
+  }
 }
