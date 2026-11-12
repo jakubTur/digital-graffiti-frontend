@@ -14,7 +14,25 @@ class PostViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = post.imageUrl;
+    final drawingUrl = drawing.imageUrl;
 
+    // a post/drawing has no image until its upload has finished.
+    // this is a helper method for displaying them null-safely.
+    Expanded expanded_image(String? url) {
+      return Expanded(
+        child: imageUrl == null
+            ? const Center(child: Icon(Icons.broken_image))
+            : CachedNetworkImage(
+                imageUrl: imageUrl,
+                width: double.infinity,
+                fit: BoxFit.contain,
+                placeholder: (_, _) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (_, _, _) =>
+                    const Center(child: Icon(Icons.broken_image)),
+              ),
+      );
+    }
     return SafeArea(
       top: false,
       child: LayoutBuilder(
@@ -51,22 +69,12 @@ class PostViewWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Expanded(
-                        // a post has no image until its upload has finished
-                        child: imageUrl == null
-                            ? const Center(child: Icon(Icons.broken_image))
-                            : CachedNetworkImage(
-                                imageUrl: imageUrl,
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                                placeholder: (_, _) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                errorWidget: (_, _, _) => const Center(
-                                  child: Icon(Icons.broken_image),
-                                ),
-                              ),
-                      ),
+                      Stack(
+                        children: [
+                          expanded_image(imageUrl),
+                          expanded_image(drawingUrl)
+                        ],
+                      )
                     ],
                   ),
                 ),
