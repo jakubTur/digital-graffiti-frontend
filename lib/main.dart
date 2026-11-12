@@ -128,7 +128,7 @@ class MyApp extends StatelessWidget {
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-            child: ProfilePopup(UserRelationStatus.SELF, null, repo),
+            child: ProfilePopup(UserRelationStatus.SELF, repo),
           );
         },
       ),
