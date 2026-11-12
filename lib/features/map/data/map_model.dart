@@ -93,10 +93,18 @@ class MapModel extends ChangeNotifier {
       log("Can't view post because its ID is null!");
       return;
     }
+    List<Drawing> drawings;
+    try {
+      drawings = await _postsRepository.getDrawingsByPostId(post.id!);
+    } catch (e) {
+      // still show the post, just without drawings.
+      debugPrint('Failed to fetch drawings for post ${post.id}: $e');
+      drawings = const [];
+    }
+    // set both together, only after the fetch, so the post view
+    // can never open with drawings belonging to a different post.
+    _drawingsOnPostToView = drawings;
     _postToView = post;
-    _drawingsOnPostToView = await _postsRepository.getDrawingsByPostId(
-      post.id!,
-    );
     notifyListeners();
   }
 
@@ -105,6 +113,7 @@ class MapModel extends ChangeNotifier {
   void clearPostToView() {
     if (_postToView == null) return;
     _postToView = null;
+    _drawingsOnPostToView = null;
     notifyListeners();
   }
 

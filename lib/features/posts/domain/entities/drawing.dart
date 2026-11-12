@@ -20,7 +20,8 @@ class Drawing {
   final String? imagePath;
 
   /// when the drawing was posted.
-  final DateTime postedAt;
+  /// backend doesn't send this, so it's nullable for now.
+  final DateTime? postedAt;
 
   const Drawing ({
     this.id,

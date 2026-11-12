@@ -16,29 +16,23 @@ class PostViewWidget extends StatelessWidget {
     final imageUrl = post.imageUrl;
     final drawingUrl = drawing?.imageUrl;
 
-    if (drawingUrl == null) {
-      print("Drawing URL null");
-    } else {
-      print("Drawing URL not null");
+    // helper for displaying an image.
+    Widget networkImage(String url) {
+      return CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.contain,
+        placeholder: (_, _) =>
+            const Center(child: CircularProgressIndicator()),
+        errorWidget: (_, _, _) =>
+            const Center(child: Icon(Icons.broken_image)),
+      );
     }
 
     // a post/drawing has no image until its upload has finished.
-    // this is a helper method for displaying them null-safely.
-    Expanded expanded_image(String? url) {
-      return Expanded(
-        child: url == null
-            ? const Center(child: Icon(Icons.broken_image))
-            : CachedNetworkImage(
-                imageUrl: url,
-                width: double.infinity,
-                fit: BoxFit.contain,
-                placeholder: (_, _) =>
-                    const Center(child: CircularProgressIndicator()),
-                errorWidget: (_, _, _) =>
-                    const Center(child: Icon(Icons.broken_image)),
-              ),
-      );
-    }
+    final layers = <Widget>[
+      if (imageUrl != null) networkImage(imageUrl),
+      if (drawingUrl != null) networkImage(drawingUrl),
+    ];
 
     return SafeArea(
       top: false,
@@ -76,11 +70,13 @@ class PostViewWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Stack(
-                        children: [
-                          expanded_image(imageUrl),
-                          if (drawing != null) expanded_image(drawingUrl),
-                        ],
+                      // Expanded must wrap the Stack (a Column child), not the
+                      // Stack's children. StackFit.expand makes both layers
+                      // fill the same box so the drawing lines up over the background.
+                      Expanded(
+                        child: layers.isEmpty
+                            ? const Center(child: Icon(Icons.broken_image))
+                            : Stack(fit: StackFit.expand, children: layers),
                       ),
                     ],
                   ),
