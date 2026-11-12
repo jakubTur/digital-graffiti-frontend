@@ -1,17 +1,38 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 
 /// widget that displays a post's data.
 /// pops up from the bottom of the screen.
 class PostViewWidget extends StatelessWidget {
-  const PostViewWidget({super.key, required this.post});
+  const PostViewWidget({super.key, required this.post, required this.drawing});
 
   final Post post;
+  final Drawing? drawing;
 
   @override
   Widget build(BuildContext context) {
     final imageUrl = post.imageUrl;
+    final drawingUrl = drawing?.imageUrl;
+
+    // helper for displaying an image.
+    Widget networkImage(String url) {
+      return CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.contain,
+        placeholder: (_, _) =>
+            const Center(child: CircularProgressIndicator()),
+        errorWidget: (_, _, _) =>
+            const Center(child: Icon(Icons.broken_image)),
+      );
+    }
+
+    // a post/drawing has no image until its upload has finished.
+    final layers = <Widget>[
+      if (imageUrl != null) networkImage(imageUrl),
+      if (drawingUrl != null) networkImage(drawingUrl),
+    ];
 
     return SafeArea(
       top: false,
@@ -49,21 +70,13 @@ class PostViewWidget extends StatelessWidget {
                           ),
                         ],
                       ),
+                      // Expanded must wrap the Stack (a Column child), not the
+                      // Stack's children. StackFit.expand makes both layers
+                      // fill the same box so the drawing lines up over the background.
                       Expanded(
-                        // a post has no image until its upload has finished
-                        child: imageUrl == null
+                        child: layers.isEmpty
                             ? const Center(child: Icon(Icons.broken_image))
-                            : CachedNetworkImage(
-                                imageUrl: imageUrl,
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                                placeholder: (_, _) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                errorWidget: (_, _, _) => const Center(
-                                  child: Icon(Icons.broken_image),
-                                ),
-                              ),
+                            : Stack(fit: StackFit.expand, children: layers),
                       ),
                     ],
                   ),

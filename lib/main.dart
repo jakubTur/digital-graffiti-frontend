@@ -21,8 +21,11 @@ import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
 import 'features/auth/presentation/registration_ui.dart';
 import 'features/posts/data/datasources/posts_remote_ds.dart';
+import 'features/posts/data/post_publisher.dart';
 import 'features/posts/data/repositories/posts_repository_impl.dart';
 import 'features/posts/domain/repositories/posts_repository.dart';
+import 'features/posts/presentation/post_creation_flow.dart';
+import 'features/profile/presentation/profile_ui.dart';
 import 'features/profile/presentation/profile_popup.dart';
 import 'features/profile/presentation/settings/change_password_form.dart';
 
@@ -80,7 +83,9 @@ class MyApp extends StatelessWidget {
         builder: (context, state) => MapScreen(
           userRepository,
           postsRepository: postsRepository,
-          authStorage: authStorage,
+          postCreationFlow: PostCreationFlow(
+            PostPublisher(postsRepository, authStorage),
+          ),
         ),
       ),
       GoRoute(
@@ -90,15 +95,8 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/post/camera',
-        builder: (context, _) => CameraScreen(
-          onPhotoCaptured: (path) async {
-            final image = await context.push<Uint8List>(
-              '/post/photo-edit',
-              extra: path,
-            );
-            if (context.mounted) context.pop(image);
-          },
-        ),
+        builder: (context, _) =>
+            CameraScreen(onPhotoCaptured: (path) async => context.pop(path)),
       ),
       GoRoute(
         path: '/post/photo-edit',

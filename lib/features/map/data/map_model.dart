@@ -1,22 +1,19 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
-import 'dart:typed_data';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'post_draft.dart';
-
 /// Data class storing state local to map (user location and posts) pulled from backend.
 /// Made with help of state management tutorial: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
 class MapModel extends ChangeNotifier {
-  MapModel({required this._postsRepository, required this._authStorage});
+  MapModel({required this._postsRepository});
 
   /// How far from the user posts are fetched, in meters.
   static const double postSearchRadius = 50;
@@ -25,7 +22,6 @@ class MapModel extends ChangeNotifier {
   static const Duration postPollInterval = Duration(seconds: 10);
 
   final PostsRepository _postsRepository;
-  final AuthStorage _authStorage;
 
   final _mapController = MapController();
 
@@ -38,12 +34,14 @@ class MapModel extends ChangeNotifier {
   bool _isFirstLocation = true;
 
   List<Post> _posts = const [];
-  PostDraft? _currentlyMadePost;
 
   /// which post is currently being viewed.
   /// this is slightly messy coupling with MapUi, but it's not a massive issue,
   /// and keeping it here allows for easier routing during post viewing.
   Post? _postToView;
+
+  /// all drawings made on the currently viewed post.
+  List<Drawing>? _drawingsOnPostToView;
 
   /// Used to keep track of the user's location
   StreamSubscription<Position>? _positionSubscription;
@@ -69,13 +67,43 @@ class MapModel extends ChangeNotifier {
   /// Getter for posts
   UnmodifiableListView<Post> get posts => UnmodifiableListView(_posts);
 
-  PostDraft? get currentlyMadePost => _currentlyMadePost;
-
   Post? get postToView => _postToView;
+
+  List<Drawing>? get drawingsOnPostToView => _drawingsOnPostToView;
+
+  /// getter for the first drawing on a post.
+  Drawing? getRootDrawingOnViewedPost() {
+    if (drawingsOnPostToView == null) {
+      return null;
+    }
+
+    for (Drawing drawing in drawingsOnPostToView!) {
+      if (drawing.parent_id == -1) {
+        // drawing with parent ID of -1 is the root.
+        return drawing;
+      }
+    }
+    return null;
+  }
 
   /// post viewing handler.
   /// slightly messy coupling (pedantically this should be in the ui), but it works.
-  void requestPostView(Post post) {
+  void requestPostView(Post post) async {
+    if (post.id == null) {
+      log("Can't view post because its ID is null!");
+      return;
+    }
+    List<Drawing> drawings;
+    try {
+      drawings = await _postsRepository.getDrawingsByPostId(post.id!);
+    } catch (e) {
+      // still show the post, just without drawings.
+      debugPrint('Failed to fetch drawings for post ${post.id}: $e');
+      drawings = const [];
+    }
+    // set both together, only after the fetch, so the post view
+    // can never open with drawings belonging to a different post.
+    _drawingsOnPostToView = drawings;
     _postToView = post;
     notifyListeners();
   }
@@ -85,54 +113,7 @@ class MapModel extends ChangeNotifier {
   void clearPostToView() {
     if (_postToView == null) return;
     _postToView = null;
-    notifyListeners();
-  }
-
-  PostDraft beginPost(LatLng location) {
-    final post = PostDraft(location: location);
-    _currentlyMadePost = post;
-    notifyListeners();
-    return post;
-  }
-
-  /// Uploads the in-progress post to the backend, then refreshes nearby posts.
-  /// Throws if the upload fails; the draft is kept so the caller can cancel it.
-  Future<void> completePost(Uint8List image) async {
-    final draft = _currentlyMadePost;
-    if (draft == null) throw StateError('There is no post in progress.');
-
-    final userId = await _authStorage.readUserId();
-    if (userId == null) throw StateError('No logged in user.');
-    final username = await _authStorage.readNickname() ?? '';
-
-    // the backend client uploads images from disk
-    final tempDirectory = await Directory.systemTemp.createTemp('post_upload');
-    try {
-      final imageFile = File('${tempDirectory.path}/post.png');
-      await imageFile.writeAsBytes(image);
-      await _postsRepository.postPost(
-        Post(
-          postedAt: DateTime.now(),
-          username: username,
-          latitude: draft.location.latitude,
-          longitude: draft.location.longitude,
-          imagePath: imageFile.path,
-          imageUrl: null,
-        ),
-        userId,
-      );
-    } finally {
-      await tempDirectory.delete(recursive: true);
-    }
-
-    _currentlyMadePost = null;
-    notifyListeners();
-    await refreshPosts();
-  }
-
-  void cancelPost() {
-    if (_currentlyMadePost == null) return;
-    _currentlyMadePost = null;
+    _drawingsOnPostToView = null;
     notifyListeners();
   }
 
