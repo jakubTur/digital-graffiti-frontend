@@ -126,7 +126,7 @@ class MyApp extends StatelessWidget {
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-            child: ProfilePopup(UserRelationStatus.SELF, null, repo),
+            child: ProfilePopup(UserRelationStatus.SELF, repo),
           );
         },
       ),
@@ -141,11 +141,13 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/change-email',
-        builder: (context, state) => ChangeEmailForm(),
+        builder: (context, state) =>
+            ChangeEmailForm(authStorage, userRepository),
       ),
       GoRoute(
         path: '/change-password',
-        builder: (context, state) => ChangePasswordForm(userRepository),
+        builder: (context, state) =>
+            ChangePasswordForm(authStorage, userRepository),
       ),
       GoRoute(
         path: '/email-changed',
@@ -153,7 +155,7 @@ class MyApp extends StatelessWidget {
             SuccessScreen('Your email was changed', 'Please login again'),
       ),
       GoRoute(
-        path: '/email-changed',
+        path: '/password-changed',
         builder: (context, state) =>
             SuccessScreen('Your password was changed', 'Please login again'),
       ),

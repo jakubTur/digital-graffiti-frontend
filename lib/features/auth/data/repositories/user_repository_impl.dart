@@ -45,4 +45,16 @@ class UserRepositoryImpl implements UserRepository {
   Future<UserResponse> updateUser(int id, UserUpdateRequest request) async {
     return await remoteDataSource.updateUser(id, request);
   }
+
+  @override
+  Future<void> updateEmail(int id, CredentialRequest request) async {
+    await remoteDataSource.updateEmail(id, request);
+  }
+
+  @override
+  Future<void> updatePassword(int id, CredentialRequest request) async {
+    await remoteDataSource.updatePassword(id, request);
+  Future<void> uploadProfilePicture(int id, String imagePath) async {
+    return await remoteDataSource.postProfilePicture(id, imagePath);
+  }
 }

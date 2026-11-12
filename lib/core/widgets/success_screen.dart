@@ -23,13 +23,15 @@ class SuccessScreen extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: IconButton(
+                iconSize: 50,
                 onPressed: () {
                   context.go("/");
                 },
-                icon: Icon(Icons.exit_to_app),
+                icon: Icon(Icons.close),
               ),
             ),
             Align(
+              alignment: Alignment.center,
               child: Column(
                 children: [
                   FormMainText(_primaryMessage),

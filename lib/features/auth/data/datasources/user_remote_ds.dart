@@ -36,6 +36,14 @@ class UserRemoteDataSource {
     await api.post('/api/credentials', body: credential.toJson());
   }
 
+  Future<void> updateEmail(int id, CredentialRequest credential) async {
+    await api.put('/api/credentials/email/$id', body: credential.toJson());
+  }
+
+  Future<void> updatePassword(int id, CredentialRequest credential) async {
+    await api.put('/api/credentials/password/$id', body: credential.toJson());
+  }
+
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     final response = await api.post(
       '/auth/login',
@@ -43,5 +51,14 @@ class UserRemoteDataSource {
       expectedStatusCode: 200,
     );
     return LoginResponse.fromJson(Map<String, dynamic>.from(response as Map));
+  }
+
+  Future<void> postProfilePicture(int userId, String imagePath) async {
+    await api.uploadFile(
+      '/api/users/$userId/photo',
+      filePath: imagePath,
+      fileField: 'file',
+      expectedStatusCode: 200,
+    );
   }
 }

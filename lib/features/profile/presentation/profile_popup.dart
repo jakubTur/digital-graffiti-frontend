@@ -1,9 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
-import 'package:frontend/features/auth/data/models/user_update_request.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/profile/data/user_relation_initiator.dart';
 import 'package:frontend/features/profile/data/user_relation_status.dart';
@@ -14,9 +11,9 @@ import 'package:go_router/go_router.dart';
 
 class ProfilePopup extends StatefulWidget {
   const ProfilePopup(
-    this._relationStatus, [
+    this._relationStatus,
+    this._userRepository, [
     this._relationInitiator,
-    this._userRepository,
     Key? key,
   ]) : super(key: key);
 
@@ -24,7 +21,7 @@ class ProfilePopup extends StatefulWidget {
 
   final UserRelationInitiator? _relationInitiator;
 
-  final UserRepository? _userRepository;
+  final UserRepository _userRepository;
 
   @override
   State<ProfilePopup> createState() => _ProfilePopupState();
@@ -39,10 +36,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
 
   String _nickname = 'Nickname';
   String _bio = 'example bio example bio example bio example bio';
-  String _email = '';
-  bool _verified = false;
-  bool _active = true;
-  Uint8List? _profileImage;
+  String? _imageUrl;
 
   @override
   void initState() {
@@ -51,27 +45,16 @@ class _ProfilePopupState extends State<ProfilePopup> {
   }
 
   Future<void> _loadUserProfile() async {
-    if (widget._userRepository == null) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-      return;
-    }
-
     try {
       final userId = await const AuthStorage(FlutterSecureStorage()).readId();
       if (userId != null) {
-        final userResponse = await widget._userRepository!.getUser(userId);
+        final userResponse = await widget._userRepository.getUser(userId);
         if (mounted) {
           setState(() {
             _nickname = userResponse.nickname;
             _bio = userResponse.bio;
-            _email = userResponse.email;
-            _verified = userResponse.verified;
-            _active = userResponse.active;
             _isLoading = false;
+            _imageUrl = userResponse.imageUrl;
           });
         }
       } else {
@@ -110,42 +93,12 @@ class _ProfilePopupState extends State<ProfilePopup> {
       return EditProfileUi(
         _nickname,
         _bio,
-        initialProfileImage: _profileImage,
+        initialProfileImageUrl: _imageUrl,
         userRepository: widget._userRepository,
         onSave: (newNickname, newBio, newImage) async {
-          if (widget._userRepository != null) {
-            try {
-              final userId = await const AuthStorage(FlutterSecureStorage())
-                  .readId();
-              if (userId != null) {
-                final req = UserUpdateRequest(
-                  nickname: newNickname,
-                  email: _email,
-                  verified: _verified,
-                  active: _active,
-                  bio: newBio,
-                );
-                final updatedUser = await widget._userRepository!.updateUser(
-                  userId,
-                  req,
-                );
-                _email = updatedUser.email;
-                _verified = updatedUser.verified;
-                _active = updatedUser.active;
-              }
-            } catch (e) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to update profile: $e')),
-                );
-              }
-            }
-          }
           if (mounted) {
+            await _loadUserProfile();
             setState(() {
-              _nickname = newNickname;
-              _bio = newBio;
-              _profileImage = newImage;
               _showEditProfile = false;
             });
           }
@@ -158,21 +111,21 @@ class _ProfilePopupState extends State<ProfilePopup> {
       );
     } else {
       return ProfileUi(
-        widget._relationStatus,
-        widget._relationInitiator,
-        () {
+        relationStatus: widget._relationStatus,
+        relationInitiator: widget._relationInitiator,
+        onAccountSettingsPressed: () {
           setState(() {
             _showAccountSettings = true;
           });
         },
-        () {
+        onEditProfilePressed: () {
           setState(() {
             _showEditProfile = true;
           });
         },
-        _nickname,
-        _bio,
-        _profileImage,
+        nickname: _nickname,
+        bio: _bio,
+        imageUrl: _imageUrl,
       );
     }
   }
