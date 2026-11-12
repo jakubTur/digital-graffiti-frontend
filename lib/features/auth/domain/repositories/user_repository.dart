@@ -1,3 +1,4 @@
+import 'package:frontend/features/auth/data/models/credential_request.dart';
 import 'package:frontend/features/auth/data/models/login_request.dart';
 import 'package:frontend/features/auth/data/models/login_response.dart';
 import 'package:frontend/features/auth/data/models/user_response.dart';
@@ -11,5 +12,7 @@ abstract class UserRepository {
   Future<void> deleteUser(int id);
   Future<UserResponse> getUser(int id);
   Future<UserResponse> updateUser(int id, UserUpdateRequest request);
+  Future<void> updateEmail(int id, CredentialRequest request);
+  Future<void> updatePassword(int id, CredentialRequest request);
   Future<void> uploadProfilePicture(int id, String imagePath);
 }

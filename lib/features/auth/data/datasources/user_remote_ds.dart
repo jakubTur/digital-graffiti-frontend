@@ -36,6 +36,14 @@ class UserRemoteDataSource {
     await api.post('/api/credentials', body: credential.toJson());
   }
 
+  Future<void> updateEmail(int id, CredentialRequest credential) async {
+    await api.put('/api/credentials/email/$id', body: credential.toJson());
+  }
+
+  Future<void> updatePassword(int id, CredentialRequest credential) async {
+    await api.put('/api/credentials/password/$id', body: credential.toJson());
+  }
+
   Future<LoginResponse> login(LoginRequest loginRequest) async {
     final response = await api.post(
       '/auth/login',
