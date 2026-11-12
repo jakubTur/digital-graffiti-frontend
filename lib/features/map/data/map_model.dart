@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/features/posts/data/repositories/posts_repository_impl.dart';
+import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:geolocator/geolocator.dart';
@@ -38,12 +41,18 @@ class MapModel extends ChangeNotifier {
   bool _isFirstLocation = true;
 
   List<Post> _posts = const [];
+
+  /// the current in-progress post draft.
+  /// TODO: figure out a better place to store it.
   PostDraft? _currentlyMadePost;
 
   /// which post is currently being viewed.
   /// this is slightly messy coupling with MapUi, but it's not a massive issue,
   /// and keeping it here allows for easier routing during post viewing.
   Post? _postToView;
+
+  /// all drawings made on the currently viewed post.
+  List<Drawing>? _drawingsOnPostToView;
 
   /// Used to keep track of the user's location
   StreamSubscription<Position>? _positionSubscription;
@@ -69,14 +78,39 @@ class MapModel extends ChangeNotifier {
   /// Getter for posts
   UnmodifiableListView<Post> get posts => UnmodifiableListView(_posts);
 
+  /// TODO: figure out a better place for post making
   PostDraft? get currentlyMadePost => _currentlyMadePost;
 
   Post? get postToView => _postToView;
 
+  List<Drawing>? get drawingsOnPostToView => _drawingsOnPostToView;
+
+  /// getter for the first drawing on a post.
+  Drawing? getRootDrawingOnViewedPost() {
+    if (drawingsOnPostToView == null) {
+      return null;
+    }
+
+    for (Drawing drawing in drawingsOnPostToView!) {
+      if (drawing.parent_id == -1) {
+        // drawing with parent ID of -1 is the root.
+        return drawing;
+      }
+    }
+    return null;
+  }
+
   /// post viewing handler.
   /// slightly messy coupling (pedantically this should be in the ui), but it works.
-  void requestPostView(Post post) {
+  void requestPostView(Post post) async {
+    if (post.id == null) {
+      log("Can't view post because its ID is null!");
+      return;
+    }
     _postToView = post;
+    _drawingsOnPostToView = await _postsRepository.getDrawingsByPostId(
+      post.id!,
+    );
     notifyListeners();
   }
 

@@ -1,13 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 
 /// widget that displays a post's data.
 /// pops up from the bottom of the screen.
 class PostViewWidget extends StatelessWidget {
-  const PostViewWidget({super.key, required this.post});
+  const PostViewWidget({super.key, required this.post, required this.drawing});
 
   final Post post;
+  final Drawing drawing;
 
   @override
   Widget build(BuildContext context) {

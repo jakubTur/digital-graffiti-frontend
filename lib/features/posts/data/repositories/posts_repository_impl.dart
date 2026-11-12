@@ -48,6 +48,7 @@ class PostsRepositoryImpl implements PostsRepository {
   }
   Post toPost(PostResponse response) {
     return Post(
+      id: response.id,
       postedAt: response.postedAt,
       username: response.username,
       latitude: response.latitude,

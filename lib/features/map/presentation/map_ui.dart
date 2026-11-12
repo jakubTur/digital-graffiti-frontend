@@ -43,12 +43,16 @@ class _MapUiState extends State<MapUi> {
   }
 
   void _onMapChanged() {
-    if (_isShowingPost || _map.postToView == null) return;
+    if (_isShowingPost ||
+        _map.postToView == null ||
+        _map.getRootDrawingOnViewedPost() == null)
+      return;
     _isShowingPost = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final post = _map.postToView;
-      if (!mounted || post == null) {
+      final drawing = _map.getRootDrawingOnViewedPost();
+      if (!mounted || post == null || drawing == null) {
         _isShowingPost = false;
         return;
       }
@@ -58,7 +62,7 @@ class _MapUiState extends State<MapUi> {
           context: context,
           isScrollControlled: true,
           clipBehavior: Clip.antiAlias,
-          builder: (_) => PostViewWidget(post: post),
+          builder: (_) => PostViewWidget(post: post, drawing: drawing),
         ).whenComplete(() {
           if (identical(_map.postToView, post)) {
             _map.clearPostToView();
