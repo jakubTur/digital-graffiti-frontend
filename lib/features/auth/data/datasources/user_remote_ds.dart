@@ -24,6 +24,11 @@ class UserRemoteDataSource {
     return UserResponse.fromJson(Map<String, dynamic>.from(response as Map));
   }
 
+  Future<UserResponse> getUserByNickname(String nickname) async {
+    final response = await api.get('/api/users/nickname/$nickname');
+    return UserResponse.fromJson(Map<String, dynamic>.from(response as Map));
+  }
+
   Future<UserResponse> updateUser(int id, UserUpdateRequest request) async {
     final response = await api.put(
       '/api/users/update/$id',
