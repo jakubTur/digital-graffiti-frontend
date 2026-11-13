@@ -1,0 +1,1 @@
+enum RelationInitiator { self, otherUser }

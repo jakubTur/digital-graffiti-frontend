@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
-import 'package:frontend/features/profile/data/user_relation_initiator.dart';
-import 'package:frontend/features/profile/data/user_relation_status.dart';
+import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/account_settings.dart';
 import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
 import 'package:frontend/features/profile/presentation/profile_ui.dart';
 import 'package:go_router/go_router.dart';
+
+import '../data/relation_initiator.dart';
 
 class ProfilePopup extends StatefulWidget {
   const ProfilePopup(
@@ -17,9 +18,9 @@ class ProfilePopup extends StatefulWidget {
     Key? key,
   ]) : super(key: key);
 
-  final UserRelationStatus _relationStatus;
+  final RelationStatus _relationStatus;
 
-  final UserRelationInitiator? _relationInitiator;
+  final RelationInitiator? _relationInitiator;
 
   final UserRepository _userRepository;
 

@@ -7,7 +7,7 @@ import 'package:frontend/features/auth/domain/repositories/user_repository.dart'
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
-import 'package:frontend/features/profile/data/user_relation_status.dart';
+import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
 import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
@@ -128,8 +128,8 @@ class MyApp extends StatelessWidget {
                 },
             child: nickname == null
                 //TODO: update with more sophisticated approach
-                ? ProfilePopup(UserRelationStatus.self, repo)
-                : ProfilePopup(UserRelationStatus.none, repo),
+                ? ProfilePopup(RelationStatus.self, repo)
+                : ProfilePopup(RelationStatus.none, repo),
           );
         },
       ),

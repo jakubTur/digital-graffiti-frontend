@@ -3,13 +3,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/user_avatar.dart';
-import '../data/user_relation_initiator.dart';
-import '../data/user_relation_status.dart';
+import '../data/relation_initiator.dart';
+import '../data/relation_status.dart';
 
 class ProfileUi extends StatefulWidget {
-  final UserRelationStatus _relationStatus;
+  final RelationStatus _relationStatus;
 
-  final UserRelationInitiator? _relationInitiator;
+  final RelationInitiator? _relationInitiator;
 
   final VoidCallback _onAccountSettingsPressed;
 
@@ -65,7 +65,7 @@ class _ProfileUiState extends State<ProfileUi> {
         children: [
           Row(
             children: [
-              if (widget._relationStatus != UserRelationStatus.self) ...[
+              if (widget._relationStatus != RelationStatus.self) ...[
                 IconButton(
                   onPressed: _reportUser,
                   iconSize: 60,
@@ -107,7 +107,7 @@ class _ProfileUiState extends State<ProfileUi> {
             ),
           ),
           const SizedBox(height: 12),
-          if (widget._relationStatus != UserRelationStatus.blocked) ...[
+          if (widget._relationStatus != RelationStatus.blocked) ...[
             Align(
               alignment: Alignment.center,
               child: Text(
@@ -119,8 +119,8 @@ class _ProfileUiState extends State<ProfileUi> {
             const SizedBox(height: 20),
             ...[
               ...switch (widget._relationStatus) {
-                UserRelationStatus.pending => [
-                  if (widget._relationInitiator == UserRelationInitiator.self)
+                RelationStatus.pending => [
+                  if (widget._relationInitiator == RelationInitiator.self)
                     ...[]
                   else ...[
                     Row(
@@ -145,7 +145,7 @@ class _ProfileUiState extends State<ProfileUi> {
                   ],
                 ],
 
-                UserRelationStatus.accepted => [
+                RelationStatus.accepted => [
                   CustomButton(
                     text: 'Remove from friends',
                     onPressed: _removeFriend,
@@ -153,7 +153,7 @@ class _ProfileUiState extends State<ProfileUi> {
                   ),
                 ],
 
-                UserRelationStatus.declined || UserRelationStatus.none => [
+                RelationStatus.declined || RelationStatus.none => [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -166,9 +166,9 @@ class _ProfileUiState extends State<ProfileUi> {
                   ),
                 ],
 
-                UserRelationStatus.blocked => throw UnimplementedError(),
+                RelationStatus.blocked => throw UnimplementedError(),
 
-                UserRelationStatus.self => [
+                RelationStatus.self => [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -212,7 +212,7 @@ class _ProfileUiState extends State<ProfileUi> {
             ...switch (widget._relationInitiator) {
               null => throw UnimplementedError(),
 
-              UserRelationInitiator.self => [
+              RelationInitiator.self => [
                 const Text(
                   'This user has been blocked',
                   style: TextStyle(
@@ -234,7 +234,7 @@ class _ProfileUiState extends State<ProfileUi> {
                 ),
               ],
 
-              UserRelationInitiator.otherUser => [
+              RelationInitiator.otherUser => [
                 const Text(
                   'This user has blocked you',
                   style: TextStyle(
