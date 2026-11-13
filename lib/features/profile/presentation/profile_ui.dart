@@ -65,7 +65,7 @@ class _ProfileUiState extends State<ProfileUi> {
         children: [
           Row(
             children: [
-              if (widget._relationStatus != UserRelationStatus.SELF) ...[
+              if (widget._relationStatus != UserRelationStatus.self) ...[
                 IconButton(
                   onPressed: _reportUser,
                   iconSize: 60,
@@ -107,7 +107,7 @@ class _ProfileUiState extends State<ProfileUi> {
             ),
           ),
           const SizedBox(height: 12),
-          if (widget._relationStatus != UserRelationStatus.BLOCKED) ...[
+          if (widget._relationStatus != UserRelationStatus.blocked) ...[
             Align(
               alignment: Alignment.center,
               child: Text(
@@ -119,8 +119,8 @@ class _ProfileUiState extends State<ProfileUi> {
             const SizedBox(height: 20),
             ...[
               ...switch (widget._relationStatus) {
-                UserRelationStatus.PENDING => [
-                  if (widget._relationInitiator == UserRelationInitiator.SELF)
+                UserRelationStatus.pending => [
+                  if (widget._relationInitiator == UserRelationInitiator.self)
                     ...[]
                   else ...[
                     Row(
@@ -145,7 +145,7 @@ class _ProfileUiState extends State<ProfileUi> {
                   ],
                 ],
 
-                UserRelationStatus.ACCEPTED => [
+                UserRelationStatus.accepted => [
                   CustomButton(
                     text: 'Remove from friends',
                     onPressed: _removeFriend,
@@ -153,7 +153,7 @@ class _ProfileUiState extends State<ProfileUi> {
                   ),
                 ],
 
-                UserRelationStatus.DECLINED || UserRelationStatus.NONE => [
+                UserRelationStatus.declined || UserRelationStatus.none => [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -166,9 +166,9 @@ class _ProfileUiState extends State<ProfileUi> {
                   ),
                 ],
 
-                UserRelationStatus.BLOCKED => throw UnimplementedError(),
+                UserRelationStatus.blocked => throw UnimplementedError(),
 
-                UserRelationStatus.SELF => [
+                UserRelationStatus.self => [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -212,7 +212,7 @@ class _ProfileUiState extends State<ProfileUi> {
             ...switch (widget._relationInitiator) {
               null => throw UnimplementedError(),
 
-              UserRelationInitiator.SELF => [
+              UserRelationInitiator.self => [
                 const Text(
                   'This user has been blocked',
                   style: TextStyle(
@@ -234,7 +234,7 @@ class _ProfileUiState extends State<ProfileUi> {
                 ),
               ],
 
-              UserRelationInitiator.OTHER_USER => [
+              UserRelationInitiator.otherUser => [
                 const Text(
                   'This user has blocked you',
                   style: TextStyle(

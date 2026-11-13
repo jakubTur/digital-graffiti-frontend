@@ -1,1 +1,1 @@
-enum UserRelationInitiator { SELF, OTHER_USER }
+enum UserRelationInitiator { self, otherUser }

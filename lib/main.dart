@@ -25,7 +25,6 @@ import 'features/posts/data/post_publisher.dart';
 import 'features/posts/data/repositories/posts_repository_impl.dart';
 import 'features/posts/domain/repositories/posts_repository.dart';
 import 'features/posts/presentation/post_creation_flow.dart';
-import 'features/profile/presentation/profile_ui.dart';
 import 'features/profile/presentation/profile_popup.dart';
 import 'features/profile/presentation/settings/change_password_form.dart';
 
@@ -81,7 +80,6 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/map',
         builder: (context, state) => MapScreen(
-          userRepository,
           postsRepository: postsRepository,
           postCreationFlow: PostCreationFlow(
             PostPublisher(postsRepository, authStorage),
@@ -115,9 +113,11 @@ class MyApp extends StatelessWidget {
         builder: (context, state) => const RegistrationSuccessful(),
       ),
       GoRoute(
-        path: '/profile',
+        name: '/profile',
+        path: 'profile/:userNickname',
         pageBuilder: (context, state) {
-          final repo = state.extra as UserRepository? ?? userRepository;
+          final String? nickname = state.pathParameters['userNickname'];
+          final repo = userRepository;
           return CustomTransitionPage(
             key: state.pageKey,
             opaque: false, // makes the map visible behind the screen
@@ -126,7 +126,10 @@ class MyApp extends StatelessWidget {
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-            child: ProfilePopup(UserRelationStatus.SELF, repo),
+            child: nickname == null
+                //TODO: update with more sophisticated approach
+                ? ProfilePopup(UserRelationStatus.self, repo)
+                : ProfilePopup(UserRelationStatus.none, repo),
           );
         },
       ),

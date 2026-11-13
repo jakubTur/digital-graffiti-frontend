@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/presentation/map_ui_button.dart';
 import 'package:frontend/features/map/presentation/post_view_widget.dart';
@@ -11,9 +10,8 @@ import 'package:provider/provider.dart';
 
 /// UI containing buttons that display above the map.
 class MapUi extends StatefulWidget {
-  const MapUi(this._userRepository, this._postCreationFlow, {super.key});
+  const MapUi(this._postCreationFlow, {super.key});
 
-  final UserRepository _userRepository;
   final PostCreationFlow _postCreationFlow;
 
   @override
@@ -125,6 +123,7 @@ class _MapUiState extends State<MapUi> {
   }
 
   void _showProfile(BuildContext context, MapModel map) {
-    context.push('/profile', extra: widget._userRepository);
+    //kinda sloppy but idk
+    context.pushNamed('profile');
   }
 }

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
+import 'package:go_router/go_router.dart';
 
 /// widget that displays a post's data.
 /// pops up from the bottom of the screen.
@@ -21,10 +22,8 @@ class PostViewWidget extends StatelessWidget {
       return CachedNetworkImage(
         imageUrl: url,
         fit: BoxFit.contain,
-        placeholder: (_, _) =>
-            const Center(child: CircularProgressIndicator()),
-        errorWidget: (_, _, _) =>
-            const Center(child: Icon(Icons.broken_image)),
+        placeholder: (_, _) => const Center(child: CircularProgressIndicator()),
+        errorWidget: (_, _, _) => const Center(child: Icon(Icons.broken_image)),
       );
     }
 
@@ -55,12 +54,20 @@ class PostViewWidget extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: Text(
-                              post.username,
-                              style: Theme.of(context).textTheme.titleMedium,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          InkWell(
+                            onTap: () {
+                              context.pushNamed(
+                                'profile',
+                                pathParameters: {'nickname': post.username},
+                              );
+                            },
+                            child: Expanded(
+                              child: Text(
+                                post.username,
+                                style: Theme.of(context).textTheme.titleMedium,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                           IconButton(

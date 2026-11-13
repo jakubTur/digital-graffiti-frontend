@@ -1,1 +1,1 @@
-enum UserRelationStatus { PENDING, ACCEPTED, DECLINED, BLOCKED, SELF, NONE }
+enum UserRelationStatus { pending, accepted, declined, blocked, self, none }
