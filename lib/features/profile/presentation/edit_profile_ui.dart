@@ -32,11 +32,11 @@ class EditProfileUi extends StatefulWidget {
 
   final VoidCallback? onBackPressed;
 
-  const EditProfileUi(
-    this.initialNickname,
-    this.initialBio, {
-    this.initialProfileImageUrl,
+  const EditProfileUi({
     required this.userRepository,
+    required this.initialNickname,
+    required this.initialBio,
+    this.initialProfileImageUrl,
     this.onSave,
     this.onBackPressed,
     super.key,

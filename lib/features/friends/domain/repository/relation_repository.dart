@@ -5,5 +5,9 @@ import '../../data/models/relation_response.dart';
 abstract class RelationRepository {
   Future<void> createRelation(RelationRequest request);
   Future<List<RelationResponse>> getRelations(int id, RelationStatus type);
-  Future<RelationResponse> getRelation(int firstId, int secondId);
+  Future<RelationResponse> getRelationByIds(int firstId, int secondId);
+  Future<RelationResponse> getRelationByNicknames(
+    String firstNickname,
+    String secondNickname,
+  );
 }

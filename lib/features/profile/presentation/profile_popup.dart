@@ -2,30 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
+import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
+import 'package:frontend/features/profile/data/relation_initiator.dart';
 import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/account_settings.dart';
 import 'package:frontend/features/profile/presentation/edit_profile_ui.dart';
 import 'package:frontend/features/profile/presentation/profile_ui.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/relation_initiator.dart';
+import '../../auth/data/models/user_response.dart';
+import '../../friends/data/models/relation_response.dart';
 
 class ProfilePopup extends StatefulWidget {
-  const ProfilePopup(
-    this._relationStatus,
-    this._userRepository, [
-    this._relationInitiator,
-    Key? key,
-  ]) : super(key: key);
-
-  final RelationStatus _relationStatus;
-
-  final RelationInitiator? _relationInitiator;
+  const ProfilePopup({
+    super.key,
+    required this._relationRepository,
+    required this._userRepository,
+    this._nickname,
+  });
 
   final UserRepository _userRepository;
 
+  final RelationRepository _relationRepository;
+
+  final String? _nickname;
+
   @override
-  State<ProfilePopup> createState() => _ProfilePopupState();
+  State<ProfilePopup> createState() => _ProfilePopupState(_nickname);
 }
 
 class _ProfilePopupState extends State<ProfilePopup> {
@@ -35,9 +38,15 @@ class _ProfilePopupState extends State<ProfilePopup> {
 
   bool _isLoading = true;
 
-  String _nickname = 'Nickname';
-  String _bio = 'example bio example bio example bio example bio';
+  String? _nickname;
+  String? _bio;
   String? _imageUrl;
+
+  RelationStatus _relationStatus = RelationStatus.none;
+
+  RelationInitiator? _relationInitiator;
+
+  _ProfilePopupState(this._nickname);
 
   @override
   void initState() {
@@ -48,21 +57,43 @@ class _ProfilePopupState extends State<ProfilePopup> {
   Future<void> _loadUserProfile() async {
     try {
       final userId = await const AuthStorage(FlutterSecureStorage()).readId();
-      if (userId != null) {
-        final userResponse = await widget._userRepository.getUser(userId);
-        if (mounted) {
-          setState(() {
-            _nickname = userResponse.nickname;
-            _bio = userResponse.bio;
-            _isLoading = false;
-            _imageUrl = userResponse.imageUrl;
-          });
+      final userNickname = await const AuthStorage(FlutterSecureStorage())
+          .readNickname();
+      if (_nickname == null) {
+        if (userId != null) {
+          final UserResponse userResponse = await widget._userRepository
+              .getUser(userId);
+          if (mounted) {
+            setState(() {
+              _nickname = userResponse.nickname;
+              _bio = userResponse.bio;
+              _isLoading = false;
+              _imageUrl = userResponse.imageUrl;
+              _relationStatus = RelationStatus.self;
+            });
+          }
         }
       } else {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
+        if (userNickname != null && _nickname != null) {
+          final RelationResponse relationResponse = await widget
+              ._relationRepository
+              .getRelationByNicknames(userNickname, _nickname!);
+          final RelationInitiator initiator =
+              relationResponse.senderNickname == _nickname
+              ? RelationInitiator.self
+              : RelationInitiator.otherUser;
+          final RelationStatus status = relationResponse.status;
+          final UserResponse userResponse = await widget._userRepository
+              .getUserByNickname(_nickname!);
+          if (mounted) {
+            setState(() {
+              _bio = userResponse.bio;
+              _isLoading = false;
+              _imageUrl = userResponse.imageUrl;
+              _relationInitiator = initiator;
+              _relationStatus = status;
+            });
+          }
         }
       }
     } catch (e) {
@@ -92,8 +123,8 @@ class _ProfilePopupState extends State<ProfilePopup> {
       );
     } else if (_showEditProfile) {
       return EditProfileUi(
-        _nickname,
-        _bio,
+        initialNickname: _nickname ?? '',
+        initialBio: _bio ?? '',
         initialProfileImageUrl: _imageUrl,
         userRepository: widget._userRepository,
         onSave: (newNickname, newBio, newImage) async {
@@ -112,8 +143,8 @@ class _ProfilePopupState extends State<ProfilePopup> {
       );
     } else {
       return ProfileUi(
-        relationStatus: widget._relationStatus,
-        relationInitiator: widget._relationInitiator,
+        relationStatus: _relationStatus,
+        relationInitiator: _relationInitiator,
         onAccountSettingsPressed: () {
           setState(() {
             _showAccountSettings = true;
@@ -124,8 +155,8 @@ class _ProfilePopupState extends State<ProfilePopup> {
             _showEditProfile = true;
           });
         },
-        nickname: _nickname,
-        bio: _bio,
+        nickname: _nickname ?? '',
+        bio: _bio ?? '',
         imageUrl: _imageUrl,
       );
     }

@@ -6,8 +6,10 @@ import 'package:frontend/core/widgets/success_screen.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
+import 'package:frontend/features/friends/data/datasources/relations_remote_ds.dart';
+import 'package:frontend/features/friends/data/repositories/relation_repository_impl.dart';
+import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
-import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
 import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
@@ -41,6 +43,7 @@ void main() async {
   );
   final usersRepo = UserRepositoryImpl(UserRemoteDataSource(api));
   final postsRepo = PostsRepositoryImpl(PostsRemoteDataSource(api));
+  final relationRepo = RelationRepositoryImpl(RelationsRemoteDataSource(api));
 
   final prefs = await SharedPreferences.getInstance();
   final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -49,6 +52,7 @@ void main() async {
     MyApp(
       userRepository: usersRepo,
       postsRepository: postsRepo,
+      relationRepository: relationRepo,
       authStorage: authStorage,
       isLoggedIn: isLoggedIn,
     ),
@@ -60,12 +64,14 @@ class MyApp extends StatelessWidget {
     super.key,
     required this.userRepository,
     required this.postsRepository,
+    required this.relationRepository,
     required this.authStorage,
     required this.isLoggedIn,
   });
 
   final UserRepository userRepository;
   final PostsRepository postsRepository;
+  final RelationRepository relationRepository;
   final AuthStorage authStorage;
   final bool isLoggedIn;
 
@@ -117,7 +123,6 @@ class MyApp extends StatelessWidget {
         path: 'profile/:userNickname',
         pageBuilder: (context, state) {
           final String? nickname = state.pathParameters['userNickname'];
-          final repo = userRepository;
           return CustomTransitionPage(
             key: state.pageKey,
             opaque: false, // makes the map visible behind the screen
@@ -126,10 +131,11 @@ class MyApp extends StatelessWidget {
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-            child: nickname == null
-                //TODO: update with more sophisticated approach
-                ? ProfilePopup(RelationStatus.self, repo)
-                : ProfilePopup(RelationStatus.none, repo),
+            child: ProfilePopup(
+              relationRepository: relationRepository,
+              userRepository: userRepository,
+              nickname: nickname,
+            ),
           );
         },
       ),

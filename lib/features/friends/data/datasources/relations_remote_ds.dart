@@ -17,4 +17,13 @@ class RelationsRemoteDataSource {
   Future<RelationResponse> getRelation(int firstId, int secondId) async {
     return await _api.get('/api/relations/between/$firstId/$secondId');
   }
+
+  Future<RelationResponse> getRelationByNickname(
+    String firstNickname,
+    String secondNickname,
+  ) async {
+    return await _api.get(
+      '/api/relations/between/nicknames/$firstNickname/$secondNickname',
+    );
+  }
 }

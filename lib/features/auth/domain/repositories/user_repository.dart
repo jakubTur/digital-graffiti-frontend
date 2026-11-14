@@ -3,6 +3,7 @@ import 'package:frontend/features/auth/data/models/login_response.dart';
 import 'package:frontend/features/auth/data/models/user_response.dart';
 import 'package:frontend/features/auth/data/models/user_update_request.dart';
 
+import '../../data/models/credential_request.dart';
 import '../entities/user.dart';
 
 abstract class UserRepository {

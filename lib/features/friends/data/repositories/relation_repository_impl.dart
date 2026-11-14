@@ -16,8 +16,19 @@ class RelationRepositoryImpl extends RelationRepository {
   }
 
   @override
-  Future<RelationResponse> getRelation(int firstId, int secondId) async {
+  Future<RelationResponse> getRelationByIds(int firstId, int secondId) async {
     return await remoteDataSource.getRelation(firstId, secondId);
+  }
+
+  @override
+  Future<RelationResponse> getRelationByNicknames(
+    String firstNickname,
+    String secondNickname,
+  ) async {
+    return await remoteDataSource.getRelationByNickname(
+      firstNickname,
+      secondNickname,
+    );
   }
 
   @override
