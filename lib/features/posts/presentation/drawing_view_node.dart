@@ -33,8 +33,8 @@ class DrawingViewNode extends StatelessWidget {
 
   /// style properties:
   static const double _borderWidth = 10;
-  static const Radius _tabRadius = Radius.circular(20);
-  static const double iconSize = 40;
+  static const Radius _tabRadius = Radius.circular(0);
+  static const double iconSize = 60;
   static const double textSize = 40;
 
   @override
@@ -50,7 +50,7 @@ class DrawingViewNode extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Container(
               constraints: const BoxConstraints(maxWidth: _imageWidth),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: const BorderRadius.vertical(top: _tabRadius),
@@ -105,7 +105,7 @@ class DrawingViewNode extends StatelessWidget {
                   color: Colors.black,
                   size: iconSize,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
                 constraints: const BoxConstraints(),
                 visualDensity: VisualDensity.compact,
               ),

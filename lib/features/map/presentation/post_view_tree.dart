@@ -8,6 +8,7 @@ import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/presentation/drawing_view_node.dart';
 import 'package:frontend/features/posts/presentation/post_creation_flow.dart';
 import 'package:graphview/GraphView.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 /// class for displaying a post and its child drawings in a tree (using GraphView).
@@ -50,47 +51,68 @@ class _PostViewTreeState extends State<PostViewTree> {
           _aspectRatio = _imageAspectRatio(post.imageUrl);
         }
         final map = context.read<MapModel>();
+
+        /// pin offset with coordinates converted for initial zoom animation
+        final pinOffset = map.mapController.camera.latLngToScreenOffset(
+          LatLng(post.latitude, post.longitude),
+        );
+
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) map.clearPostToView();
           },
-          child: ColoredBox(
-            color: Colors.black54,
-            child: SafeArea(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: FutureBuilder<double>(
-                      future: _aspectRatio,
-                      builder: (context, aspectRatio) => aspectRatio.hasData
-                          ? _buildTree(
-                              context,
-                              map,
-                              post,
-                              drawings ?? const [],
-                              currentUsername,
-                              aspectRatio.data!,
-                            )
-                          : const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
+          child: FutureBuilder<double>(
+            future: _aspectRatio,
+            builder: (context, aspectRatio) => aspectRatio.hasData
+                ? TweenAnimationBuilder<double>( // grow animation
+                    key: ValueKey(post.id),
+                    tween: Tween(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOut,
+                    builder: (_, progress, tree) => ColoredBox(
+                      color: Colors.black87.withValues(
+                        alpha: Colors.black87.a * progress,
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Transform.scale(
+                              scale: progress,
+                              alignment: Alignment.topLeft,
+                              origin: pinOffset,
+                              child: tree,
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: SafeArea(
+                              child: IconButton(
+                                tooltip: 'Close',
+                                onPressed: map.clearPostToView,
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton(
-                      tooltip: 'Close',
-                      onPressed: map.clearPostToView,
-                      icon: const Icon(Icons.close, color: Colors.white),
+                    child: _buildTree(
+                      context,
+                      map,
+                      post,
+                      drawings ?? const [],
+                      currentUsername,
+                      aspectRatio.data!,
                     ),
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
                   ),
-                ],
-              ),
-            ),
           ),
         );
       },
@@ -154,13 +176,15 @@ class _PostViewTreeState extends State<PostViewTree> {
     return GraphView.builder(
       key: ValueKey(post.id),
       graph: graph,
+      animated: false,
+      panAnimationDuration: const Duration(milliseconds: 0),
       algorithm: BuchheimWalkerAlgorithm(
         configuration,
         TreeEdgeRenderer(configuration),
       ),
       paint: Paint()
-        ..color = Colors.white
-        ..strokeWidth = 2
+        ..color = Colors.grey
+        ..strokeWidth = 10
         ..style = PaintingStyle.stroke,
       autoZoomToFit: true,
       builder: (node) {
