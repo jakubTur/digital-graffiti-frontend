@@ -120,9 +120,9 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         name: '/profile',
-        path: 'profile/:userNickname',
+        path: '/profile/:nickname',
         pageBuilder: (context, state) {
-          final String? nickname = state.pathParameters['userNickname'];
+          final String? nickname = state.pathParameters['nickname'];
           return CustomTransitionPage(
             key: state.pageKey,
             opaque: false, // makes the map visible behind the screen

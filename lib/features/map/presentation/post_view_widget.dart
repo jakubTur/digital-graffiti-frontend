@@ -54,14 +54,14 @@ class PostViewWidget extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          InkWell(
-                            onTap: () {
-                              context.pushNamed(
-                                'profile',
-                                pathParameters: {'nickname': post.username},
-                              );
-                            },
-                            child: Expanded(
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                context.pushNamed(
+                                  '/profile',
+                                  pathParameters: {'nickname': post.username},
+                                );
+                              },
                               child: Text(
                                 post.username,
                                 style: Theme.of(context).textTheme.titleMedium,
