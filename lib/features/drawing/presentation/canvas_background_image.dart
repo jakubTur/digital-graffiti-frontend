@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/paint_model.dart';
 
@@ -15,29 +13,40 @@ class CanvasBackgroundImage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => SizedBox.fromSize(
-    size: paintModel.canvasSize,
-    child:
-        paintModel.backgroundImagePath == null ||
-            paintModel.backgroundImagePath!.isEmpty
-        ? null
-        : Image.file(
-            File(paintModel.backgroundImagePath!),
-            fit: BoxFit.cover,
-            excludeFromSemantics: true,
-            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-              final image = (child as RawImage).image;
-              if (image != null) {
-                final size = Size(
-                  image.width.toDouble(),
-                  image.height.toDouble(),
-                );
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => paintModel.setCanvasSize(size),
-                );
-              }
-              return child;
-            },
-          ),
-  );
+  Widget build(BuildContext context) {
+    final layers = paintModel.backgroundLayers;
+    return SizedBox.fromSize(
+      size: paintModel.canvasSize,
+      child: layers.isEmpty
+          ? null
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                for (final (index, layer) in layers.indexed)
+                  Image(
+                    image: layer,
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                    frameBuilder: index == 0 ? _sizeCanvasToImage : null,
+                  ),
+              ],
+            ),
+    );
+  }
+
+  Widget _sizeCanvasToImage(
+    BuildContext context,
+    Widget child,
+    int? frame,
+    bool wasSynchronouslyLoaded,
+  ) {
+    final image = (child as RawImage).image;
+    if (image != null) {
+      final size = Size(image.width.toDouble(), image.height.toDouble());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => paintModel.setCanvasSize(size),
+      );
+    }
+    return child;
+  }
 }

@@ -14,15 +14,17 @@ class PaintModel extends ChangeNotifier {
   PaintModel({
     required this.brush,
     required this.exporter,
-    this.backgroundImagePath,
+    this.backgroundLayers = const [],
   });
 
   // settings of currently used brush.
   final BrushSettings brush;
   final CanvasExporter exporter;
 
-  // background image is stored here for export funcitonality to work correctly
-  final String? backgroundImagePath;
+  
+  // list of uneditable layers as background (leaving a comment renders child drawings here too)
+  final List<ImageProvider> backgroundLayers;
+  
   bool _isExporting = false;
   bool get isExporting => _isExporting;
 

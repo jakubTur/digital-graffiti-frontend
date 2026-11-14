@@ -15,28 +15,28 @@ import 'package:provider/provider.dart';
 // wires together all the other paint-related widgets with the model that manages their state.
 class PaintScreen extends StatelessWidget {
 
-  final String? imagePath;
+  final List<ImageProvider> backgroundLayers;
 
   // updates the canvas with the created image stored as raw bytes.
   final ValueChanged<Uint8List> onImageCreated;
 
   const PaintScreen({
     super.key,
-    this.imagePath,
+    this.backgroundLayers = const [],
     required this.onImageCreated,
   });
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      key: ValueKey(imagePath),
+      key: ObjectKey(backgroundLayers),
       providers: [
         ChangeNotifierProvider(create: (_) => BrushSettings()),
         ChangeNotifierProvider(
           create: (context) => PaintModel(
             brush: context.read<BrushSettings>(),
             exporter: CanvasExporter(),
-            backgroundImagePath: imagePath,
+            backgroundLayers: backgroundLayers,
           ),
         ),
       ],

@@ -87,6 +87,7 @@ class MyApp extends StatelessWidget {
         path: '/map',
         builder: (context, state) => MapScreen(
           postsRepository: postsRepository,
+          authStorage: authStorage,
           postCreationFlow: PostCreationFlow(
             PostPublisher(postsRepository, authStorage),
           ),
@@ -94,20 +95,15 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/post/draw',
-        builder: (context, _) =>
-            PaintScreen(onImageCreated: (image) => context.pop(image)),
+        builder: (context, state) => PaintScreen(
+          backgroundLayers: state.extra as List<ImageProvider>? ?? const [],
+          onImageCreated: (image) => context.pop(image),
+        ),
       ),
       GoRoute(
         path: '/post/camera',
         builder: (context, _) =>
             CameraScreen(onPhotoCaptured: (path) async => context.pop(path)),
-      ),
-      GoRoute(
-        path: '/post/photo-edit',
-        builder: (context, state) => PaintScreen(
-          imagePath: state.extra as String,
-          onImageCreated: (image) => context.pop(image),
-        ),
       ),
       GoRoute(
         path: '/register',
