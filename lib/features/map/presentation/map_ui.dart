@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/presentation/map_ui_button.dart';
 import 'package:frontend/features/map/presentation/post_view_widget.dart';
 import 'package:frontend/features/posts/presentation/post_creation_flow.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/storage/auth_storage.dart';
 
 /// UI containing buttons that display above the map.
 class MapUi extends StatefulWidget {
@@ -122,8 +125,11 @@ class _MapUiState extends State<MapUi> {
     );
   }
 
-  void _showProfile(BuildContext context, MapModel map) {
+  Future<void> _showProfile(BuildContext context, MapModel map) async {
     //kinda sloppy but idk
-    context.pushNamed('profile');
+    final userNickname = await const AuthStorage(FlutterSecureStorage())
+        .readNickname();
+    if (!context.mounted || userNickname == null) return;
+    context.pushNamed('/profile', pathParameters: {'nickname': userNickname});
   }
 }

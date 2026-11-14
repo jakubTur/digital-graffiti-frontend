@@ -56,13 +56,12 @@ class _ProfilePopupState extends State<ProfilePopup> {
 
   Future<void> _loadUserProfile() async {
     try {
-      final userId = await const AuthStorage(FlutterSecureStorage()).readId();
       final userNickname = await const AuthStorage(FlutterSecureStorage())
           .readNickname();
-      if (_nickname == null) {
-        if (userId != null) {
+      if (_nickname == userNickname) {
+        if (userNickname != null) {
           final UserResponse userResponse = await widget._userRepository
-              .getUser(userId);
+              .getUserByNickname(userNickname);
           if (mounted) {
             setState(() {
               _nickname = userResponse.nickname;
