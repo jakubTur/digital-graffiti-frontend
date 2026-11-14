@@ -8,12 +8,23 @@ import 'package:frontend/features/posts/presentation/post_creation_flow.dart';
 import 'package:graphview/GraphView.dart';
 import 'package:provider/provider.dart';
 
-/// class for displaying a post and its child drawings in a tree.
-/// uses GraphView.
-class PostViewTree extends StatelessWidget {
+/// class for displaying a post and its child drawings in a tree (using GraphView).
+/// stateful so that it can properly update existing nodes (to make them move over when a new drawing appears)
+class PostViewTree extends StatefulWidget {
   const PostViewTree(this._postCreationFlow, {super.key});
 
   final PostCreationFlow _postCreationFlow;
+
+  @override
+  State<PostViewTree> createState() => _PostViewTreeState();
+}
+
+class _PostViewTreeState extends State<PostViewTree> {
+  final _nodes = <int, Node>{};
+  int? _nodesPostId;
+
+  Node _node(int drawingId) =>
+      _nodes.putIfAbsent(drawingId, () => Node.Id(drawingId));
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +96,11 @@ class PostViewTree extends StatelessWidget {
     }
     final root = roots.first;
 
+    if (_nodesPostId != post.id) {
+      _nodes.clear();
+      _nodesPostId = post.id;
+    }
+
     final graph = Graph()..isTree = true;
     final nodeDrawings = <int, Drawing>{};
     final nodeLayers = <int, List<ImageProvider>>{};
@@ -97,13 +113,13 @@ class PostViewTree extends StatelessWidget {
         if (imageUrl != null) CachedNetworkImageProvider(imageUrl),
       ];
       for (final child in (children[drawing.id!] ?? const []).reversed) {
-        graph.addEdge(Node.Id(drawing.id!), Node.Id(child.id!));
+        graph.addEdge(_node(drawing.id!), _node(child.id!));
         addSubtree(child, nodeLayers[drawing.id!]!);
       }
     }
 
     final postImageUrl = post.imageUrl;
-    graph.addNode(Node.Id(root.id!));
+    graph.addNode(_node(root.id!));
     addSubtree(root, [
       if (postImageUrl != null) CachedNetworkImageProvider(postImageUrl),
     ]);
@@ -135,7 +151,7 @@ class PostViewTree extends StatelessWidget {
           layers: layers,
           isOwn: drawing.username == currentUsername,
           onDraw: () async {
-            if (await _postCreationFlow.drawOn(context, drawing, layers)) {
+            if (await widget._postCreationFlow.drawOn(context, drawing, layers)) {
               map.requestPostView(post);
             }
           },
