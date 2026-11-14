@@ -212,7 +212,7 @@ class _EditProfileUiState extends State<EditProfileUi> {
         .push<Uint8List>(
           MaterialPageRoute(
             builder: (context) => PaintScreen(
-              imagePath: photoPath,
+              backgroundLayers: [FileImage(File(photoPath))],
               onImageCreated: (bytes) {
                 Navigator.of(context).pop(bytes);
               },

@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:frontend/core/storage/auth_storage.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
@@ -13,7 +14,7 @@ import 'package:latlong2/latlong.dart';
 /// Data class storing state local to map (user location and posts) pulled from backend.
 /// Made with help of state management tutorial: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
 class MapModel extends ChangeNotifier {
-  MapModel({required this._postsRepository});
+  MapModel({required this._postsRepository, required this._authStorage});
 
   /// How far from the user posts are fetched, in meters.
   static const double postSearchRadius = 50;
@@ -22,6 +23,9 @@ class MapModel extends ChangeNotifier {
   static const Duration postPollInterval = Duration(seconds: 10);
 
   final PostsRepository _postsRepository;
+
+  /// reference to AuthStorage.
+  final AuthStorage _authStorage;
 
   final _mapController = MapController();
 
@@ -42,6 +46,10 @@ class MapModel extends ChangeNotifier {
 
   /// all drawings made on the currently viewed post.
   List<Drawing>? _drawingsOnPostToView;
+
+  /// current username. used to check which drawings should be displayed as green.
+  /// TODO (if needed): change this to work on user ID instead.
+  String? _currentUsername;
 
   /// Used to keep track of the user's location
   StreamSubscription<Position>? _positionSubscription;
@@ -71,20 +79,8 @@ class MapModel extends ChangeNotifier {
 
   List<Drawing>? get drawingsOnPostToView => _drawingsOnPostToView;
 
-  /// getter for the first drawing on a post.
-  Drawing? getRootDrawingOnViewedPost() {
-    if (drawingsOnPostToView == null) {
-      return null;
-    }
-
-    for (Drawing drawing in drawingsOnPostToView!) {
-      if (drawing.parent_id == -1) {
-        // drawing with parent ID of -1 is the root.
-        return drawing;
-      }
-    }
-    return null;
-  }
+  /// getter for username.
+  String? get currentUsername => _currentUsername;
 
   /// post viewing handler.
   /// slightly messy coupling (pedantically this should be in the ui), but it works.
@@ -101,9 +97,11 @@ class MapModel extends ChangeNotifier {
       debugPrint('Failed to fetch drawings for post ${post.id}: $e');
       drawings = const [];
     }
+    final username = await _authStorage.readNickname();
     // set both together, only after the fetch, so the post view
     // can never open with drawings belonging to a different post.
     _drawingsOnPostToView = drawings;
+    _currentUsername = username;
     _postToView = post;
     notifyListeners();
   }
