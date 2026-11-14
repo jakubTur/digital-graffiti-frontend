@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/map/data/map_model.dart';
@@ -13,6 +15,7 @@ import 'package:provider/provider.dart';
 class PostViewTree extends StatefulWidget {
   const PostViewTree(this._postCreationFlow, {super.key});
 
+  /// class containing control flow methods for post (and drawing) creation.
   final PostCreationFlow _postCreationFlow;
 
   @override
@@ -20,8 +23,15 @@ class PostViewTree extends StatefulWidget {
 }
 
 class _PostViewTreeState extends State<PostViewTree> {
+
+  /// GraphView nodes
   final _nodes = <int, Node>{};
+  
+  /// ID of currently viewed post
   int? _nodesPostId;
+
+  /// aspect ratio of image on post.
+  Future<double>? _aspectRatio;
 
   Node _node(int drawingId) =>
       _nodes.putIfAbsent(drawingId, () => Node.Id(drawingId));
@@ -34,6 +44,11 @@ class _PostViewTreeState extends State<PostViewTree> {
       builder: (context, data, _) {
         final (post, drawings, currentUsername) = data;
         if (post == null) return const SizedBox.shrink();
+        if (_nodesPostId != post.id) {
+          _nodesPostId = post.id;
+          _nodes.clear();
+          _aspectRatio = _imageAspectRatio(post.imageUrl);
+        }
         final map = context.read<MapModel>();
         return PopScope(
           canPop: false,
@@ -46,12 +61,22 @@ class _PostViewTreeState extends State<PostViewTree> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: _buildTree(
-                      context,
-                      map,
-                      post,
-                      drawings ?? const [],
-                      currentUsername,
+                    child: FutureBuilder<double>(
+                      future: _aspectRatio,
+                      builder: (context, aspectRatio) => aspectRatio.hasData
+                          ? _buildTree(
+                              context,
+                              map,
+                              post,
+                              drawings ?? const [],
+                              currentUsername,
+                              aspectRatio.data!,
+                            )
+                          : const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                   Positioned(
@@ -78,6 +103,7 @@ class _PostViewTreeState extends State<PostViewTree> {
     Post post,
     List<Drawing> drawings,
     String? currentUsername,
+    double aspectRatio,
   ) {
     final children = <int, List<Drawing>>{};
     for (final drawing in drawings) {
@@ -95,11 +121,6 @@ class _PostViewTreeState extends State<PostViewTree> {
       );
     }
     final root = roots.first;
-
-    if (_nodesPostId != post.id) {
-      _nodes.clear();
-      _nodesPostId = post.id;
-    }
 
     final graph = Graph()..isTree = true;
     final nodeDrawings = <int, Drawing>{};
@@ -149,6 +170,7 @@ class _PostViewTreeState extends State<PostViewTree> {
         return DrawingViewNode(
           drawing: drawing,
           layers: layers,
+          aspectRatio: aspectRatio,
           isOwn: drawing.username == currentUsername,
           onDraw: () async {
             if (await widget._postCreationFlow.drawOn(context, drawing, layers)) {
@@ -158,6 +180,31 @@ class _PostViewTreeState extends State<PostViewTree> {
         );
       },
     );
+  }
+
+  static Future<double> _imageAspectRatio(String? url) {
+    if (url == null) return Future.value(1);
+    final completer = Completer<double>();
+    final stream = CachedNetworkImageProvider(
+      url,
+    ).resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (info, _) {
+        if (!completer.isCompleted) {
+          completer.complete(info.image.width / info.image.height);
+        }
+        info.dispose();
+        stream.removeListener(listener);
+      },
+      onError: (error, _) {
+        debugPrint('Failed to load post background $url: $error');
+        if (!completer.isCompleted) completer.complete(1);
+        stream.removeListener(listener);
+      },
+    );
+    stream.addListener(listener);
+    return completer.future;
   }
 
   static int _byAge(Drawing a, Drawing b) {
