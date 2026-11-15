@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/presentation/map_ui_button.dart';
 import 'package:frontend/features/posts/presentation/post_creation_flow.dart';
@@ -11,8 +10,9 @@ import '../../../core/storage/auth_storage.dart';
 /// UI containing buttons that display above the map.
 /// stateless now that we have a separate class for post creation flow
 class MapUi extends StatelessWidget {
-  const MapUi(this._userRepository, this._postCreationFlow, {super.key});
+  const MapUi(this._authStorage, this._postCreationFlow, {super.key});
 
+  final AuthStorage _authStorage;
   final PostCreationFlow _postCreationFlow;
 
   Future<void> _createPost(BuildContext context, MapModel map) async {
@@ -68,7 +68,9 @@ class MapUi extends StatelessWidget {
     );
   }
 
-  void _showProfile(BuildContext context, MapModel map) {
-    context.push('/profile', extra: _userRepository);
+  Future<void> _showProfile(BuildContext context, MapModel map) async {
+    final userNickname = await _authStorage.readNickname();
+    if (!context.mounted || userNickname == null) return;
+    context.pushNamed('/profile', pathParameters: {'nickname': userNickname});
   }
 }
