@@ -16,6 +16,7 @@ class DrawingViewNode extends StatelessWidget {
     required this.aspectRatio,
     required this.isOwn,
     required this.onDraw,
+    required this.onImageTap,
   });
 
   /// the currently previewed drawing object. get parents or post recursively.
@@ -33,14 +34,17 @@ class DrawingViewNode extends StatelessWidget {
   /// callback for the draw (comment) button.
   final VoidCallback onDraw;
 
+  /// callback for when image is tapped (fullscreen)
+  final VoidCallback onImageTap;
+
   /// width size of node to display. combine with AspectRatio. image is scaled to fit.
-  static const double _imageWidth = 220;
+  static const double _imageWidth = 300;
 
   /// style properties:
   static const double _borderWidth = 10;
   static const Radius _tabRadius = Radius.circular(0);
   static const double iconSize = 60;
-  static const double textSize = 30;
+  static const double textSize = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -84,22 +88,25 @@ class DrawingViewNode extends StatelessWidget {
             ),
             child: SizedBox(
               width: _imageWidth,
-              child: AspectRatio(
-                aspectRatio: aspectRatio,
-                child: layers.isEmpty
-                    ? const Center(child: Icon(Icons.broken_image))
-                    : Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          for (final layer in layers)
-                            Image(
-                              image: layer,
-                              fit: BoxFit.fill,
-                              errorBuilder: (_, _, _) =>
-                                  const SizedBox.shrink(),
-                            ),
-                        ],
-                      ),
+              child: GestureDetector(
+                onTap: onImageTap,
+                child: AspectRatio(
+                  aspectRatio: aspectRatio,
+                  child: layers.isEmpty
+                      ? const Center(child: Icon(Icons.broken_image))
+                      : Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            for (final layer in layers)
+                              Image(
+                                image: layer,
+                                fit: BoxFit.fill,
+                                errorBuilder: (_, _, _) =>
+                                    const SizedBox.shrink(),
+                              ),
+                          ],
+                        ),
+                ),
               ),
             ),
           ),
