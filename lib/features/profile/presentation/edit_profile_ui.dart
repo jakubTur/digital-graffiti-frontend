@@ -32,11 +32,11 @@ class EditProfileUi extends StatefulWidget {
 
   final VoidCallback? onBackPressed;
 
-  const EditProfileUi(
-    this.initialNickname,
-    this.initialBio, {
-    this.initialProfileImageUrl,
+  const EditProfileUi({
     required this.userRepository,
+    required this.initialNickname,
+    required this.initialBio,
+    this.initialProfileImageUrl,
     this.onSave,
     this.onBackPressed,
     super.key,
@@ -212,7 +212,8 @@ class _EditProfileUiState extends State<EditProfileUi> {
         .push<Uint8List>(
           MaterialPageRoute(
             builder: (context) => PaintScreen(
-              imagePath: photoPath,
+              backgroundLayers: [FileImage(File(photoPath))],
+              exportWithBackground: true,
               onImageCreated: (bytes) {
                 Navigator.of(context).pop(bytes);
               },

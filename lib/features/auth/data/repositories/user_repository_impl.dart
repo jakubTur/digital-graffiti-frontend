@@ -47,6 +47,11 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
+  Future<UserResponse> getUserByNickname(String nickname) async {
+    return await remoteDataSource.getUserByNickname(nickname);
+  }
+
+  @override
   Future<void> updateEmail(int id, CredentialRequest request) async {
     await remoteDataSource.updateEmail(id, request);
   }

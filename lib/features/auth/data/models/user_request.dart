@@ -1,5 +1,3 @@
-import 'package:frontend/features/auth/domain/entities/user.dart';
-
 class UserRequest {
   final String nickname;
   final String email;

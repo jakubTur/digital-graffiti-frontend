@@ -1,78 +1,22 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/presentation/map_ui_button.dart';
-import 'package:frontend/features/map/presentation/post_view_widget.dart';
 import 'package:frontend/features/posts/presentation/post_creation_flow.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-/// UI containing buttons that display above the map.
-class MapUi extends StatefulWidget {
-  const MapUi(this._userRepository, this._postCreationFlow, {super.key});
+import '../../../core/storage/auth_storage.dart';
 
-  final UserRepository _userRepository;
+/// UI containing buttons that display above the map.
+/// stateless now that we have a separate class for post creation flow
+class MapUi extends StatelessWidget {
+  const MapUi(this._authStorage, this._postCreationFlow, {super.key});
+
+  final AuthStorage _authStorage;
   final PostCreationFlow _postCreationFlow;
 
-  @override
-  State<MapUi> createState() => _MapUiState();
-}
-
-/// contains UI-specific state that doesn't need to be in MapModel.
-class _MapUiState extends State<MapUi> {
-  /// model containing map data.
-  /// reference map state here.
-  late final MapModel _map;
-
-  /// set to true/false if viewing post.
-  bool _isShowingPost = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _map = context.read<MapModel>();
-    _map.addListener(_onMapChanged);
-  }
-
-  @override
-  void dispose() {
-    _map.removeListener(_onMapChanged);
-    super.dispose();
-  }
-
-  void _onMapChanged() {
-    if (_isShowingPost || _map.postToView == null) return;
-    _isShowingPost = true;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final post = _map.postToView;
-      final drawing = _map.getRootDrawingOnViewedPost();
-      if (!mounted || post == null) {
-        _isShowingPost = false;
-        return;
-      }
-
-      unawaited(
-        showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          clipBehavior: Clip.antiAlias,
-          builder: (_) => PostViewWidget(post: post, drawing: drawing),
-        ).whenComplete(() {
-          if (identical(_map.postToView, post)) {
-            _map.clearPostToView();
-          }
-          _isShowingPost = false;
-          if (mounted && _map.postToView != null) _onMapChanged();
-        }),
-      );
-    });
-  }
-
   Future<void> _createPost(BuildContext context, MapModel map) async {
-    if (await widget._postCreationFlow.run(context, map.userLocation)) {
+    if (await _postCreationFlow.run(context, map.userLocation)) {
       await map.refreshPosts();
     }
   }
@@ -124,7 +68,9 @@ class _MapUiState extends State<MapUi> {
     );
   }
 
-  void _showProfile(BuildContext context, MapModel map) {
-    context.push('/profile', extra: widget._userRepository);
+  Future<void> _showProfile(BuildContext context, MapModel map) async {
+    final userNickname = await _authStorage.readNickname();
+    if (!context.mounted || userNickname == null) return;
+    context.pushNamed('/profile', pathParameters: {'nickname': userNickname});
   }
 }
