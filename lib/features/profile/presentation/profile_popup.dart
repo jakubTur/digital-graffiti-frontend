@@ -78,7 +78,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
               ._relationRepository
               .getRelationByNicknames(userNickname, _nickname!);
           final RelationInitiator initiator =
-              relationResponse.senderNickname == _nickname
+              relationResponse.senderNickname == userNickname
               ? RelationInitiator.self
               : RelationInitiator.otherUser;
           final RelationStatus status = relationResponse.status;

@@ -40,32 +40,37 @@ class ProfileUi extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _ProfileUiState(_relationStatus);
+    return _ProfileUiState();
   }
 }
 
 class _ProfileUiState extends State<ProfileUi> {
-  _ProfileUiState(this.status);
+  late RelationStatus status;
 
-  RelationStatus status;
+  @override
+  void initState() {
+    super.initState();
+    status = widget._relationStatus;
+  }
 
   Future<String?> _getUserNickname() async {
     return await const AuthStorage(FlutterSecureStorage()).readNickname();
   }
 
-  void _removeFriend() async {
+  Future<void> _removeFriend() async {
     final userNickname = await _getUserNickname();
     if (userNickname == null) return;
     await widget._relationRepository.deleteRelation(
       userNickname,
       widget._nickname,
     );
+    if (!mounted) return;
     setState(() {
       status = RelationStatus.none;
     });
   }
 
-  void _acceptFriendRequest() async {
+  Future<void> _acceptFriendRequest() async {
     final userNickname = await _getUserNickname();
     if (userNickname == null) return;
     RelationNicknameRequest request = RelationNicknameRequest(
@@ -74,6 +79,7 @@ class _ProfileUiState extends State<ProfileUi> {
       status: RelationStatus.accepted,
     );
     await widget._relationRepository.updateRelation(request);
+    if (!mounted) return;
     setState(() {
       status = RelationStatus.accepted;
     });
@@ -94,6 +100,7 @@ class _ProfileUiState extends State<ProfileUi> {
     } else {
       await widget._relationRepository.updateRelation(request);
     }
+    if (!mounted) return;
     setState(() {
       status = RelationStatus.pending;
     });
@@ -108,6 +115,7 @@ class _ProfileUiState extends State<ProfileUi> {
       status: RelationStatus.declined,
     );
     await widget._relationRepository.updateRelation(request);
+    if (!mounted) return;
     setState(() {
       status = RelationStatus.declined;
     });
@@ -133,7 +141,7 @@ class _ProfileUiState extends State<ProfileUi> {
         children: [
           Row(
             children: [
-              if (widget._relationStatus != RelationStatus.self) ...[
+              if (status != RelationStatus.self) ...[
                 IconButton(
                   onPressed: _reportUser,
                   iconSize: 60,
@@ -175,7 +183,7 @@ class _ProfileUiState extends State<ProfileUi> {
             ),
           ),
           const SizedBox(height: 12),
-          if (widget._relationStatus != RelationStatus.blocked) ...[
+          if (status != RelationStatus.blocked) ...[
             Align(
               alignment: Alignment.center,
               child: Text(
@@ -186,7 +194,7 @@ class _ProfileUiState extends State<ProfileUi> {
             ),
             const SizedBox(height: 20),
             ...[
-              ...switch (widget._relationStatus) {
+              ...switch (status) {
                 RelationStatus.pending => [
                   if (widget._relationInitiator == RelationInitiator.self) ...[
                     CustomButton(
@@ -233,20 +241,24 @@ class _ProfileUiState extends State<ProfileUi> {
                       backgroundColor: Colors.grey,
                     ),
                   ] else ...[
-                    Expanded(
-                      child: CustomButton(
-                        text: 'Accept friend request',
-                        onPressed: _acceptFriendRequest,
-                        backgroundColor: Colors.green,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomButton(
-                        text: 'Decline friend request',
-                        onPressed: _declineFriendRequest,
-                        backgroundColor: Colors.red,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomButton(
+                            text: 'Accept friend request',
+                            onPressed: _acceptFriendRequest,
+                            backgroundColor: Colors.green,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomButton(
+                            text: 'Decline friend request',
+                            onPressed: _declineFriendRequest,
+                            backgroundColor: Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],
