@@ -68,7 +68,9 @@ class _PostViewTreeState extends State<PostViewTree> {
           child: FutureBuilder<double>(
             future: _aspectRatio,
             builder: (context, aspectRatio) => aspectRatio.hasData
-                ? TweenAnimationBuilder<double>( // grow animation
+                // grow animation.
+                // overlaps built-in animation but it looks good enough.
+                ? TweenAnimationBuilder<double>(
                     key: ValueKey(post.id),
                     tween: Tween(begin: 0, end: 1),
                     duration: const Duration(milliseconds: 500),
@@ -181,7 +183,7 @@ class _PostViewTreeState extends State<PostViewTree> {
       graph: graph,
       controller: _graphController,
       animated: false,
-      panAnimationDuration: const Duration(milliseconds: 300),
+      panAnimationDuration: const Duration(milliseconds: 0),
       algorithm: BuchheimWalkerAlgorithm(
         configuration,
         TreeEdgeRenderer(configuration),
