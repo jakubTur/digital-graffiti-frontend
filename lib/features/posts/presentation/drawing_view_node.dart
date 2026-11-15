@@ -40,7 +40,7 @@ class DrawingViewNode extends StatelessWidget {
   static const double _borderWidth = 10;
   static const Radius _tabRadius = Radius.circular(0);
   static const double iconSize = 60;
-  static const double textSize = 40;
+  static const double textSize = 30;
 
   @override
   Widget build(BuildContext context) {
