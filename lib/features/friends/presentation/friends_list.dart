@@ -8,14 +8,14 @@ class FriendsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: .start,
-            children: [FormMainText('Invites'), FormMainText('Friends')],
-          ),
+    return Container(
+      constraints: const BoxConstraints(minHeight: 200, maxHeight: 500),
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [FormMainText('Invites'), FormMainText('Friends')],
         ),
       ),
     );

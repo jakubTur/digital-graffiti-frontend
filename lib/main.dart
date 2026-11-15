@@ -9,7 +9,7 @@ import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/friends/data/datasources/relations_remote_ds.dart';
 import 'package:frontend/features/friends/data/repositories/relation_repository_impl.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
-import 'package:frontend/features/friends/presentation/friends_list.dart';
+import 'package:frontend/features/friends/presentation/friends_popup.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
@@ -120,6 +120,8 @@ class MyApp extends StatelessWidget {
         path: '/profile/:nickname',
         pageBuilder: (context, state) {
           final String? nickname = state.pathParameters['nickname'];
+          final bool fromPostView =
+              state.uri.queryParameters['fromPostView'] == 'true';
           return CustomTransitionPage(
             key: state.pageKey,
             opaque: false, // makes the map visible behind the screen
@@ -131,15 +133,29 @@ class MyApp extends StatelessWidget {
             child: ProfilePopup(
               relationRepository: relationRepository,
               userRepository: userRepository,
+              authStorage: authStorage,
               nickname: nickname,
+              showTopButtons: !fromPostView,
             ),
           );
         },
       ),
       GoRoute(
         path: '/friends',
-        builder: (context, state) =>
-            FriendsList(relationRepository: relationRepository),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            opaque: false, // makes the map visible behind the screen
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            child: FriendsPopup(
+              relationRepository: relationRepository,
+              authStorage: authStorage,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '/logout',
