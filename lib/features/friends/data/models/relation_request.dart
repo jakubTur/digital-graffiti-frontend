@@ -12,6 +12,10 @@ class RelationRequest {
   final RelationStatus status;
 
   Map<String, dynamic> toJson() {
-    return {'senderId': senderId, 'receiverId': receiverId, 'status': status};
+    return {
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'type': status.name,
+    };
   }
 }

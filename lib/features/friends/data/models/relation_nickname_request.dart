@@ -15,7 +15,7 @@ class RelationNicknameRequest {
     return {
       'senderNickname': senderNickname,
       'receiverNickname': receiverNickname,
-      'status': status.name,
+      'type': status.name,
     };
   }
 }
