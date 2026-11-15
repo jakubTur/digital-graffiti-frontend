@@ -142,6 +142,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
       );
     } else {
       return ProfileUi(
+        relationRepository: widget._relationRepository,
         relationStatus: _relationStatus,
         relationInitiator: _relationInitiator,
         onAccountSettingsPressed: () {

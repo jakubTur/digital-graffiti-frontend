@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/features/friends/data/models/relation_nickname_request.dart';
+import 'package:frontend/features/friends/data/models/relation_response.dart';
+import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/storage/auth_storage.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../data/relation_initiator.dart';
@@ -15,6 +20,8 @@ class ProfileUi extends StatefulWidget {
 
   final VoidCallback _onEditProfilePressed;
 
+  final RelationRepository _relationRepository;
+
   final String _nickname;
   final String _bio;
   final String? _imageUrl;
@@ -28,30 +35,91 @@ class ProfileUi extends StatefulWidget {
     required this._bio,
     this._imageUrl,
     super.key,
+    required this._relationRepository,
   });
 
   @override
   State<StatefulWidget> createState() {
-    return _ProfileUiState();
+    return _ProfileUiState(_relationStatus);
   }
 }
 
 class _ProfileUiState extends State<ProfileUi> {
-  //TODO: implement the placeholder functions
+  _ProfileUiState(this.status);
+
+  RelationStatus status;
+
+  Future<String?> _getUserNickname() async {
+    return await const AuthStorage(FlutterSecureStorage()).readNickname();
+  }
+
+  void _removeFriend() async {
+    final userNickname = await _getUserNickname();
+    if (userNickname == null) return;
+    await widget._relationRepository.deleteRelation(
+      userNickname,
+      widget._nickname,
+    );
+    setState(() {
+      status = RelationStatus.none;
+    });
+  }
+
+  void _acceptFriendRequest() async {
+    final userNickname = await _getUserNickname();
+    if (userNickname == null) return;
+    RelationNicknameRequest request = RelationNicknameRequest(
+      senderNickname: widget._nickname,
+      receiverNickname: userNickname,
+      status: RelationStatus.accepted,
+    );
+    await widget._relationRepository.updateRelation(request);
+    setState(() {
+      status = RelationStatus.accepted;
+    });
+  }
+
+  Future<void> _sendFriendRequest() async {
+    final userNickname = await _getUserNickname();
+    if (userNickname == null) return;
+    RelationNicknameRequest request = RelationNicknameRequest(
+      senderNickname: userNickname,
+      receiverNickname: widget._nickname,
+      status: RelationStatus.pending,
+    );
+    RelationResponse currentRelation = await widget._relationRepository
+        .getRelationByNicknames(userNickname, widget._nickname);
+    if (currentRelation.status == RelationStatus.none) {
+      await widget._relationRepository.createRelationByNicknames(request);
+    } else {
+      await widget._relationRepository.updateRelation(request);
+    }
+    setState(() {
+      status = RelationStatus.pending;
+    });
+  }
+
+  Future<void> _declineFriendRequest() async {
+    final userNickname = await _getUserNickname();
+    if (userNickname == null) return;
+    RelationNicknameRequest request = RelationNicknameRequest(
+      senderNickname: widget._nickname,
+      receiverNickname: userNickname,
+      status: RelationStatus.declined,
+    );
+    await widget._relationRepository.updateRelation(request);
+    setState(() {
+      status = RelationStatus.declined;
+    });
+  }
+
+  //TODO: implement blocking after table refactor
 
   void _blockUser() {}
 
   void _reportUser() {}
 
   void _unblockUser() {}
-
-  void _removeFriend() {}
-
-  void _acceptFriendRequest() {}
-
-  void _sendFriendRequest() {}
-
-  void _declineFriendRequest() {}
 
   @override
   Widget build(BuildContext context) {
@@ -120,9 +188,13 @@ class _ProfileUiState extends State<ProfileUi> {
             ...[
               ...switch (widget._relationStatus) {
                 RelationStatus.pending => [
-                  if (widget._relationInitiator == RelationInitiator.self)
-                    ...[]
-                  else ...[
+                  if (widget._relationInitiator == RelationInitiator.self) ...[
+                    CustomButton(
+                      text: 'Friend request sent',
+                      onPressed: () {},
+                      backgroundColor: Colors.grey,
+                    ),
+                  ] else ...[
                     Row(
                       children: [
                         Expanded(
@@ -153,7 +225,33 @@ class _ProfileUiState extends State<ProfileUi> {
                   ),
                 ],
 
-                RelationStatus.declined || RelationStatus.none => [
+                RelationStatus.declined => [
+                  if (widget._relationInitiator == RelationInitiator.self) ...[
+                    CustomButton(
+                      text: 'Friend request sent',
+                      onPressed: () {},
+                      backgroundColor: Colors.grey,
+                    ),
+                  ] else ...[
+                    Expanded(
+                      child: CustomButton(
+                        text: 'Accept friend request',
+                        onPressed: _acceptFriendRequest,
+                        backgroundColor: Colors.green,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: CustomButton(
+                        text: 'Decline friend request',
+                        onPressed: _declineFriendRequest,
+                        backgroundColor: Colors.red,
+                      ),
+                    ),
+                  ],
+                ],
+
+                RelationStatus.none => [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
