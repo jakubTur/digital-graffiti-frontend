@@ -46,11 +46,13 @@ class ProfileUi extends StatefulWidget {
 
 class _ProfileUiState extends State<ProfileUi> {
   late RelationStatus status;
+  late RelationInitiator? initiator;
 
   @override
   void initState() {
     super.initState();
     status = widget._relationStatus;
+    initiator = widget._relationInitiator;
   }
 
   Future<String?> _getUserNickname() async {
@@ -103,6 +105,7 @@ class _ProfileUiState extends State<ProfileUi> {
     if (!mounted) return;
     setState(() {
       status = RelationStatus.pending;
+      initiator = RelationInitiator.self;
     });
   }
 
@@ -196,7 +199,7 @@ class _ProfileUiState extends State<ProfileUi> {
             ...[
               ...switch (status) {
                 RelationStatus.pending => [
-                  if (widget._relationInitiator == RelationInitiator.self) ...[
+                  if (initiator == RelationInitiator.self) ...[
                     CustomButton(
                       text: 'Friend request sent',
                       onPressed: () {},
@@ -234,31 +237,17 @@ class _ProfileUiState extends State<ProfileUi> {
                 ],
 
                 RelationStatus.declined => [
-                  if (widget._relationInitiator == RelationInitiator.self) ...[
+                  if (initiator == RelationInitiator.self) ...[
                     CustomButton(
                       text: 'Friend request sent',
                       onPressed: () {},
                       backgroundColor: Colors.grey,
                     ),
                   ] else ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomButton(
-                            text: 'Accept friend request',
-                            onPressed: _acceptFriendRequest,
-                            backgroundColor: Colors.green,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: CustomButton(
-                            text: 'Decline friend request',
-                            onPressed: _declineFriendRequest,
-                            backgroundColor: Colors.red,
-                          ),
-                        ),
-                      ],
+                    CustomButton(
+                      text: 'Send friend request',
+                      onPressed: _sendFriendRequest,
+                      backgroundColor: Colors.deepPurple,
                     ),
                   ],
                 ],
@@ -319,7 +308,7 @@ class _ProfileUiState extends State<ProfileUi> {
 
             //TODO: List of posts
           ] else ...[
-            ...switch (widget._relationInitiator) {
+            ...switch (initiator) {
               null => throw UnimplementedError(),
 
               RelationInitiator.self => [
