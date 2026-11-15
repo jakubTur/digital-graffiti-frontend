@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,8 @@ class _PostViewTreeState extends State<PostViewTree> {
   /// aspect ratio of image on post.
   Future<double>? _aspectRatio;
 
+  final _graphController = GraphViewController();
+
   Node _node(int drawingId) =>
       _nodes.putIfAbsent(drawingId, () => Node.Id(drawingId));
 
@@ -65,7 +68,9 @@ class _PostViewTreeState extends State<PostViewTree> {
           child: FutureBuilder<double>(
             future: _aspectRatio,
             builder: (context, aspectRatio) => aspectRatio.hasData
-                ? TweenAnimationBuilder<double>( // grow animation
+                // grow animation.
+                // overlaps built-in animation but it looks good enough.
+                ? TweenAnimationBuilder<double>(
                     key: ValueKey(post.id),
                     tween: Tween(begin: 0, end: 1),
                     duration: const Duration(milliseconds: 500),
@@ -176,6 +181,7 @@ class _PostViewTreeState extends State<PostViewTree> {
     return GraphView.builder(
       key: ValueKey(post.id),
       graph: graph,
+      controller: _graphController,
       animated: false,
       panAnimationDuration: const Duration(milliseconds: 0),
       algorithm: BuchheimWalkerAlgorithm(
@@ -201,8 +207,22 @@ class _PostViewTreeState extends State<PostViewTree> {
               map.requestPostView(post);
             }
           },
+          onImageTap: () => _fitToScreen(node),
         );
       },
+    );
+  }
+
+  // zoom in on a node (kinda-fullscreen)
+  void _fitToScreen(Node node) {
+    final screen = MediaQuery.sizeOf(context);
+    final scale =
+        0.95 * min(screen.width / node.width, screen.height / node.height);
+    final offset =
+        screen.center(Offset.zero) - (node.position & node.size).center * scale;
+    _graphController.animateToMatrix(
+      Matrix4.diagonal3Values(scale, scale, 1)
+        ..setTranslationRaw(offset.dx, offset.dy, 0),
     );
   }
 
