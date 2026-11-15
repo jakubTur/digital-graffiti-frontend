@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "804852230107",
+    "project_id": "digitalgraffiti-9aec4",
+    "storage_bucket": "digitalgraffiti-9aec4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:804852230107:android:4a7a9584722cdf94bc29fe",
+        "android_client_info": {
+          "package_name": "pl.edu.pwr.digitalgraffiti"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjgEOqT1mDs0RUGcska6Xg_JZ8V9Dure4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

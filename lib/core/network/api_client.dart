@@ -23,6 +23,7 @@ class ApiClient {
   Future<dynamic> post(String path, {Map<String, String>? queryParameters, required Map<String, dynamic> body, int expectedStatusCode = 201}) => send('POST', path, queryParameters: queryParameters, body: body, expectedStatusCode: expectedStatusCode);
   Future<dynamic> put(String path, {Map<String, String>? queryParameters, required Map<String, dynamic> body}) => send('PUT', path, queryParameters: queryParameters, body: body, expectedStatusCode: 200);
   Future<dynamic> delete(String path, {Map<String, String>? queryParameters}) => send('DELETE', path, queryParameters: queryParameters, expectedStatusCode: 200);
+  Future<dynamic> patch(String path, {Map<String, String>? queryParameters, required Map<String, dynamic> body}) => send('PATCH', path, queryParameters: queryParameters, body: body, expectedStatusCode: 200);
 
 
   Future<dynamic> send(String method, String path, {Map<String, String>? queryParameters, Map<String, dynamic>? body, required int expectedStatusCode, bool refreshed = false}) async {
@@ -40,6 +41,9 @@ class ApiClient {
         response = await _client.put(uri, headers: headers, body: encodedBody);
       case 'DELETE':
         response = await _client.delete(uri, headers: headers);
+      case 'PATCH':
+        response = await _client.patch(uri, headers: headers, body: encodedBody);
+
       default:
         throw Exception('Unsupported method: $method');
     }

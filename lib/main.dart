@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,6 +11,9 @@ import 'package:frontend/features/friends/data/datasources/relations_remote_ds.d
 import 'package:frontend/features/friends/data/repositories/relation_repository_impl.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
+import 'package:frontend/features/notifications/data/datasources/notifications_remote_data_source.dart';
+import 'package:frontend/features/notifications/data/services/push_notification_service.dart';
+import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
 import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
@@ -18,6 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/api_client.dart';
 import 'core/storage/auth_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
@@ -33,6 +38,8 @@ import 'features/profile/presentation/settings/change_password_form.dart';
 void main() async {
   // App locked into vertical mode
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   const secureStorage = FlutterSecureStorage();
   final authStorage = AuthStorage(secureStorage);
@@ -41,6 +48,17 @@ void main() async {
     refreshTokenProvider: authStorage.readRefreshToken,
     updateTokens: authStorage.updateTokens,
   );
+  final notificationsDataSource = NotificationsRemoteDataSource(api);
+  final pushNotificationService = PushNotificationService(
+    getAccessToken: authStorage.readAccessToken,
+    registerDeviceToken: notificationsDataSource.registerDeviceToken,
+  );
+  try {
+    await pushNotificationService.initialize();
+  } catch (error, stackTrace) {
+    debugPrint('Push notification service initialization error: $error');
+    debugPrint('Stack trace: $stackTrace');
+  }
   final usersRepo = UserRepositoryImpl(UserRemoteDataSource(api));
   final postsRepo = PostsRepositoryImpl(PostsRemoteDataSource(api));
   final relationRepo = RelationRepositoryImpl(RelationsRemoteDataSource(api));
@@ -55,6 +73,7 @@ void main() async {
       relationRepository: relationRepo,
       authStorage: authStorage,
       isLoggedIn: isLoggedIn,
+      pushNotificationService: pushNotificationService,
     ),
   );
 }
@@ -67,6 +86,7 @@ class MyApp extends StatelessWidget {
     required this.relationRepository,
     required this.authStorage,
     required this.isLoggedIn,
+    required this.pushNotificationService,
   });
 
   final UserRepository userRepository;
@@ -74,6 +94,7 @@ class MyApp extends StatelessWidget {
   final RelationRepository relationRepository;
   final AuthStorage authStorage;
   final bool isLoggedIn;
+  final PushNotificationService pushNotificationService;
 
   late final GoRouter router = GoRouter(
     initialLocation: isLoggedIn ? '/map' : '/',
@@ -81,7 +102,7 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/',
         builder: (context, state) =>
-            LoginUi(repo: userRepository, authStorage: authStorage),
+            LoginUi(repo: userRepository, authStorage: authStorage, notificationService: pushNotificationService),
       ),
       GoRoute(
         path: '/map',
