@@ -21,6 +21,16 @@ class MapUi extends StatelessWidget {
     }
   }
 
+  Future<void> _showProfile(BuildContext context, MapModel map) async {
+    final userNickname = await _authStorage.readNickname();
+    if (!context.mounted || userNickname == null) return;
+    context.pushNamed('/profile', pathParameters: {'nickname': userNickname});
+  }
+
+  Future<void> _showFriendsList(BuildContext context, MapModel map) async {
+    context.push('/friends');
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -32,6 +42,15 @@ class MapUi extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Consumer<MapModel>(
+                  builder: (context, map, child) {
+                    return MapUiButton(
+                      onTap: () => _showFriendsList(context, map),
+                      icon: Icons.people,
+                      heroTag: 'friends_button',
+                    );
+                  },
+                ),
                 Consumer<MapModel>(
                   builder: (context, map, child) {
                     return MapUiButton(
@@ -66,11 +85,5 @@ class MapUi extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _showProfile(BuildContext context, MapModel map) async {
-    final userNickname = await _authStorage.readNickname();
-    if (!context.mounted || userNickname == null) return;
-    context.pushNamed('/profile', pathParameters: {'nickname': userNickname});
   }
 }

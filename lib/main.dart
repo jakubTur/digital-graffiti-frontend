@@ -9,6 +9,7 @@ import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/friends/data/datasources/relations_remote_ds.dart';
 import 'package:frontend/features/friends/data/repositories/relation_repository_impl.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
+import 'package:frontend/features/friends/presentation/friends_list.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
@@ -134,6 +135,11 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: '/friends',
+        builder: (context, state) =>
+            FriendsList(relationRepository: relationRepository),
       ),
       GoRoute(
         path: '/logout',
