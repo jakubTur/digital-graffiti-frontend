@@ -1,3 +1,4 @@
+import 'package:frontend/features/friends/data/models/relation_nickname_request.dart';
 import 'package:frontend/features/friends/data/models/relation_request.dart';
 import 'package:frontend/features/friends/data/models/relation_response.dart';
 
@@ -13,6 +14,13 @@ class RelationRepositoryImpl extends RelationRepository {
   @override
   Future<void> createRelation(RelationRequest request) async {
     return await remoteDataSource.createRelation(request);
+  }
+
+  @override
+  Future<void> createRelationByNicknames(
+    RelationNicknameRequest request,
+  ) async {
+    return await remoteDataSource.createByNicknames(request);
   }
 
   @override
@@ -37,5 +45,18 @@ class RelationRepositoryImpl extends RelationRepository {
     RelationStatus type,
   ) async {
     return await remoteDataSource.getRelations(id, type.name);
+  }
+
+  @override
+  Future<void> deleteRelation(
+    String firstNickname,
+    String secondNickname,
+  ) async {
+    return await remoteDataSource.deleteRelation(firstNickname, secondNickname);
+  }
+
+  @override
+  Future<void> updateRelation(RelationNicknameRequest request) async {
+    return await remoteDataSource.updateRelation(request);
   }
 }

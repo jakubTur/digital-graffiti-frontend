@@ -1,3 +1,5 @@
+import 'package:frontend/features/friends/data/models/relation_nickname_request.dart';
+
 import '../../../../core/network/api_client.dart';
 import '../models/relation_request.dart';
 import '../models/relation_response.dart';
@@ -25,5 +27,20 @@ class RelationsRemoteDataSource {
     return await _api.get(
       '/api/relations/between/nicknames/$firstNickname/$secondNickname',
     );
+  }
+
+  Future<void> deleteRelation(
+    String firstNickname,
+    String secondNickname,
+  ) async {
+    return await _api.delete('/api/relations/$firstNickname/$secondNickname');
+  }
+
+  Future<void> createByNicknames(RelationNicknameRequest request) async {
+    return await _api.post('/api/relations/nicknames', body: request.toJson());
+  }
+
+  Future<void> updateRelation(RelationNicknameRequest request) async {
+    return await _api.put('/api/relations', body: request.toJson());
   }
 }
