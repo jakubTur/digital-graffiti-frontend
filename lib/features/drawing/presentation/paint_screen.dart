@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 class PaintScreen extends StatelessWidget {
 
   final List<ImageProvider> backgroundLayers;
+  final bool exportWithBackground;
 
   // updates the canvas with the created image stored as raw bytes.
   final ValueChanged<Uint8List> onImageCreated;
@@ -23,6 +24,7 @@ class PaintScreen extends StatelessWidget {
   const PaintScreen({
     super.key,
     this.backgroundLayers = const [],
+    this.exportWithBackground = false,
     required this.onImageCreated,
   });
 
@@ -96,7 +98,9 @@ class PaintScreen extends StatelessWidget {
     ValueChanged<Uint8List> onImageCreated,
   ) async {
     try {
-      final image = await model.exportImage();
+      final image = await model.exportImage(
+        includeBackground: exportWithBackground,
+      );
       if (context.mounted) onImageCreated(image);
     } catch (error) {
       if (context.mounted) {

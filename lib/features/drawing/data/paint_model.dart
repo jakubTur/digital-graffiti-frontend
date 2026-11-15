@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/brush_settings.dart';
@@ -31,7 +32,11 @@ class PaintModel extends ChangeNotifier {
   Size _canvasSize = const Size(800, 800); // overridden by background image size; otherwise this value is used as default
   Size get canvasSize => _canvasSize;
 
-  void setCanvasSize(Size size) {
+  ui.Image? _backgroundImage;
+
+  void setBackgroundImage(ui.Image image) {
+    _backgroundImage = image;
+    final size = Size(image.width.toDouble(), image.height.toDouble());
     if (_canvasSize == size) return;
     _canvasSize = size;
     notifyListeners();
@@ -111,7 +116,7 @@ class PaintModel extends ChangeNotifier {
 
   // exports the image as a future containing raw bytes using PictureRecorder.
   // TODO: decide if this is really the correct export format.
-  Future<Uint8List> exportImage() async {
+  Future<Uint8List> exportImage({bool includeBackground = false}) async {
     if (_isExporting) throw StateError('Image export is already in progress.');
     _isExporting = true;
     notifyListeners();
@@ -120,6 +125,8 @@ class PaintModel extends ChangeNotifier {
       return await exporter.export(
         lines: lines,
         size: _canvasSize,
+        background: _backgroundImage,
+        includeBackground: includeBackground,
       );
     } finally {
       _isExporting = false;

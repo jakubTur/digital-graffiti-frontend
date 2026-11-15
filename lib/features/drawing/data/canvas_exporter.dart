@@ -9,10 +9,15 @@ class CanvasExporter {
   Future<Uint8List> export({
     required List<DrawnLine> lines,
     required Size size,
+    ui.Image? background,
+    bool includeBackground = false,
   }) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
+    if (includeBackground && background != null) {
+      canvas.drawImage(background, Offset.zero, Paint());
+    }
     for (final line in lines) {
       canvas.drawPath(line.path, line.getPaint());
     }

@@ -213,6 +213,7 @@ class _EditProfileUiState extends State<EditProfileUi> {
           MaterialPageRoute(
             builder: (context) => PaintScreen(
               backgroundLayers: [FileImage(File(photoPath))],
+              exportWithBackground: true,
               onImageCreated: (bytes) {
                 Navigator.of(context).pop(bytes);
               },

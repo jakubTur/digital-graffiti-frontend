@@ -42,9 +42,8 @@ class CanvasBackgroundImage extends StatelessWidget {
   ) {
     final image = (child as RawImage).image;
     if (image != null) {
-      final size = Size(image.width.toDouble(), image.height.toDouble());
       WidgetsBinding.instance.addPostFrameCallback(
-        (_) => paintModel.setCanvasSize(size),
+        (_) => paintModel.setBackgroundImage(image),
       );
     }
     return child;
