@@ -1,3 +1,8 @@
+
+
+
+
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
 
@@ -55,13 +60,21 @@ class DrawingViewNode extends StatelessWidget {
                 color: color,
                 borderRadius: const BorderRadius.vertical(top: _tabRadius),
               ),
+              child: InkWell(
+                onTap: () {
+                  context.pushNamed(
+                    '/profile',
+                    pathParameters: {'nickname': drawing.username},
+                  );
+                },
               child: Text(
-                drawing.username,
-                style: Theme.of(context).textTheme.labelLarge
-                    ?.copyWith(color: Colors.black, fontSize: textSize),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                    drawing.username,
+                    style: Theme.of(context).textTheme.labelLarge
+                        ?.copyWith(color: Colors.black, fontSize: textSize),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
               ),
+              )
             ),
           ),
           Container(
