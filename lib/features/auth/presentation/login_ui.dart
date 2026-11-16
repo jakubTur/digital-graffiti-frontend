@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/notifications/data/services/push_notification_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +13,8 @@ import '../domain/repositories/user_repository.dart';
 class LoginUi extends StatefulWidget {
   final UserRepository repo;
   final AuthStorage authStorage;
-  const LoginUi({super.key, required this.repo, required this.authStorage});
+  final PushNotificationService notificationService;
+  const LoginUi({super.key, required this.repo, required this.authStorage, required this.notificationService});
 
   @override
   State<StatefulWidget> createState() => _LoginUiState();
@@ -43,6 +45,12 @@ class _LoginUiState extends State<LoginUi> {
         ),
       );
       await widget.authStorage.saveLogin(response);
+      try {
+        await widget.notificationService.registerCurrentToken();
+      } catch (error, stackTrace) {
+        debugPrint('FCM token registration failed: $error');
+        debugPrint('Stack trace: $stackTrace');
+      }
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', _rememberUser);
