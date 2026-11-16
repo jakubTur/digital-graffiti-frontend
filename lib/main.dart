@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +15,6 @@ import 'package:frontend/features/friends/presentation/friends_popup.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/notifications/data/datasources/notifications_remote_data_source.dart';
 import 'package:frontend/features/notifications/data/services/push_notification_service.dart';
-import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
 import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
@@ -23,7 +23,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/api_client.dart';
 import 'core/storage/auth_storage.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
@@ -102,8 +101,11 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) =>
-            LoginUi(repo: userRepository, authStorage: authStorage, notificationService: pushNotificationService),
+        builder: (context, state) => LoginUi(
+          repo: userRepository,
+          authStorage: authStorage,
+          notificationService: pushNotificationService,
+        ),
       ),
       GoRoute(
         path: '/map',
@@ -154,6 +156,7 @@ class MyApp extends StatelessWidget {
             child: ProfilePopup(
               relationRepository: relationRepository,
               userRepository: userRepository,
+              postsRepository: postsRepository,
               authStorage: authStorage,
               nickname: nickname,
               showTopButtons: !fromPostView,

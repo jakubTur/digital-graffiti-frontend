@@ -4,6 +4,7 @@ import 'package:frontend/core/widgets/loading_screen.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
 import 'package:frontend/features/map/presentation/map_bottom_popup.dart';
+import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:frontend/features/profile/data/relation_initiator.dart';
 import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/account_settings.dart';
@@ -21,9 +22,11 @@ class ProfilePopup extends StatefulWidget {
     required this.authStorage,
     this.nickname,
     this.showTopButtons = true,
+    required this.postsRepository,
   });
 
   final UserRepository userRepository;
+  final PostsRepository postsRepository;
   final RelationRepository relationRepository;
   final AuthStorage authStorage;
   final String? nickname;
@@ -138,6 +141,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
       return ProfileUi(
         relationRepository: widget.relationRepository,
         relationStatus: _relationStatus,
+        postsRepository: widget.postsRepository,
         relationInitiator: _relationInitiator,
         onAccountSettingsPressed: () {
           setState(() {
