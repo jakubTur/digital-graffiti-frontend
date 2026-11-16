@@ -152,6 +152,7 @@ class MyApp extends StatelessWidget {
                 },
             child: FriendsPopup(
               relationRepository: relationRepository,
+              userRepository: userRepository,
               authStorage: authStorage,
             ),
           );

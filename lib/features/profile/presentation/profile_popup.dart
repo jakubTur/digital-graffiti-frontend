@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/core/widgets/loading_screen.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
 import 'package:frontend/features/map/presentation/map_bottom_popup.dart';
@@ -102,10 +103,7 @@ class _ProfilePopupState extends State<ProfilePopup> {
 
   Widget _selectScreen() {
     if (_isLoading) {
-      return const SizedBox(
-        height: 200,
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return LoadingScreen();
     }
 
     if (_showAccountSettings) {
