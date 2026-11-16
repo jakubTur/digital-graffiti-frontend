@@ -89,45 +89,45 @@ class _FriendsListState extends State<FriendsList> {
   @override
   Widget build(BuildContext context) {
     return _isLoading
-        ? LoadingScreen()
-        : Container(
-            constraints: const BoxConstraints(minHeight: 200, maxHeight: 500),
+        ? const LoadingScreen()
+        : SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (invites.isNotEmpty) ...[
-                    Column(
-                      children: [
-                        Row(children: [PopupText('Invites'), Spacer()]),
-                        ...invites.map(
-                          (invite) => FriendCard(
-                            response: invite,
-                            onRefresh: _loadFriends,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                      ],
-                    ),
-                  ],
-                  PopupText('Friends'),
-                  if (friends.isNotEmpty)
-                    ...friends.map(
-                      (friend) =>
-                          FriendCard(response: friend, onRefresh: _loadFriends),
-                    )
-                  else ...[
-                    SizedBox(height: 10),
-                    Center(
-                      child: FormSecondaryText(
-                        'You have no friends :(\nGo out and make some!',
-                        color: Colors.grey,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (invites.isNotEmpty) ...[
+                  Column(
+                    children: [
+                      Row(
+                        children: [const PopupText('Invites'), const Spacer()],
                       ),
-                    ),
-                  ],
+                      ...invites.map(
+                        (invite) => FriendCard(
+                          response: invite,
+                          onRefresh: _loadFriends,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                    ],
+                  ),
                 ],
-              ),
+                const PopupText('Friends'),
+                if (friends.isNotEmpty)
+                  ...friends.map(
+                    (friend) =>
+                        FriendCard(response: friend, onRefresh: _loadFriends),
+                  )
+                else ...[
+                  const SizedBox(height: 10),
+                  Center(
+                    child: FormSecondaryText(
+                      'You have no friends :(\nGo out and make some!',
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ],
             ),
           );
   }

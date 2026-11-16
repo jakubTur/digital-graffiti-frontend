@@ -84,27 +84,25 @@ class MapBottomPopup extends StatelessWidget {
                     ],
                   ),
                 Expanded(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(
-                        left: 12.0,
-                        right: 12.0,
-                        bottom: 12.0,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24.0),
-                        border: Border.all(color: Colors.white38, width: 1),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black26, blurRadius: 12),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24.0),
-                        child: child,
-                      ),
+                  child: Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    margin: const EdgeInsets.only(
+                      left: 12.0,
+                      right: 12.0,
+                      bottom: 12.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24.0),
+                      border: Border.all(color: Colors.white38, width: 1),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black26, blurRadius: 12),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24.0),
+                      child: child,
                     ),
                   ),
                 ),
