@@ -75,6 +75,8 @@ class MapModel extends ChangeNotifier {
   /// Getter for posts
   UnmodifiableListView<Post> get posts => UnmodifiableListView(_posts);
 
+  bool get isFetchingPosts => _isFetchingPosts;
+
   Post? get postToView => _postToView;
 
   List<Drawing>? get drawingsOnPostToView => _drawingsOnPostToView;
@@ -121,17 +123,18 @@ class MapModel extends ChangeNotifier {
     if (_isFetchingPosts || _isFirstLocation) return;
 
     _isFetchingPosts = true;
+    notifyListeners();
     try {
       _posts = await _postsRepository.getPostsByRadius(
         _userLocation.latitude,
         _userLocation.longitude,
         postSearchRadius,
       );
-      notifyListeners();
     } catch (e) {
       debugPrint('Failed to fetch posts: $e');
     } finally {
       _isFetchingPosts = false;
+      notifyListeners();
     }
   }
 
@@ -168,7 +171,11 @@ class MapModel extends ChangeNotifier {
               _startPostPolling();
             } else {
               _animateUserLocation(coordinates);
-              moveMap(coordinates, 19.4, 0.0);
+              moveMap(
+                coordinates,
+                _mapController.camera.zoom,
+                _mapController.camera.rotation,
+              );
             }
 
             debugPrint(
@@ -201,7 +208,7 @@ class MapModel extends ChangeNotifier {
     );
 
     final controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 1200),
       vsync: vsync!,
     );
     _locationAnimationController = controller;
@@ -261,7 +268,7 @@ class MapModel extends ChangeNotifier {
     final rotationTween = Tween<double>(begin: camera.rotation, end: rotation);
 
     final controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 1200),
       vsync: vsync!,
     );
     _activeAnimationController = controller;
