@@ -1,10 +1,6 @@
-
-
-
-
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
+import 'package:go_router/go_router.dart';
 
 /// node that displays a drawing, all of its ancestors, and the post background in order from front to back.
 /// used in the post tree.
@@ -69,16 +65,17 @@ class DrawingViewNode extends StatelessWidget {
                   context.pushNamed(
                     '/profile',
                     pathParameters: {'nickname': drawing.username},
+                    queryParameters: {'fromPostView': 'true'},
                   );
                 },
-              child: Text(
-                    drawing.username,
-                    style: Theme.of(context).textTheme.labelLarge
-                        ?.copyWith(color: Colors.black, fontSize: textSize),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                child: Text(
+                  drawing.username,
+                  style: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: Colors.black, fontSize: textSize),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              )
             ),
           ),
           Container(
