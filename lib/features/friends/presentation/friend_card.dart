@@ -4,9 +4,10 @@ import 'package:frontend/features/auth/data/models/user_response.dart';
 import 'package:go_router/go_router.dart';
 
 class FriendCard extends StatelessWidget {
-  const FriendCard({required this.response, super.key});
+  const FriendCard({required this.response, this.onRefresh, super.key});
 
   final UserResponse response;
+  final VoidCallback? onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -19,11 +20,12 @@ class FriendCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          context.pushNamed(
+        onTap: () async {
+          await context.pushNamed(
             '/profile',
             pathParameters: {'nickname': response.nickname},
           );
+          onRefresh?.call();
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),

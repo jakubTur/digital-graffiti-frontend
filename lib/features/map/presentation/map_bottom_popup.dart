@@ -19,19 +19,18 @@ class MapBottomPopup extends StatelessWidget {
   final bool isFriendsOpen;
   final bool showTopButtons;
 
+  void _popToMap(BuildContext context) {
+    while (context.canPop()) {
+      context.pop();
+    }
+  }
+
   Future<void> _handleFriendsTap(BuildContext context) async {
     if (isFriendsOpen) {
-      if (context.canPop()) {
-        context.pop();
-      } else {
-        context.go('/map');
-      }
+      _popToMap(context);
     } else {
-      if (context.canPop()) {
-        context.pushReplacement('/friends');
-      } else {
-        context.go('/friends');
-      }
+      _popToMap(context);
+      context.push('/friends');
     }
   }
 
@@ -40,23 +39,10 @@ class MapBottomPopup extends StatelessWidget {
     if (!context.mounted || userNickname == null) return;
 
     if (!isFriendsOpen && currentNickname == userNickname) {
-      if (context.canPop()) {
-        context.pop();
-      } else {
-        context.go('/map');
-      }
+      _popToMap(context);
     } else {
-      if (context.canPop()) {
-        context.pushReplacementNamed(
-          '/profile',
-          pathParameters: {'nickname': userNickname},
-        );
-      } else {
-        context.pushNamed(
-          '/profile',
-          pathParameters: {'nickname': userNickname},
-        );
-      }
+      _popToMap(context);
+      context.pushNamed('/profile', pathParameters: {'nickname': userNickname});
     }
   }
 

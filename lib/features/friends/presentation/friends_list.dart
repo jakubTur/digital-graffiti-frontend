@@ -50,7 +50,7 @@ class _FriendsListState extends State<FriendsList> {
       List<RelationResponse> friendRelations = await widget.relationRepository
           .getRelations(userId, RelationStatus.accepted);
 
-      friends = await Future.wait(
+      List<UserResponse> loadedFriends = await Future.wait(
         friendRelations.map(
           (relation) => widget.userRepository.getUserByNickname(
             relation.senderNickname == userNickname
@@ -69,16 +69,20 @@ class _FriendsListState extends State<FriendsList> {
           .where((request) => request.senderNickname != userNickname)
           .toList();
 
-      invites = await Future.wait(
+      List<UserResponse> loadedInvites = await Future.wait(
         receivedInvites.map(
           (relation) =>
               widget.userRepository.getUserByNickname(relation.senderNickname),
         ),
       );
 
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          friends = loadedFriends;
+          invites = loadedInvites;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -98,7 +102,10 @@ class _FriendsListState extends State<FriendsList> {
                       children: [
                         Row(children: [PopupText('Invites'), Spacer()]),
                         ...invites.map(
-                          (invite) => FriendCard(response: invite),
+                          (invite) => FriendCard(
+                            response: invite,
+                            onRefresh: _loadFriends,
+                          ),
                         ),
                         SizedBox(height: 10),
                       ],
@@ -106,7 +113,10 @@ class _FriendsListState extends State<FriendsList> {
                   ],
                   PopupText('Friends'),
                   if (friends.isNotEmpty)
-                    ...friends.map((friend) => FriendCard(response: friend))
+                    ...friends.map(
+                      (friend) =>
+                          FriendCard(response: friend, onRefresh: _loadFriends),
+                    )
                   else ...[
                     SizedBox(height: 10),
                     Center(
