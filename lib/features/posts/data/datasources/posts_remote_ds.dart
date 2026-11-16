@@ -11,7 +11,9 @@ class PostsRemoteDataSource {
   Future<int> postPost(PostRequest post, String? imagePath) async {
     final response = await api.post('/api/posts/create', body: post.toJson());
     if (response is! Map || response['id'] is! num) {
-      throw const FormatException('Create post response does not contain a valid id');
+      throw const FormatException(
+        'Create post response does not contain a valid id',
+      );
     }
     int postId = (response['id'] as num).toInt();
     if (imagePath != null) {
@@ -24,25 +26,44 @@ class PostsRemoteDataSource {
     }
     return postId;
   }
+
   Future<List<PostResponse>> getPosts() async {
     final response = await api.get('/api/posts/all');
     return parsePosts(response);
   }
-  Future<List<PostResponse>> getPostsByRadius ({required double latitude, required double longitude, required double radius}) async {
+
+  Future<List<PostResponse>> getPostsByRadius({
+    required double latitude,
+    required double longitude,
+    required double radius,
+  }) async {
     final response = await api.get(
       '/api/posts/nearby',
       queryParameters: {
         'latitude': latitude.toString(),
         'longitude': longitude.toString(),
-        'radius': radius.toString()
+        'radius': radius.toString(),
       },
     );
     return parsePosts(response);
   }
+
+  Future<List<PostResponse>> getPostsByNickname(String nickname) async {
+    ///TODO: typo copied from backend
+    final response = await api.get('/api/posts/nickname/$nickname');
+    return parsePosts(response);
+  }
+
   Future<void> postDrawing(DrawingRequest drawing, String imagePath) async {
-    final response = await api.post('/api/posts/drawings/add', body: drawing.toJson(), expectedStatusCode: 200);
+    final response = await api.post(
+      '/api/posts/drawings/add',
+      body: drawing.toJson(),
+      expectedStatusCode: 200,
+    );
     if (response is! Map || response['id'] is! num) {
-      throw const FormatException('Create drawing response does not contain a valid id');
+      throw const FormatException(
+        'Create drawing response does not contain a valid id',
+      );
     }
     int drawingId = (response['id'] as num).toInt();
     await api.uploadFile(
@@ -52,26 +73,33 @@ class PostsRemoteDataSource {
       expectedStatusCode: 200,
     );
   }
+
   Future<List<DrawingResponse>> getDrawingsByPostId(int postId) async {
     final response = await api.get('/api/posts/drawings/$postId');
     return parseDrawings(response);
   }
+
   List<PostResponse> parsePosts(dynamic response) {
     if (response is! List) {
       throw const FormatException('Get posts response is not a list');
     }
-    return response.map((item) => PostResponse.fromJson(
-          Map<String, dynamic>.from(item as Map),
-        ),
-    ).toList();
+    return response
+        .map(
+          (item) =>
+              PostResponse.fromJson(Map<String, dynamic>.from(item as Map)),
+        )
+        .toList();
   }
+
   List<DrawingResponse> parseDrawings(dynamic response) {
     if (response is! List) {
       throw const FormatException('Get drawings response is not a list');
     }
-    return response.map((item) => DrawingResponse.fromJson(
-          Map<String, dynamic>.from(item as Map),
-        ),
-    ).toList();
+    return response
+        .map(
+          (item) =>
+              DrawingResponse.fromJson(Map<String, dynamic>.from(item as Map)),
+        )
+        .toList();
   }
 }
