@@ -8,6 +8,7 @@ import 'package:frontend/features/friends/data/models/relation_response.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
 import 'package:frontend/features/friends/presentation/friend_card.dart';
 import 'package:frontend/features/profile/data/relation_status.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../auth/data/models/user_response.dart';
 
@@ -96,6 +97,22 @@ class _FriendsListState extends State<FriendsList> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/map');
+                        }
+                      },
+                      iconSize: 40,
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    ),
+                  ],
+                ),
                 if (invites.isNotEmpty) ...[
                   Column(
                     children: [

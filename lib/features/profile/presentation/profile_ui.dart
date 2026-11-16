@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/features/friends/data/models/relation_nickname_request.dart';
 import 'package:frontend/features/friends/data/models/relation_response.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
+import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/storage/auth_storage.dart';
@@ -23,6 +24,8 @@ class ProfileUi extends StatefulWidget {
 
   final RelationRepository _relationRepository;
 
+  final PostsRepository _postsRepository;
+
   final String _nickname;
   final String _bio;
   final String? _imageUrl;
@@ -37,6 +40,7 @@ class ProfileUi extends StatefulWidget {
     this._imageUrl,
     super.key,
     required this._relationRepository,
+    required this._postsRepository,
   });
 
   @override
@@ -146,16 +150,18 @@ class _ProfileUiState extends State<ProfileUi> {
           Row(
             children: [
               if (status != RelationStatus.self) ...[
-                IconButton(
-                  onPressed: _reportUser,
-                  iconSize: 60,
-                  icon: const Icon(Icons.report, color: Colors.black),
-                ),
-                IconButton(
-                  onPressed: _blockUser,
-                  iconSize: 60,
-                  icon: const Icon(Icons.block, color: Colors.black),
-                ),
+                // TODO: uncomment when reporting implemented
+                // IconButton(
+                //   onPressed: _reportUser,
+                //   iconSize: 40,
+                //   icon: const Icon(Icons.report, color: Colors.black),
+                // ),
+                // TODO: uncomment when blocking implemented
+                // IconButton(
+                //   onPressed: _blockUser,
+                //   iconSize: 40,
+                //   icon: const Icon(Icons.block, color: Colors.black),
+                // ),
               ],
               const Spacer(),
               IconButton(
@@ -166,7 +172,7 @@ class _ProfileUiState extends State<ProfileUi> {
                     context.go('/map');
                   }
                 },
-                iconSize: 60,
+                iconSize: 40,
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
               ),
             ],
@@ -188,14 +194,29 @@ class _ProfileUiState extends State<ProfileUi> {
           ),
           const SizedBox(height: 12),
           if (status != RelationStatus.blocked) ...[
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                widget._bio,
-                style: const TextStyle(fontSize: 20, color: Colors.black87),
-                textAlign: TextAlign.center,
+            if (widget._bio.isNotEmpty) ...[
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  widget._bio,
+                  style: const TextStyle(fontSize: 20, color: Colors.black87),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
+            ] else ...[
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'This user has no bio',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             ...[
               ...switch (status) {
@@ -293,11 +314,32 @@ class _ProfileUiState extends State<ProfileUi> {
               },
             ],
 
-            const SizedBox(height: 24),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: PopupText('Posts'),
-            ),
+            if (status == RelationStatus.accepted) ...[
+              const SizedBox(height: 24),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: PopupText('Posts'),
+
+                /// TODO: if no posts: "This user has no posts yet"
+                /// TODO: else: list of posts
+              ),
+            ] else ...[
+              const SizedBox(height: 60),
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  status == RelationStatus.self
+                      ? "You haven't created any posts yet"
+                      : 'Become friends with this user to view the location of their posts!',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
 
             //TODO: List of posts
           ] else ...[
