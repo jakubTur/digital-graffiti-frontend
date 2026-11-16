@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/storage/auth_storage.dart';
-import 'package:frontend/core/widgets/form_main_text.dart';
+import 'package:frontend/core/widgets/form_secondary_text.dart';
 import 'package:frontend/core/widgets/loading_screen.dart';
+import 'package:frontend/core/widgets/popup_text.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/friends/data/models/relation_response.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
@@ -44,6 +45,8 @@ class _FriendsListState extends State<FriendsList> {
     int? userId = await widget.authStorage.readId();
     String? userNickname = await widget.authStorage.readNickname();
     if (userId != null && userNickname != null) {
+      /// get friends
+
       List<RelationResponse> friendRelations = await widget.relationRepository
           .getRelations(userId, RelationStatus.accepted);
 
@@ -56,6 +59,8 @@ class _FriendsListState extends State<FriendsList> {
           ),
         ),
       );
+
+      /// get pending invites from others
 
       List<RelationResponse> pending = await widget.relationRepository
           .getRelations(userId, RelationStatus.pending);
@@ -70,6 +75,7 @@ class _FriendsListState extends State<FriendsList> {
               widget.userRepository.getUserByNickname(relation.senderNickname),
         ),
       );
+
       setState(() {
         _isLoading = false;
       });
@@ -85,20 +91,31 @@ class _FriendsListState extends State<FriendsList> {
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (invites.isNotEmpty) ...[
                     Column(
                       children: [
-                        FormMainText('Invites'),
+                        Row(children: [PopupText('Invites'), Spacer()]),
                         ...invites.map(
                           (invite) => FriendCard(response: invite),
                         ),
+                        SizedBox(height: 10),
                       ],
                     ),
                   ],
-                  FormMainText('Friends'),
-                  ...friends.map((friend) => FriendCard(response: friend)),
+                  PopupText('Friends'),
+                  if (friends.isNotEmpty)
+                    ...friends.map((friend) => FriendCard(response: friend))
+                  else ...[
+                    SizedBox(height: 10),
+                    Center(
+                      child: FormSecondaryText(
+                        'You have no friends :(\nGo out and make some!',
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/storage/auth_storage.dart';
 import '../../../core/widgets/custom_button.dart';
+import '../../../core/widgets/popup_text.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../data/relation_initiator.dart';
 import '../data/relation_status.dart';
@@ -295,15 +296,7 @@ class _ProfileUiState extends State<ProfileUi> {
             const SizedBox(height: 24),
             const Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Posts',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: PopupText('Posts'),
             ),
 
             //TODO: List of posts

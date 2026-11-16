@@ -101,6 +101,7 @@ class MapBottomPopup extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
+                      width: double.infinity,
                       margin: const EdgeInsets.only(
                         left: 12.0,
                         right: 12.0,
