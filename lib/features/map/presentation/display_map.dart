@@ -90,10 +90,10 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
   }
 
   /// Calculates the minZoom level so zooming out does not exceed the database post fetch radius.
-  double _calculateMinZoom(LatLng userLocation, Size size) {
+  double _calculateMinZoom(LatLng focusLocation, Size size) {
     if (size.width <= 0 || size.height <= 0) return 18.0;
 
-    final latRad = userLocation.latitude * (math.pi / 180.0);
+    final latRad = focusLocation.latitude * (math.pi / 180.0);
     final latCos = math.cos(latRad);
     final validLatCos = latCos > 0.01 ? latCos : 1.0;
     const earthCircumference = 40075016.686;
@@ -112,7 +112,8 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
 
     return Consumer<MapModel>(
       builder: (context, map, child) {
-        final minZoom = _calculateMinZoom(map.userLocation, size);
+        final focusLocation = map.currentFocusLocation;
+        final minZoom = _calculateMinZoom(focusLocation, size);
 
         if (map.isFetchingPosts != _wasFetching) {
           _wasFetching = map.isFetchingPosts;
@@ -151,10 +152,11 @@ class _DisplayMapState extends State<DisplayMap> with TickerProviderStateMixin {
                     ~InteractiveFlag.pinchMove,
               ),
               onPositionChanged: (camera, hasGesture) {
-                if (camera.center.latitude != map.userLocation.latitude ||
-                    camera.center.longitude != map.userLocation.longitude) {
+                final currentTarget = map.currentFocusLocation;
+                if (camera.center.latitude != currentTarget.latitude ||
+                    camera.center.longitude != currentTarget.longitude) {
                   mapModel.mapController.moveAndRotate(
-                    map.userLocation,
+                    currentTarget,
                     camera.zoom,
                     camera.rotation,
                   );

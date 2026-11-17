@@ -40,25 +40,67 @@ class MapUi extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Consumer<MapModel>(
                   builder: (context, map, child) {
-                    return MapUiButton(
-                      onTap: () => _showFriendsList(context, map),
-                      icon: Icons.people,
-                      heroTag: 'friends_button',
+                    final nickname = map.lastViewedProfileNickname;
+                    if (nickname == null) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 12.0),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                        ),
+                        onPressed: () {
+                          map.clearProfileReturn();
+                          context.pushNamed(
+                            '/profile',
+                            pathParameters: {'nickname': nickname},
+                          );
+                        },
+                        icon: const Icon(Icons.arrow_back, size: 20),
+                        label: Text(
+                          'Profile: $nickname',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ),
-                Consumer<MapModel>(
-                  builder: (context, map, child) {
-                    return MapUiButton(
-                      onTap: () => _showProfile(context, map),
-                      icon: Icons.person,
-                      heroTag: 'profile_button',
-                    );
-                  },
+                Row(
+                  children: [
+                    Consumer<MapModel>(
+                      builder: (context, map, child) {
+                        return MapUiButton(
+                          onTap: () => _showFriendsList(context, map),
+                          icon: Icons.people,
+                          heroTag: 'friends_button',
+                        );
+                      },
+                    ),
+                    Consumer<MapModel>(
+                      builder: (context, map, child) {
+                        return MapUiButton(
+                          onTap: () => _showProfile(context, map),
+                          icon: Icons.person,
+                          heroTag: 'profile_button',
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -75,7 +117,7 @@ class MapUi extends StatelessWidget {
             Consumer<MapModel>(
               builder: (context, map, child) {
                 return MapUiButton(
-                  onTap: () => map.moveMap(map.userLocation, 19.4, 0.0),
+                  onTap: () => map.returnToUserLocation(),
                   icon: Icons.my_location,
                   heroTag: 'location_button',
                 );
