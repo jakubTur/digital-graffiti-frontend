@@ -3,11 +3,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/features/friends/data/models/relation_nickname_request.dart';
 import 'package:frontend/features/friends/data/models/relation_response.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
+import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:frontend/features/posts/presentation/post_list.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/storage/auth_storage.dart';
 import '../../../core/widgets/custom_button.dart';
@@ -416,7 +418,18 @@ class _ProfileUiState extends State<ProfileUi> {
                 PostList(
                   posts: _posts!,
                   userPosition: _userPosition,
-                  onPostTap: (post) {},
+                  onPostTap: (post) async {
+                    try {
+                      final mapModel = context.read<MapModel>();
+                      await mapModel.focusOnPostFromProfile(
+                        post,
+                        widget._nickname,
+                      );
+                      if (context.mounted) {
+                        context.go('/map');
+                      }
+                    } catch (_) {}
+                  },
                 ),
               ],
             ] else ...[

@@ -7,7 +7,7 @@ class ScreenHeader extends StatelessWidget {
     this.title,
     this.onBackPressed,
     this.titleStyle,
-    this.iconSize = 60.0,
+    this.iconSize = 40.0,
   });
 
   final String? title;
@@ -26,7 +26,7 @@ class ScreenHeader extends StatelessWidget {
                 titleStyle ??
                 const TextStyle(
                   color: Colors.black87,
-                  fontSize: 30,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
           ),
