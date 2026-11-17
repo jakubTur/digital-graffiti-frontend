@@ -49,7 +49,6 @@ class PostsRemoteDataSource {
   }
 
   Future<List<PostResponse>> getPostsByNickname(String nickname) async {
-    ///TODO: typo copied from backend
     final response = await api.get('/api/posts/nickname/$nickname');
     return parsePosts(response);
   }

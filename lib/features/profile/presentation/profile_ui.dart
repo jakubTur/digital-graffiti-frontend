@@ -157,6 +157,10 @@ class _ProfileUiState extends State<ProfileUi> {
   Future<void> _sendFriendRequest() async {
     final userNickname = await _getUserNickname();
     if (userNickname == null) return;
+    setState(() {
+      status = RelationStatus.pending;
+      initiator = RelationInitiator.self;
+    });
     RelationNicknameRequest request = RelationNicknameRequest(
       senderNickname: userNickname,
       receiverNickname: widget._nickname,
@@ -169,11 +173,6 @@ class _ProfileUiState extends State<ProfileUi> {
     } else {
       await widget._relationRepository.updateRelation(request);
     }
-    if (!mounted) return;
-    setState(() {
-      status = RelationStatus.pending;
-      initiator = RelationInitiator.self;
-    });
   }
 
   Future<void> _declineFriendRequest() async {

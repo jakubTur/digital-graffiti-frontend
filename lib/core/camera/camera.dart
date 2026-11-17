@@ -43,7 +43,11 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _initCamera(int index) async {
     if (cameras.isEmpty) return;
     await cameraController?.dispose();
-    final controller = CameraController(cameras[index], ResolutionPreset.high);
+    final controller = CameraController(
+      cameras[index],
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
     await controller.initialize();
     if (mounted) {
       setState(() {
