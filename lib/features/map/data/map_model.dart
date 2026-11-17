@@ -19,6 +19,9 @@ class MapModel extends ChangeNotifier {
   /// How far from the user posts are fetched, in meters.
   static const double postSearchRadius = 50;
 
+  /// Maximum distance (in meters) from which a user can open/view a post.
+  static const double maxPostViewDistance = 10.0;
+
   /// How often nearby posts are fetched.
   static const Duration postPollInterval = Duration(seconds: 10);
 
@@ -36,6 +39,13 @@ class MapModel extends ChangeNotifier {
   /// User location to be displayed on the map.
   LatLng _userLocation = LatLng(0, 0);
   bool _isFirstLocation = true;
+
+  /// Focused location when focused on a post (or null if tracking user).
+  LatLng? _focusedLocation;
+  bool _isTrackingUserLocation = true;
+
+  /// Nickname of the profile user whose post was selected, for returning to profile.
+  String? _lastViewedProfileNickname;
 
   List<Post> _posts = const [];
 
@@ -72,8 +82,19 @@ class MapModel extends ChangeNotifier {
   /// Getter for user location
   LatLng get userLocation => _userLocation;
 
+  /// Getter for current camera focus location (either focused post or user location)
+  LatLng get currentFocusLocation => _focusedLocation ?? _userLocation;
+
+  /// Getter for whether camera is currently tracking user location
+  bool get isTrackingUserLocation => _isTrackingUserLocation;
+
+  /// Getter for nickname of the profile to return to
+  String? get lastViewedProfileNickname => _lastViewedProfileNickname;
+
   /// Getter for posts
   UnmodifiableListView<Post> get posts => UnmodifiableListView(_posts);
+
+  bool get isFetchingPosts => _isFetchingPosts;
 
   Post? get postToView => _postToView;
 
@@ -82,11 +103,25 @@ class MapModel extends ChangeNotifier {
   /// getter for username.
   String? get currentUsername => _currentUsername;
 
+  /// Checks if user is within 10 meters of the given post
+  bool isPostWithinViewDistance(Post post) {
+    final distance = Geolocator.distanceBetween(
+      _userLocation.latitude,
+      _userLocation.longitude,
+      post.latitude,
+      post.longitude,
+    );
+    return distance <= maxPostViewDistance;
+  }
+
   /// post viewing handler.
-  /// slightly messy coupling (pedantically this should be in the ui), but it works.
   void requestPostView(Post post) async {
     if (post.id == null) {
       log("Can't view post because its ID is null!");
+      return;
+    }
+    if (!isPostWithinViewDistance(post)) {
+      debugPrint('Cannot open post ${post.id}: user is farther than 10 meters');
       return;
     }
     List<Drawing> drawings;
@@ -98,16 +133,57 @@ class MapModel extends ChangeNotifier {
       drawings = const [];
     }
     final username = await _authStorage.readNickname();
-    // set both together, only after the fetch, so the post view
-    // can never open with drawings belonging to a different post.
     _drawingsOnPostToView = drawings;
     _currentUsername = username;
     _postToView = post;
     notifyListeners();
   }
 
+  /// Called when selecting a post from a profile.
+  /// Moves map to post location, fetches posts around it, and sets return profile nickname.
+  Future<void> focusOnPostFromProfile(Post post, String profileNickname) async {
+    _lastViewedProfileNickname = profileNickname;
+    _isTrackingUserLocation = false;
+    _focusedLocation = LatLng(post.latitude, post.longitude);
+
+    recenterMap(_focusedLocation!, 19.4, 0.0);
+
+    _isFetchingPosts = true;
+    notifyListeners();
+    try {
+      _posts = await _postsRepository.getPostsByRadius(
+        post.latitude,
+        post.longitude,
+        postSearchRadius,
+      );
+    } catch (e) {
+      debugPrint('Failed to fetch posts around post location: $e');
+    } finally {
+      _isFetchingPosts = false;
+      notifyListeners();
+    }
+
+    if (isPostWithinViewDistance(post)) {
+      requestPostView(post);
+    }
+  }
+
+  /// Returns camera focus back to user location and resumes tracking user movement
+  void returnToUserLocation() {
+    _isTrackingUserLocation = true;
+    _focusedLocation = null;
+    _lastViewedProfileNickname = null;
+    recenterMap(_userLocation, 19.4, 0.0);
+    unawaited(refreshPosts());
+  }
+
+  /// Clears profile return shortcut
+  void clearProfileReturn() {
+    _lastViewedProfileNickname = null;
+    notifyListeners();
+  }
+
   /// post viewing callback.
-  /// slightly messy coupling (pedantically this should be in the ui), but it works.
   void clearPostToView() {
     if (_postToView == null) return;
     _postToView = null;
@@ -115,23 +191,24 @@ class MapModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Replaces the stored posts with those currently near the user.
-  /// On failure the previous posts stay visible until the next successful fetch.
+  /// Replaces stored posts with those currently near currentFocusLocation.
   Future<void> refreshPosts() async {
     if (_isFetchingPosts || _isFirstLocation) return;
 
     _isFetchingPosts = true;
+    notifyListeners();
     try {
+      final target = currentFocusLocation;
       _posts = await _postsRepository.getPostsByRadius(
-        _userLocation.latitude,
-        _userLocation.longitude,
+        target.latitude,
+        target.longitude,
         postSearchRadius,
       );
-      notifyListeners();
     } catch (e) {
       debugPrint('Failed to fetch posts: $e');
     } finally {
       _isFetchingPosts = false;
+      notifyListeners();
     }
   }
 
@@ -145,7 +222,6 @@ class MapModel extends ChangeNotifier {
 
   /// Call to start updating the user's location
   void startUserLocationUpdates() async {
-    // Avoid creating duplicate listeners
     if (_positionSubscription != null) {
       return;
     }
@@ -168,7 +244,13 @@ class MapModel extends ChangeNotifier {
               _startPostPolling();
             } else {
               _animateUserLocation(coordinates);
-              moveMap(coordinates, 19.4, 0.0);
+              if (_isTrackingUserLocation) {
+                moveMap(
+                  coordinates,
+                  _mapController.camera.zoom,
+                  _mapController.camera.rotation,
+                );
+              }
             }
 
             debugPrint(
@@ -201,7 +283,7 @@ class MapModel extends ChangeNotifier {
     );
 
     final controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 1200),
       vsync: vsync!,
     );
     _locationAnimationController = controller;
@@ -261,7 +343,7 @@ class MapModel extends ChangeNotifier {
     final rotationTween = Tween<double>(begin: camera.rotation, end: rotation);
 
     final controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 1200),
       vsync: vsync!,
     );
     _activeAnimationController = controller;
@@ -298,7 +380,6 @@ class MapModel extends ChangeNotifier {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
@@ -325,7 +406,6 @@ class MapModel extends ChangeNotifier {
     _positionSubscription = null;
   }
 
-  /// Stream is cancelled when MapModel is disposed
   @override
   void notifyListeners() {
     if (!_isDisposed) super.notifyListeners();
