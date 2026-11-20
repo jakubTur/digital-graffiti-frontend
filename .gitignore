@@ -49,4 +49,4 @@ app.*.map.json
 .widget_preview/
 
 # Config files
-lib/app/config/
+/lib/app/config/
