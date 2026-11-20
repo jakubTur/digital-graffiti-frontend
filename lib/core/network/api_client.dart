@@ -69,12 +69,12 @@ class ApiClient {
           throw ApiException(response.statusCode, text);
         }
         final http.Response refreshResponse = await _client.post(
-          Uri.parse('${Config.baseUrl}/auth/refresh'),
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Accept': 'application/json'
-          },
-          body: jsonEncode({'refreshToken': refreshToken})
+            Uri.parse('${Config.baseUrl}/auth/refresh'),
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Accept': 'application/json'
+            },
+            body: jsonEncode({'refreshToken': refreshToken})
         );
         debugPrint('refresh response: ${refreshResponse.statusCode} ${refreshResponse.body}');
         if (refreshResponse.statusCode != 200) {
