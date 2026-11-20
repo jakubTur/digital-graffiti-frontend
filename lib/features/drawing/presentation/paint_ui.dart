@@ -129,13 +129,26 @@ class _PaintUiState extends State<PaintUi> {
 
   Widget _buildBottomBar() => Material(
     elevation: 8,
+    color: Colors.deepPurple,
     child: SafeArea(
       top: false,
       child: IconButtonTheme(
         data: IconButtonThemeData(
-          style: IconButton.styleFrom(
-            iconSize: _iconSize,
+          style: ButtonStyle(
+            iconSize: const WidgetStatePropertyAll(_iconSize),
             visualDensity: VisualDensity.compact,
+            foregroundColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.disabled)
+                  ? Colors.white38
+                  : Colors.white,
+            ),
+            // highlight for the selected tool / open menu
+            backgroundColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.selected)
+                  ? Colors.white24
+                  : null,
+            ),
+            overlayColor: const WidgetStatePropertyAll(Colors.white12),
           ),
         ),
         child: Row(
@@ -167,7 +180,7 @@ class _PaintUiState extends State<PaintUi> {
             _buildMenuButton(
               _Menu.width,
               'Width',
-              _Dot(color: Colors.black87, diameter: _widthDotDiameter),
+              _Dot(color: Colors.white, diameter: _widthDotDiameter),
             ),
             const Spacer(),
             IconButton(
@@ -212,7 +225,7 @@ class _Dot extends StatelessWidget {
     decoration: BoxDecoration(
       color: color,
       shape: BoxShape.circle,
-      border: Border.all(color: Colors.black26),
+      border: Border.all(color: Colors.white70),
     ),
   );
 }

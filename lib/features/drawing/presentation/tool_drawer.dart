@@ -17,6 +17,7 @@ class ToolDrawer extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: Material(
         elevation: 4,
+        color: Colors.deepPurple.shade50,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         child: Container(
           width: double.infinity,
