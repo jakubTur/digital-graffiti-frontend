@@ -49,4 +49,4 @@ app.*.map.json
 .widget_preview/
 
 # Config files
-**/app/config/config.dart
+lib/app/config/
