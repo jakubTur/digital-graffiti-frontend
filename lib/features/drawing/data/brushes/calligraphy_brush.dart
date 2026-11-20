@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/core/icons/phosphor_icons.dart';
 import 'package:frontend/features/drawing/data/brushes/variable_width_brush.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 
@@ -14,7 +15,7 @@ class CalligraphyBrush extends VariableWidthBrush {
   String get name => 'Calligraphy';
 
   @override
-  IconData get icon => Icons.history_edu;
+  IconData get icon => PhosphorIconsRegular.penNib;
 
   @override
   double segmentWidth(DrawnLine line, List<Offset> points, int index) {

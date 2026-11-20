@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/icons/phosphor_icons.dart';
 import 'package:frontend/features/drawing/data/brushes/path_brush.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 
@@ -9,7 +10,7 @@ class AirBrush extends PathBrush {
   String get name => 'Airbrush';
 
   @override
-  IconData get icon => Icons.blur_on;
+  IconData get icon => PhosphorIconsRegular.gradient;
 
   @override
   Paint createPaint(DrawnLine line) => super.createPaint(line)

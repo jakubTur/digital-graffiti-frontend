@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/icons/phosphor_icons.dart';
 import 'package:frontend/features/drawing/data/brushes/path_brush.dart';
 
 class RoundBrush extends PathBrush {
@@ -8,5 +9,5 @@ class RoundBrush extends PathBrush {
   String get name => 'Brush';
 
   @override
-  IconData get icon => Icons.brush;
+  IconData get icon => PhosphorIconsRegular.paintBrush;
 }

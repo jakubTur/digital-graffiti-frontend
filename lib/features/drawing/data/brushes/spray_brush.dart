@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' show PointMode;
 
 import 'package:flutter/material.dart';
+import 'package:frontend/core/icons/phosphor_icons.dart';
 import 'package:frontend/features/drawing/data/brushes/brush.dart';
 import 'package:frontend/features/drawing/data/brushes/polyline.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
@@ -15,7 +16,7 @@ class SprayBrush extends Brush {
   String get name => 'Spray paint';
 
   @override
-  IconData get icon => Icons.grain;
+  IconData get icon => PhosphorIconsRegular.sprayBottle;
 
   @override
   void paint(Canvas canvas, DrawnLine line) {
