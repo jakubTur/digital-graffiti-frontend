@@ -49,9 +49,22 @@ class ApiClient {
     }
     final text = utf8.decode(response.bodyBytes);
     debugPrint('-> ${response.statusCode} $text');
+    final data = jsonDecode(text);
+    final code = data is Map<String, dynamic> ? data['code'] : null;
+
+    debugPrint(
+      'refresh check: code=$code refreshed=$refreshed '
+          'provider=${refreshTokenProvider != null}',
+    );
+
+    final refreshToken = await refreshTokenProvider?.call();
+    debugPrint('refresh token present: ${refreshToken != null}');
     if (response.statusCode != expectedStatusCode) {
-      if (response.statusCode == 401 && !refreshed && refreshTokenProvider != null) {
+      final code = jsonDecode(text) is Map<String, dynamic> ? jsonDecode(text)['code'] : null;
+      if (response.statusCode == 401 && code != null && code == 'ACCESS_TOKEN_EXPIRED' && !refreshed && refreshTokenProvider != null) {
+        debugPrint('refresh ENTERED');
         final refreshToken = await refreshTokenProvider?.call();
+        debugPrint('refresh token present: $refreshToken');
         if (refreshToken == null) {
           throw ApiException(response.statusCode, text);
         }
@@ -63,13 +76,16 @@ class ApiClient {
           },
           body: jsonEncode({'refreshToken': refreshToken})
         );
+        debugPrint('refresh response: ${refreshResponse.statusCode} ${refreshResponse.body}');
         if (refreshResponse.statusCode != 200) {
           throw ApiException(refreshResponse.statusCode, refreshResponse.body);
         }
         final refreshData = jsonDecode(refreshResponse.body);
         final accessToken = refreshData['accessToken'];
         final newRefreshToken = refreshData['refreshToken'];
+        debugPrint('new tokens: $accessToken $newRefreshToken');
         if (updateTokens != null) {
+          debugPrint('update tokens');
           await updateTokens?.call(accessToken, newRefreshToken);
         }
         return send(method, path, queryParameters: queryParameters, body: body, expectedStatusCode: expectedStatusCode, refreshed: true);
