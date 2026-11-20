@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/icons/phosphor_icons.dart';
 import 'package:frontend/features/drawing/data/brush_settings.dart';
 import 'package:frontend/features/drawing/data/brushes/brush.dart';
 import 'package:frontend/features/drawing/presentation/brush_picker.dart';
@@ -107,7 +108,10 @@ class _PaintUiState extends State<PaintUi> {
             child: IconButton(
               tooltip: 'Back',
               iconSize: 40,
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              icon: const Icon(
+                PhosphorIconsRegular.arrowLeft,
+                color: Colors.black,
+              ),
               onPressed: () {
                 if (context.canPop()) {
                   context.pop();
@@ -121,7 +125,10 @@ class _PaintUiState extends State<PaintUi> {
         alignment: Alignment.bottomCenter,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [ToolDrawer(child: _drawerContent), _buildBottomBar()],
+          children: [
+            ToolDrawer(child: _drawerContent),
+            _buildBottomBar(),
+          ],
         ),
       ),
     ],
@@ -144,9 +151,8 @@ class _PaintUiState extends State<PaintUi> {
             ),
             // highlight for the selected tool / open menu
             backgroundColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? Colors.white24
-                  : null,
+              (states) =>
+                  states.contains(WidgetState.selected) ? Colors.white24 : null,
             ),
             overlayColor: const WidgetStatePropertyAll(Colors.white12),
           ),
@@ -155,19 +161,19 @@ class _PaintUiState extends State<PaintUi> {
           children: [
             IconButton(
               tooltip: 'Undo',
-              icon: const Icon(Icons.undo),
+              icon: const Icon(PhosphorIconsRegular.arrowCounterClockwise),
               onPressed: widget.canUndo ? widget.onUndo : null,
             ),
             IconButton(
               tooltip: 'Clear canvas',
-              icon: const Icon(Icons.delete_outline),
+              icon: const Icon(PhosphorIconsRegular.trash),
               onPressed: widget.hasStrokes ? widget.onClear : null,
             ),
             const Spacer(),
             _buildMenuButton(_Menu.brush, 'Brush', Icon(widget.brush.icon)),
             IconButton(
               tooltip: 'Eraser',
-              icon: const Icon(Icons.format_color_reset),
+              icon: const Icon(PhosphorIconsRegular.eraser),
               isSelected: widget.isErasing,
               onPressed: () => widget.onErasingChanged(!widget.isErasing),
             ),
@@ -185,7 +191,7 @@ class _PaintUiState extends State<PaintUi> {
             const Spacer(),
             IconButton(
               tooltip: 'Done',
-              icon: const Icon(Icons.done),
+              icon: const Icon(PhosphorIconsRegular.check),
               onPressed: widget.isExporting ? null : widget.onDone,
             ),
           ],

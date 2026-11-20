@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/icons/phosphor_icons.dart';
 import 'package:frontend/features/drawing/presentation/custom_color_dialog.dart';
 
 /// color palette.
@@ -24,8 +25,7 @@ class ColorPalette extends StatelessWidget {
     required this.onColorSelected,
   });
 
-  bool _isSelected(Color color) =>
-      color.toARGB32() == selectedColor.toARGB32();
+  bool _isSelected(Color color) => color.toARGB32() == selectedColor.toARGB32();
 
   bool get _isCustomColor => !presetColors.any(_isSelected);
 
@@ -49,7 +49,7 @@ class ColorPalette extends StatelessWidget {
           color: _isCustomColor ? selectedColor : Colors.grey.shade300,
           isSelected: _isCustomColor,
           onTap: () => _pickCustomColor(context),
-          child: const Icon(Icons.add, color: Colors.black54),
+          child: const Icon(PhosphorIconsRegular.plus, color: Colors.black54),
         ),
       ],
     ),
