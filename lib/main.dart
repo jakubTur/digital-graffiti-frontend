@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,19 +12,19 @@ import 'package:frontend/features/friends/data/datasources/relations_remote_ds.d
 import 'package:frontend/features/friends/data/repositories/relation_repository_impl.dart';
 import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
 import 'package:frontend/features/friends/presentation/friends_popup.dart';
+import 'package:frontend/features/map/data/map_model.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
 import 'package:frontend/features/notifications/data/datasources/notifications_remote_data_source.dart';
 import 'package:frontend/features/notifications/data/services/push_notification_service.dart';
-import 'package:frontend/features/profile/data/relation_status.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
 import 'package:frontend/features/profile/presentation/settings/delete_account_form.dart';
 import 'package:frontend/features/profile/presentation/settings/logout_form.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/network/api_client.dart';
 import 'core/storage/auth_storage.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
@@ -102,18 +103,79 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) =>
-            LoginUi(repo: userRepository, authStorage: authStorage, notificationService: pushNotificationService),
-      ),
-      GoRoute(
-        path: '/map',
-        builder: (context, state) => MapScreen(
-          postsRepository: postsRepository,
+        builder: (context, state) => LoginUi(
+          repo: userRepository,
           authStorage: authStorage,
-          postCreationFlow: PostCreationFlow(
-            PostPublisher(postsRepository, authStorage),
-          ),
+          notificationService: pushNotificationService,
         ),
+      ),
+      ShellRoute(
+        // gives access to MapModel to the child routes
+        builder: (context, state, child) {
+          return ChangeNotifierProvider(
+            create: (_) => MapModel(
+              postsRepository: postsRepository,
+              authStorage: authStorage,
+            ),
+            child: child,
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/map',
+            builder: (context, state) => MapScreen(
+              postsRepository: postsRepository,
+              authStorage: authStorage,
+              postCreationFlow: PostCreationFlow(
+                PostPublisher(postsRepository, authStorage),
+              ),
+            ),
+          ),
+          GoRoute(
+            name: '/profile',
+            path: '/profile/:nickname',
+            pageBuilder: (context, state) {
+              final String? nickname = state.pathParameters['nickname'];
+              final bool fromPostView =
+                  state.uri.queryParameters['fromPostView'] == 'true';
+              return CustomTransitionPage(
+                key: state.pageKey,
+                opaque: false, // makes the map visible behind the screen
+                // screen transition animation
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                child: ProfilePopup(
+                  relationRepository: relationRepository,
+                  userRepository: userRepository,
+                  postsRepository: postsRepository,
+                  authStorage: authStorage,
+                  nickname: nickname,
+                  showTopButtons: !fromPostView,
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/friends',
+            pageBuilder: (context, state) {
+              return CustomTransitionPage(
+                key: state.pageKey,
+                opaque: false, // makes the map visible behind the screen
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                child: FriendsPopup(
+                  relationRepository: relationRepository,
+                  userRepository: userRepository,
+                  authStorage: authStorage,
+                ),
+              );
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: '/post/draw',
@@ -135,49 +197,6 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/registration_successful',
         builder: (context, state) => const RegistrationSuccessful(),
-      ),
-      GoRoute(
-        name: '/profile',
-        path: '/profile/:nickname',
-        pageBuilder: (context, state) {
-          final String? nickname = state.pathParameters['nickname'];
-          final bool fromPostView =
-              state.uri.queryParameters['fromPostView'] == 'true';
-          return CustomTransitionPage(
-            key: state.pageKey,
-            opaque: false, // makes the map visible behind the screen
-            // screen transition animation
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-            child: ProfilePopup(
-              relationRepository: relationRepository,
-              userRepository: userRepository,
-              authStorage: authStorage,
-              nickname: nickname,
-              showTopButtons: !fromPostView,
-            ),
-          );
-        },
-      ),
-      GoRoute(
-        path: '/friends',
-        pageBuilder: (context, state) {
-          return CustomTransitionPage(
-            key: state.pageKey,
-            opaque: false, // makes the map visible behind the screen
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-            child: FriendsPopup(
-              relationRepository: relationRepository,
-              userRepository: userRepository,
-              authStorage: authStorage,
-            ),
-          );
-        },
       ),
       GoRoute(
         path: '/logout',
