@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -6,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/brush_settings.dart';
 import 'package:frontend/features/drawing/data/canvas_exporter.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
+import 'package:frontend/features/drawing/data/stroke_raster_cache.dart';
 
 // main class for managing canvas state and making it accessible to child widgets.
 // stores basically all state related to the painting itself, strokes,
@@ -13,19 +13,19 @@ import 'package:frontend/features/drawing/data/drawn_line.dart';
 // in order to use this in a widget, use a Consumer.
 class PaintModel extends ChangeNotifier {
   PaintModel({
-    required this.brush,
+    required this.brushSettings,
     required this.exporter,
     this.backgroundLayers = const [],
   });
 
   // settings of currently used brush.
-  final BrushSettings brush;
+  final BrushSettings brushSettings;
   final CanvasExporter exporter;
 
-  
+
   // list of uneditable layers as background (leaving a comment renders child drawings here too)
   final List<ImageProvider> backgroundLayers;
-  
+
   bool _isExporting = false;
   bool get isExporting => _isExporting;
 
@@ -39,33 +39,37 @@ class PaintModel extends ChangeNotifier {
     final size = Size(image.width.toDouble(), image.height.toDouble());
     if (_canvasSize == size) return;
     _canvasSize = size;
+    _cache.rebuild(_lines, size);
     notifyListeners();
   }
 
-  // already-drawn lines (with getter)
+  // already-drawn lines
   final List<DrawnLine> _lines = [];
-  List<DrawnLine> get lines => UnmodifiableListView(_lines);
+  final StrokeRasterCache _cache = StrokeRasterCache();
+  ui.Image? get finishedStrokes => _cache.image;
 
   // currently-drawn line is stored separately so as not to trigger unnecessary updates.
-  // for that same reason, it has its own painter (see CurrentLinePainter).
   // nullable because it's null when no line is being drawn.
   DrawnLine? _currentLine;
   DrawnLine? get currentLine => _currentLine;
 
-  // change notifiers. used to update the canvas.
-  final ChangeNotifier _linesRepaint = ChangeNotifier();
-  final ChangeNotifier _currentLineRepaint = ChangeNotifier();
-  Listenable get linesRepaint => _linesRepaint;
-  Listenable get currentLineRepaint => _currentLineRepaint;
+  // change notifier. used to update the canvas.
+  final ChangeNotifier _canvasRepaint = ChangeNotifier();
+  Listenable get canvasRepaint => _canvasRepaint;
 
   bool get canUndo => _lines.isNotEmpty;
   bool get hasStrokes => _lines.isNotEmpty || _currentLine != null;
 
   // call based on gestures
   void beginStroke(Offset point) {
-    final path = Path()..moveTo(point.dx, point.dy);
-    _currentLine = DrawnLine(path, brush.color, brush.width);
-    _currentLineRepaint.notifyListeners();
+    _currentLine = DrawnLine(
+      brush: brushSettings.brush,
+      color: brushSettings.color,
+      width: brushSettings.width,
+      erases: brushSettings.isErasing,
+      start: point,
+    );
+    _canvasRepaint.notifyListeners();
     notifyListeners();
   }
 
@@ -73,8 +77,8 @@ class PaintModel extends ChangeNotifier {
   void extendStroke(Offset point) {
     final line = _currentLine;
     if (line == null) return;
-    line.path.lineTo(point.dx, point.dy);
-    _currentLineRepaint.notifyListeners();
+    line.addPoint(point);
+    _canvasRepaint.notifyListeners();
   }
 
   // call based on gestures
@@ -82,9 +86,9 @@ class PaintModel extends ChangeNotifier {
     final line = _currentLine;
     if (line == null) return;
     _lines.add(line);
+    _cache.add(line, _canvasSize);
     _currentLine = null;
-    _linesRepaint.notifyListeners();
-    _currentLineRepaint.notifyListeners();
+    _canvasRepaint.notifyListeners();
     notifyListeners();
   }
 
@@ -92,7 +96,7 @@ class PaintModel extends ChangeNotifier {
   void cancelStroke() {
     if (_currentLine == null) return;
     _currentLine = null;
-    _currentLineRepaint.notifyListeners();
+    _canvasRepaint.notifyListeners();
     notifyListeners();
   }
 
@@ -100,7 +104,8 @@ class PaintModel extends ChangeNotifier {
   void undo() {
     if (!canUndo) return;
     _lines.removeLast();
-    _linesRepaint.notifyListeners();
+    _cache.rebuild(_lines, _canvasSize);
+    _canvasRepaint.notifyListeners();
     notifyListeners();
   }
 
@@ -109,8 +114,8 @@ class PaintModel extends ChangeNotifier {
     if (!hasStrokes) return;
     _lines.clear();
     _currentLine = null;
-    _linesRepaint.notifyListeners();
-    _currentLineRepaint.notifyListeners();
+    _cache.rebuild(_lines, _canvasSize);
+    _canvasRepaint.notifyListeners();
     notifyListeners();
   }
 
@@ -123,10 +128,9 @@ class PaintModel extends ChangeNotifier {
     try {
       finishStroke();
       return await exporter.export(
-        lines: lines,
         size: _canvasSize,
-        background: _backgroundImage,
-        includeBackground: includeBackground,
+        strokes: _cache.image,
+        background: includeBackground ? _backgroundImage : null,
       );
     } finally {
       _isExporting = false;
@@ -136,8 +140,8 @@ class PaintModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    _linesRepaint.dispose();
-    _currentLineRepaint.dispose();
+    _cache.dispose();
+    _canvasRepaint.dispose();
     super.dispose();
   }
 
