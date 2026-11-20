@@ -3,6 +3,7 @@ import 'package:frontend/features/drawing/data/brushes/brush.dart';
 import 'package:frontend/features/drawing/data/brushes/polyline.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 
+/// parent class for brushes whose width... varies... throughout the stroke. shocking i know.
 abstract class VariableWidthBrush extends Brush {
   const VariableWidthBrush();
 

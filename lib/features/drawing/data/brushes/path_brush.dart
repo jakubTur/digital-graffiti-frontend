@@ -3,6 +3,7 @@ import 'package:frontend/features/drawing/data/brushes/brush.dart';
 import 'package:frontend/features/drawing/data/brushes/polyline.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 
+/// parent class for brushes rendered simply with canvas.drawPath()
 abstract class PathBrush extends Brush {
   const PathBrush();
 

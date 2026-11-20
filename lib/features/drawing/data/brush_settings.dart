@@ -7,10 +7,19 @@ class BrushSettings extends ChangeNotifier {
   static const double minWidth = 1;
   static const double maxWidth = 50;
 
+  /// current brush.
   Brush _brush = const RoundBrush();
+
+  /// if true, brush is being used to erase instead of add color.
   bool _isErasing = false;
+
+  /// color of stroke (irrelevent if _isErasing is true)
   Color _color = Colors.black;
+
+  /// width of brush
   double _width = 10;
+
+  ///getters:
   Brush get brush => _brush;
   bool get isErasing => _isErasing;
   Color get color => _color;
