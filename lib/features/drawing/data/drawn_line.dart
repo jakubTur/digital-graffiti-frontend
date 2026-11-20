@@ -1,19 +1,37 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:frontend/features/drawing/data/brushes/brush.dart';
 
 /// contains data of a single stroke.
-/// does not store the brush itself because umm uhh mind your own damn business.
-/// (could potentially be refactored to store the actual brush but there's no need for that now. can be done later if needed.)
 class DrawnLine {
-  final Path path;
+
+  /// brush.
+  final Brush brush;
   final Color color;
-  final double strokeWidth;
-  late final Paint _paint = Paint()
-    ..color = color
-    ..strokeWidth = strokeWidth
-    ..style = PaintingStyle.stroke
-    ..strokeCap = StrokeCap.round;
+  final double width;
 
-  DrawnLine(this.path, this.color, this.strokeWidth);
+  /// if true, this line is being used to erase other lines.
+  final bool erases;
 
-  Paint getPaint() => _paint;
+  /// points in the line.
+  final List<Offset> _points;
+
+  DrawnLine({
+    required this.brush,
+    required this.color,
+    required this.width,
+    required this.erases,
+    required Offset start,
+  }) : _points = [start];
+
+  List<Offset> get points => UnmodifiableListView(_points);
+
+  void addPoint(Offset point) => _points.add(point);
+
+  void paint(Canvas canvas) {
+    if (erases) canvas.saveLayer(null, Paint()..blendMode = BlendMode.dstOut);
+    brush.paint(canvas, this);
+    if (erases) canvas.restore();
+  }
 }

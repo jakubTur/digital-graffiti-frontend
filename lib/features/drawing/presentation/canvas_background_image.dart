@@ -7,10 +7,7 @@ import 'package:frontend/features/drawing/data/paint_model.dart';
 class CanvasBackgroundImage extends StatelessWidget {
   final PaintModel paintModel;
 
-  const CanvasBackgroundImage({
-    super.key,
-    required this.paintModel,
-  });
+  const CanvasBackgroundImage({super.key, required this.paintModel});
 
   @override
   Widget build(BuildContext context) {

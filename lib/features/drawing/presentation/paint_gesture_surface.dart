@@ -35,10 +35,10 @@ class _PaintGestureSurfaceState extends State<PaintGestureSurface> {
   Size? _lastSceneSize;
   Size? _lastViewportSize;
   int? _paintPointer;
-  
+
   // for preventing accidental strokes being created if the user actually wants to zoom/pan
   Stopwatch? _strokeTimer;
-  
+
   bool _multiPointerGesture = false;
   bool _panEnabled = false;
 

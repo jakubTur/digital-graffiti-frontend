@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/brush_settings.dart';
 import 'package:frontend/features/drawing/data/canvas_exporter.dart';
 import 'package:frontend/features/drawing/data/paint_model.dart';
-import 'package:frontend/features/drawing/presentation/brush_controls.dart';
 import 'package:frontend/features/drawing/presentation/canvas_background_image.dart';
 import 'package:frontend/features/drawing/presentation/paint_canvas.dart';
 import 'package:frontend/features/drawing/presentation/paint_gesture_surface.dart';
@@ -36,7 +35,7 @@ class PaintScreen extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BrushSettings()),
         ChangeNotifierProvider(
           create: (context) => PaintModel(
-            brush: context.read<BrushSettings>(),
+            brushSettings: context.read<BrushSettings>(),
             exporter: CanvasExporter(),
             backgroundLayers: backgroundLayers,
           ),
@@ -65,16 +64,8 @@ class PaintScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Consumer<BrushSettings>(
-                  builder: (context, brush, _) => BrushControls(
-                    color: brush.color,
-                    width: brush.width,
-                    onColorChanged: brush.setColor,
-                    onWidthChanged: brush.setWidth,
-                  ),
-                ),
-                Consumer<PaintModel>(
-                  builder: (context, model, _) => PaintUi(
+                Consumer2<PaintModel, BrushSettings>(
+                  builder: (context, model, settings, _) => PaintUi(
                     canUndo: model.canUndo,
                     hasStrokes: model.hasStrokes,
                     onUndo: model.undo,
@@ -82,6 +73,14 @@ class PaintScreen extends StatelessWidget {
                     isExporting: model.isExporting,
                     onDone: () =>
                         _exportImage(context, paintModel, onImageCreated),
+                    brush: settings.brush,
+                    isErasing: settings.isErasing,
+                    color: settings.color,
+                    width: settings.width,
+                    onBrushChanged: settings.setBrush,
+                    onErasingChanged: settings.setErasing,
+                    onColorChanged: settings.setColor,
+                    onWidthChanged: settings.setWidth,
                   ),
                 ),
               ],
