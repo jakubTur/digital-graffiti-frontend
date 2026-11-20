@@ -1,3 +1,3 @@
 class Config {
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'http://<YOUR_IP>:8080';
 }
