@@ -7,6 +7,7 @@ import 'package:frontend/features/drawing/data/brushes/pen_brush.dart';
 import 'package:frontend/features/drawing/data/brushes/round_brush.dart';
 import 'package:frontend/features/drawing/data/brushes/spray_brush.dart';
 
+/// widget for picking a brush.
 class BrushPicker extends StatelessWidget {
   static const brushes = <Brush>[
     RoundBrush(),

@@ -5,10 +5,16 @@ import 'package:frontend/features/drawing/data/brushes/brush.dart';
 
 /// contains data of a single stroke.
 class DrawnLine {
+
+  /// brush.
   final Brush brush;
   final Color color;
   final double width;
+
+  /// if true, this line is being used to erase other lines.
   final bool erases;
+
+  /// points in the line.
   final List<Offset> _points;
 
   DrawnLine({

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:frontend/features/drawing/data/drawn_line.dart';
 
+/// stores a stroke raster format to enable custom interaction stuff (erasing, overlaying without alpha stacking)
 class StrokeRasterCache {
   ui.Image? _image;
   ui.Image? get image => _image;
