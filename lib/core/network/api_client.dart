@@ -48,14 +48,23 @@ class ApiClient {
         throw Exception('Unsupported method: $method');
     }
     final text = utf8.decode(response.bodyBytes);
-    debugPrint('-> ${response.statusCode} $text');
-    final data = jsonDecode(text);
-    final code = data is Map<String, dynamic> ? data['code'] : null;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
 
-    debugPrint(
-      'refresh check: code=$code refreshed=$refreshed '
-          'provider=${refreshTokenProvider != null}',
-    );
+
+      if (text.trim().isEmpty) {
+        return;
+      }
+
+      final data = jsonDecode(text);
+      debugPrint('data: $data');
+      final code = data is Map<String, dynamic> ? data['code'] : null;
+      debugPrint(
+        'refresh check: code=$code refreshed=$refreshed '
+            'provider=${refreshTokenProvider != null}',
+      );
+    }
+
+
 
     final refreshToken = await refreshTokenProvider?.call();
     debugPrint('refresh token present: ${refreshToken != null}');
