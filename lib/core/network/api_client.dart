@@ -48,13 +48,8 @@ class ApiClient {
         throw Exception('Unsupported method: $method');
     }
     final text = utf8.decode(response.bodyBytes);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-
-
-      if (text.trim().isEmpty) {
-        return;
-      }
-
+    debugPrint('response: ${response.statusCode} $text');
+    if (!text.trim().isEmpty) {
       final data = jsonDecode(text);
       debugPrint('data: $data');
       final code = data is Map<String, dynamic> ? data['code'] : null;
@@ -63,6 +58,7 @@ class ApiClient {
             'provider=${refreshTokenProvider != null}',
       );
     }
+
 
 
 
