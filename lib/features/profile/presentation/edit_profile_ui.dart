@@ -10,7 +10,7 @@ import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/profile/presentation/square_crop_screen.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/storage/auth_storage.dart';
+import '../../auth/data/datasources/auth_storage.dart';
 import '../../../core/widgets/confirmation_dialog.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';

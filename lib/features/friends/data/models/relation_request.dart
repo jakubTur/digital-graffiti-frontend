@@ -1,4 +1,4 @@
-import '../../../profile/data/relation_status.dart';
+import '../../domain/entities/relation_status.dart';
 
 class RelationRequest {
   const RelationRequest({

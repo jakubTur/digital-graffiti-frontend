@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/brushes/air_brush.dart';
-import 'package:frontend/features/drawing/data/brushes/brush.dart';
-import 'package:frontend/features/drawing/data/brushes/calligraphy_brush.dart';
-import 'package:frontend/features/drawing/data/brushes/marker_brush.dart';
-import 'package:frontend/features/drawing/data/brushes/pen_brush.dart';
-import 'package:frontend/features/drawing/data/brushes/round_brush.dart';
-import 'package:frontend/features/drawing/data/brushes/spray_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/air_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/calligraphy_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/marker_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/pen_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/round_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/spray_brush.dart';
 
 /// widget for picking a brush.
 class BrushPicker extends StatelessWidget {

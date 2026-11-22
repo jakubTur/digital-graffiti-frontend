@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/brush_settings.dart';
-import 'package:frontend/features/drawing/data/canvas_exporter.dart';
-import 'package:frontend/features/drawing/data/paint_model.dart';
+import 'package:frontend/features/drawing/presentation/state/brush_settings.dart';
+import 'package:frontend/features/drawing/presentation/canvas_exporter.dart';
+import 'package:frontend/features/drawing/presentation/state/paint_model.dart';
 import 'package:frontend/features/drawing/presentation/canvas_background_image.dart';
 import 'package:frontend/features/drawing/presentation/paint_canvas.dart';
 import 'package:frontend/features/drawing/presentation/paint_gesture_surface.dart';

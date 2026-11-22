@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:frontend/features/map/data/map_model.dart';
+import 'package:frontend/features/map/presentation/state/map_model.dart';
 import 'package:frontend/features/map/presentation/post_pin.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:latlong2/latlong.dart';

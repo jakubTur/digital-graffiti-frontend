@@ -1,4 +1,4 @@
-import '../../../profile/data/relation_status.dart';
+import '../entities/relation_status.dart';
 import '../../data/models/relation_nickname_request.dart';
 import '../../data/models/relation_request.dart';
 import '../../data/models/relation_response.dart';

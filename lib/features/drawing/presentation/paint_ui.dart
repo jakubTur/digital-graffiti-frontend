@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/icons/phosphor_icons.dart';
-import 'package:frontend/features/drawing/data/brush_settings.dart';
-import 'package:frontend/features/drawing/data/brushes/brush.dart';
+import 'package:frontend/features/drawing/presentation/state/brush_settings.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/brush.dart';
 import 'package:frontend/features/drawing/presentation/brush_picker.dart';
 import 'package:frontend/features/drawing/presentation/brush_width_slider.dart';
 import 'package:frontend/features/drawing/presentation/color_palette.dart';

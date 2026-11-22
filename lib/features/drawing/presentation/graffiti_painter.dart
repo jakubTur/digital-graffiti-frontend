@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/paint_model.dart';
+import 'package:frontend/features/drawing/presentation/state/paint_model.dart';
 
 class GraffitiPainter extends CustomPainter {
   final PaintModel paintModel;

@@ -3,9 +3,9 @@ import 'dart:ui' show PointMode;
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/icons/phosphor_icons.dart';
-import 'package:frontend/features/drawing/data/brushes/brush.dart';
-import 'package:frontend/features/drawing/data/brushes/polyline.dart';
-import 'package:frontend/features/drawing/data/drawn_line.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/polyline.dart';
+import 'package:frontend/features/drawing/domain/entities/drawn_line.dart';
 
 class SprayBrush extends Brush {
   const SprayBrush();

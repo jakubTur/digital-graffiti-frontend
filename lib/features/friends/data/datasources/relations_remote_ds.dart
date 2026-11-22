@@ -1,7 +1,7 @@
 import 'package:frontend/features/friends/data/models/relation_nickname_request.dart';
 
 import '../../../../core/network/api_client.dart';
-import '../../../profile/data/relation_status.dart';
+import '../../domain/entities/relation_status.dart';
 import '../models/relation_request.dart';
 import '../models/relation_response.dart';
 

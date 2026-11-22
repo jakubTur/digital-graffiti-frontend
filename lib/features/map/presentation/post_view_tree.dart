@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/features/map/data/map_model.dart';
+import 'package:frontend/features/map/presentation/state/map_model.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/presentation/drawing_view_node.dart';

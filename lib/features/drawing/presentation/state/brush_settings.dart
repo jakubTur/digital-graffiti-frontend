@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/brushes/brush.dart';
-import 'package:frontend/features/drawing/data/brushes/round_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/round_brush.dart';
 
 /// class storing brush settings. (moved from stroke data)
 class BrushSettings extends ChangeNotifier {

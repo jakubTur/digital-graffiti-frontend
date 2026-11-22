@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/brushes/brush.dart';
-import 'package:frontend/features/drawing/data/brushes/polyline.dart';
-import 'package:frontend/features/drawing/data/drawn_line.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/polyline.dart';
+import 'package:frontend/features/drawing/domain/entities/drawn_line.dart';
 
 /// parent class for brushes whose width... varies... throughout the stroke. shocking i know.
 abstract class VariableWidthBrush extends Brush {

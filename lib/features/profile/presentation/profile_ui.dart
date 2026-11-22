@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/features/friends/data/models/relation_nickname_request.dart';
 import 'package:frontend/features/friends/data/models/relation_response.dart';
-import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
-import 'package:frontend/features/map/data/map_model.dart';
+import 'package:frontend/features/friends/domain/repositories/relation_repository.dart';
+import 'package:frontend/features/map/presentation/state/map_model.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:frontend/features/posts/presentation/post_list.dart';
@@ -11,12 +11,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/storage/auth_storage.dart';
+import '../../auth/data/datasources/auth_storage.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/popup_text.dart';
 import '../../../core/widgets/user_avatar.dart';
-import '../data/relation_initiator.dart';
-import '../data/relation_status.dart';
+import '../../friends/domain/entities/relation_initiator.dart';
+import '../../friends/domain/entities/relation_status.dart';
 
 class ProfileUi extends StatefulWidget {
   final RelationStatus _relationStatus;

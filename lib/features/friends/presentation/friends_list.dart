@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/features/auth/data/datasources/auth_storage.dart';
 import 'package:frontend/core/widgets/form_secondary_text.dart';
 import 'package:frontend/core/widgets/loading_screen.dart';
 import 'package:frontend/core/widgets/popup_text.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
 import 'package:frontend/features/friends/data/models/relation_response.dart';
-import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
+import 'package:frontend/features/friends/domain/repositories/relation_repository.dart';
 import 'package:frontend/features/friends/presentation/friend_card.dart';
-import 'package:frontend/features/profile/data/relation_status.dart';
+import 'package:frontend/features/friends/domain/entities/relation_status.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../auth/data/models/user_response.dart';

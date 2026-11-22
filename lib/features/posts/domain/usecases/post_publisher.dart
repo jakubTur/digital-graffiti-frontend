@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/features/auth/data/datasources/auth_storage.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/domain/entities/post_draft.dart';

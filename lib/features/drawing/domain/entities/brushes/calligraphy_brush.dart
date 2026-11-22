@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/icons/phosphor_icons.dart';
-import 'package:frontend/features/drawing/data/brushes/variable_width_brush.dart';
-import 'package:frontend/features/drawing/data/drawn_line.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/variable_width_brush.dart';
+import 'package:frontend/features/drawing/domain/entities/drawn_line.dart';
 
 class CalligraphyBrush extends VariableWidthBrush {
   const CalligraphyBrush();
