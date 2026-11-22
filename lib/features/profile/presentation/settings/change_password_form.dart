@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/features/auth/data/datasources/auth_storage.dart';
 import 'package:frontend/core/widgets/form_main_text.dart';
 import 'package:frontend/features/auth/data/models/credential_request.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';

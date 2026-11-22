@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/drawn_line.dart';
+import 'package:frontend/features/drawing/domain/entities/drawn_line.dart';
 
 
 /// brush class.

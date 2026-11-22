@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/map/data/map_model.dart';
+import 'package:frontend/features/map/presentation/state/map_model.dart';
 import 'package:frontend/features/map/presentation/map_ui_button.dart';
 import 'package:frontend/features/posts/presentation/post_creation_flow.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/storage/auth_storage.dart';
+import '../../auth/data/datasources/auth_storage.dart';
 
 /// UI containing buttons that display above the map.
 /// stateless now that we have a separate class for post creation flow

@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/brushes/brush.dart';
+import 'package:frontend/features/drawing/domain/entities/brushes/brush.dart';
 
 /// contains data of a single stroke.
 class DrawnLine {

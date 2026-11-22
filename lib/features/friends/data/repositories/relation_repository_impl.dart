@@ -2,8 +2,8 @@ import 'package:frontend/features/friends/data/models/relation_nickname_request.
 import 'package:frontend/features/friends/data/models/relation_request.dart';
 import 'package:frontend/features/friends/data/models/relation_response.dart';
 
-import '../../../profile/data/relation_status.dart';
-import '../../domain/repository/relation_repository.dart';
+import '../../domain/entities/relation_status.dart';
+import '../../domain/repositories/relation_repository.dart';
 import '../datasources/relations_remote_ds.dart';
 
 class RelationRepositoryImpl extends RelationRepository {

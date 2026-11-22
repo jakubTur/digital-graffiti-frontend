@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/brush_settings.dart';
+import 'package:frontend/features/drawing/presentation/state/brush_settings.dart';
 
 /// slider for brush widgth.
 class BrushWidthSlider extends StatelessWidget {

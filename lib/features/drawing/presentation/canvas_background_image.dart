@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/paint_model.dart';
+import 'package:frontend/features/drawing/presentation/state/paint_model.dart';
 
 // simple widget for displaying the background image.
 // this is just here to keep PaintScreen clean and concise really.

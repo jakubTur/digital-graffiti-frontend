@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/storage/auth_storage.dart';
+import 'package:frontend/features/auth/data/datasources/auth_storage.dart';
 import 'package:frontend/features/map/presentation/map_ui.dart';
 import 'package:frontend/features/map/presentation/post_view_tree.dart';
 import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';

@@ -2,10 +2,10 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:frontend/features/drawing/data/brush_settings.dart';
-import 'package:frontend/features/drawing/data/canvas_exporter.dart';
-import 'package:frontend/features/drawing/data/drawn_line.dart';
-import 'package:frontend/features/drawing/data/stroke_raster_cache.dart';
+import 'package:frontend/features/drawing/presentation/state/brush_settings.dart';
+import 'package:frontend/features/drawing/presentation/canvas_exporter.dart';
+import 'package:frontend/features/drawing/domain/entities/drawn_line.dart';
+import 'package:frontend/features/drawing/presentation/stroke_raster_cache.dart';
 
 // main class for managing canvas state and making it accessible to child widgets.
 // stores basically all state related to the painting itself, strokes,

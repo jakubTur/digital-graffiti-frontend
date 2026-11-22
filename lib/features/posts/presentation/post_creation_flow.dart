@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/features/posts/data/post_publisher.dart';
+import 'package:frontend/features/posts/domain/usecases/post_publisher.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post_draft.dart';
 import 'package:go_router/go_router.dart';
