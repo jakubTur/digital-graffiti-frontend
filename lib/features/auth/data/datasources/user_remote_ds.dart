@@ -68,6 +68,6 @@ class UserRemoteDataSource {
   }
 
   Future<void> deleteNotification(String notificationId) async {
-    await api.delete('/api/users/$notificationId');
+    await api.delete('/api/users/$notificationId', expectedStatusCode: 204);
   }
 }

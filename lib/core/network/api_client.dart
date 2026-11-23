@@ -55,13 +55,16 @@ class ApiClient {
     body: body,
     expectedStatusCode: 200,
   );
-  Future<dynamic> delete(String path, {Map<String, String>? queryParameters}) =>
-      send(
-        'DELETE',
-        path,
-        queryParameters: queryParameters,
-        expectedStatusCode: 200,
-      );
+  Future<dynamic> delete(
+    String path, {
+    Map<String, String>? queryParameters,
+    int expectedStatusCode = 200,
+  }) => send(
+    'DELETE',
+    path,
+    queryParameters: queryParameters,
+    expectedStatusCode: expectedStatusCode,
+  );
   Future<dynamic> patch(
     String path, {
     Map<String, String>? queryParameters,

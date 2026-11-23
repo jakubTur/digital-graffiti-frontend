@@ -193,6 +193,7 @@ class MyApp extends StatelessWidget {
                   authStorage: authStorage,
                   notificationsDataSource: notificationsRemoteDataSource,
                   relationRepository: relationRepository,
+                  userRepository: userRepository,
                 ),
               );
             },
