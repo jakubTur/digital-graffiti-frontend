@@ -205,11 +205,13 @@ class _PostViewTreeState extends State<PostViewTree> {
           layers: layers,
           aspectRatio: aspectRatio,
           isOwn: isOwn,
-          onDraw: () async {
-            if (await widget._postCreationFlow.drawOn(context, drawing, layers)) {
-              map.requestPostView(post);
-            }
-          },
+          onDraw: drawing.active
+              ? () async {
+                  if (await widget._postCreationFlow.drawOn(context, drawing, layers)) {
+                    map.requestPostView(post);
+                  }
+                }
+              : null,
           onImageTap: () => _fitToScreen(node),
           onDelete: isOwn && drawing.active ? () => _delete(map, drawing) : null,
         );

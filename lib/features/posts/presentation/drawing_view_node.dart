@@ -11,7 +11,7 @@ class DrawingViewNode extends StatelessWidget {
     required this.layers,
     required this.aspectRatio,
     required this.isOwn,
-    required this.onDraw,
+    this.onDraw,
     required this.onImageTap,
     this.onDelete,
   });
@@ -29,7 +29,7 @@ class DrawingViewNode extends StatelessWidget {
   final bool isOwn;
 
   /// callback for the draw (comment) button.
-  final VoidCallback onDraw;
+  final VoidCallback? onDraw;
 
   /// callback for when image is tapped (fullscreen)
   final VoidCallback onImageTap;
@@ -92,20 +92,7 @@ class DrawingViewNode extends StatelessWidget {
                 onTap: onImageTap,
                 child: AspectRatio(
                   aspectRatio: aspectRatio,
-                  child: layers.isEmpty
-                      ? const Center(child: Icon(Icons.broken_image))
-                      : Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            for (final layer in layers)
-                              Image(
-                                image: layer,
-                                fit: BoxFit.fill,
-                                errorBuilder: (_, _, _) =>
-                                    const SizedBox.shrink(),
-                              ),
-                          ],
-                        ),
+                  child: _canvas(),
                 ),
               ),
             ),
@@ -122,13 +109,41 @@ class DrawingViewNode extends StatelessWidget {
                 children: [
                   if (onDelete != null)
                     _tabButton('Delete', Icons.delete, onDelete!),
-                  _tabButton('Draw', Icons.edit_square, onDraw),
+                  if (onDraw != null)
+                    _tabButton('Draw', Icons.edit_square, onDraw!),
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _canvas() {
+    if (!drawing.active) {
+      return const Center(
+        child: Text(
+          'deleted',
+          style: TextStyle(
+            color: Colors.grey,
+            fontStyle: FontStyle.italic,
+            fontSize: textSize,
+          ),
+        ),
+      );
+    }
+    if (layers.isEmpty) return const Center(child: Icon(Icons.broken_image));
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (final layer in layers)
+          Image(
+            image: layer,
+            fit: BoxFit.fill,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          ),
+      ],
     );
   }
 
