@@ -8,22 +8,6 @@ class NotificationCard extends StatelessWidget {
   final NotificationResponse notification;
   final VoidCallback? onTap;
 
-  IconData _getIcon(String type) {
-    debugPrint(type);
-    switch (type.toLowerCase()) {
-      case 'new_friend_request':
-        return Icons.person_add;
-      case 'friend_request_accepted':
-        return Icons.check_circle;
-      case 'new_comment':
-        return Icons.draw_sharp;
-      case 'new_post':
-        return Icons.image;
-      default:
-        return Icons.notifications;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -51,7 +35,7 @@ class NotificationCard extends StatelessWidget {
                     ? Colors.grey.shade100
                     : Colors.deepPurple.shade100,
                 child: Icon(
-                  _getIcon(notification.type),
+                  notification.notificationType.icon,
                   color: notification.read
                       ? Colors.grey.shade600
                       : Colors.deepPurple,

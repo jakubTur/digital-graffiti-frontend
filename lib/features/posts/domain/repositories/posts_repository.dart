@@ -12,4 +12,5 @@ abstract class PostsRepository {
   Future<void> postDrawing(Drawing drawing, int userId);
   Future<List<Drawing>> getDrawingsByPostId(int postId);
   Future<List<Post>> getPostsByNickname(String nickname);
+  Future<Post> getPost(int id);
 }

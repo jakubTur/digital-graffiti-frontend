@@ -4,14 +4,24 @@ import 'package:frontend/core/widgets/loading_screen.dart';
 import 'package:frontend/core/widgets/popup_text.dart';
 import 'package:frontend/features/notifications/data/datasources/notifications_remote_data_source.dart';
 import 'package:frontend/features/notifications/data/models/notification_response.dart';
+import 'package:frontend/features/notifications/domain/notification_type.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../../friends/domain/repositories/relation_repository.dart';
+import '../../map/presentation/state/map_model.dart';
 import 'notification_card.dart';
 
 class NotificationList extends StatefulWidget {
-  const NotificationList({super.key, this.notificationsDataSource});
+  const NotificationList({
+    super.key,
+    required this.notificationsDataSource,
+    required this.relationRepository,
+  });
 
-  final NotificationsRemoteDataSource? notificationsDataSource;
+  final NotificationsRemoteDataSource notificationsDataSource;
+
+  final RelationRepository relationRepository;
 
   @override
   State<NotificationList> createState() => _NotificationListState();
@@ -28,22 +38,79 @@ class _NotificationListState extends State<NotificationList> {
   }
 
   Future<void> _loadNotifications() async {
-    if (widget.notificationsDataSource != null) {
-      try {
-        final loaded = await widget.notificationsDataSource!.getNotifications();
-        if (mounted) {
-          setState(() {
-            _notifications = loaded;
-            _isLoading = false;
-          });
-        }
-        return;
-      } catch (e) {}
+    try {
+      final loaded = await widget.notificationsDataSource.getNotifications();
+      if (mounted) {
+        setState(() {
+          _notifications = loaded;
+          _isLoading = false;
+        });
+      }
+      return;
+    } catch (e) {
+      debugPrint('Failed to load notifications: $e');
     }
     if (mounted) {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _handleNotificationTap(NotificationResponse notification) async {
+    if (!notification.read) {
+      try {
+        await widget.notificationsDataSource.markAsRead(notification.id);
+      } catch (e) {
+        debugPrint('Failed to mark notification as read: $e');
+      }
+    }
+
+    if (!mounted) return;
+
+    final type = notification.notificationType;
+    final id = int.tryParse(notification.referenceId);
+
+    switch (type) {
+      case NotificationType.newFriendRequest:
+      case NotificationType.friendRequestAccepted:
+        if (id != null) {
+          final relation = await widget.relationRepository.getRelation(id);
+          if (!mounted) return;
+          if (type == NotificationType.newFriendRequest) {
+            context.pushNamed(
+              '/profile',
+              pathParameters: {"nickname": relation.senderNickname},
+            );
+
+            context.pushNamed(
+              '/profile',
+              pathParameters: {"nickname": relation.receiverNickname},
+            );
+          }
+        } else {
+          context.pushReplacement('/friends');
+        }
+        break;
+
+      case NotificationType.newPost:
+      case NotificationType.newComment:
+        final mapModel = context.read<MapModel>();
+
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/map');
+        }
+
+        if (id != null) {
+          await mapModel.focusOnPostById(id);
+        }
+        break;
+
+      default:
+        _loadNotifications();
+        break;
     }
   }
 
@@ -79,15 +146,7 @@ class _NotificationListState extends State<NotificationList> {
                   ..._notifications.map(
                     (notification) => NotificationCard(
                       notification: notification,
-                      onTap: () async {
-                        if (!notification.read &&
-                            widget.notificationsDataSource != null) {
-                          await widget.notificationsDataSource!.markAsRead(
-                            notification.id,
-                          );
-                          _loadNotifications();
-                        }
-                      },
+                      onTap: () => _handleNotificationTap(notification),
                     ),
                   )
                 else ...[

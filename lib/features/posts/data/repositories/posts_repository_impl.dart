@@ -28,6 +28,12 @@ class PostsRepositoryImpl implements PostsRepository {
   }
 
   @override
+  Future<Post> getPost(int id) async {
+    final response = await remoteDataSource.getPost(id);
+    return toPost(response);
+  }
+
+  @override
   Future<List<Post>> getPostsByRadius(
     double latitude,
     double longitude,

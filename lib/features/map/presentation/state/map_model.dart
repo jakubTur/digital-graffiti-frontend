@@ -168,6 +168,53 @@ class MapModel extends ChangeNotifier {
     }
   }
 
+  /// Focuses the map on a post by its ID (e.g. from a notification).
+  Future<void> focusOnPostById(int postId) async {
+    Post? targetPost;
+    for (final p in _posts) {
+      if (p.id == postId) {
+        targetPost = p;
+        break;
+      }
+    }
+
+    if (targetPost == null) {
+      try {
+        targetPost = await _postsRepository.getPost(postId);
+      } catch (e) {
+        debugPrint('Failed to fetch posts to locate post $postId: $e');
+      }
+    }
+
+    if (targetPost == null) {
+      debugPrint('Post $postId not found');
+      return;
+    }
+
+    _isTrackingUserLocation = false;
+    _focusedLocation = LatLng(targetPost.latitude, targetPost.longitude);
+    recenterMap(_focusedLocation!, 19.4, 0.0);
+
+    _isFetchingPosts = true;
+    notifyListeners();
+    try {
+      _posts = await _postsRepository.getPostsByRadius(
+        targetPost.latitude,
+        targetPost.longitude,
+        postSearchRadius,
+      );
+    } catch (e) {
+      debugPrint('Failed to fetch posts around post location: $e');
+    } finally {
+      _isFetchingPosts = false;
+      notifyListeners();
+    }
+
+    if (isPostWithinViewDistance(targetPost)) {
+      requestPostView(targetPost);
+    }
+  }
+
   /// Returns camera focus back to user location and resumes tracking user movement
   void returnToUserLocation() {
     _isTrackingUserLocation = true;
