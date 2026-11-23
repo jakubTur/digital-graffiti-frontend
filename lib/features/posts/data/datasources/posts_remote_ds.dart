@@ -84,11 +84,11 @@ class PostsRemoteDataSource {
   }
 
   Future<void> deletePost(int id) async {
-    await api.delete('/api/posts/$id');
+    await api.delete('/api/posts/$id', expectedStatusCode: 204);
   }
 
   Future<void> deleteDrawing(int id) async {
-    await api.delete('/api/posts/drawings/$id');
+    await api.delete('/api/posts/drawings/$id', expectedStatusCode: 204);
   }
 
   List<PostResponse> parsePosts(dynamic response) {
