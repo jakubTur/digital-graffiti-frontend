@@ -3,10 +3,10 @@ import 'package:frontend/features/notifications/data/services/push_notification_
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/datasources/auth_storage.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/form_main_text.dart';
+import '../data/datasources/auth_storage.dart';
 import '../data/models/login_request.dart';
 import '../domain/repositories/user_repository.dart';
 
@@ -14,7 +14,12 @@ class LoginUi extends StatefulWidget {
   final UserRepository repo;
   final AuthStorage authStorage;
   final PushNotificationService notificationService;
-  const LoginUi({super.key, required this.repo, required this.authStorage, required this.notificationService});
+  const LoginUi({
+    super.key,
+    required this.repo,
+    required this.authStorage,
+    required this.notificationService,
+  });
 
   @override
   State<StatefulWidget> createState() => _LoginUiState();
@@ -146,7 +151,7 @@ class _LoginUiState extends State<LoginUi> {
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
                                   onPressed: () {
-                                    //TODO: redirect to forgot password form
+                                    context.go("/forgot-password");
                                   },
                                   child: const Text(
                                     'Forgot password?',
