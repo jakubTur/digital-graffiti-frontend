@@ -11,8 +11,9 @@ class DrawingViewNode extends StatelessWidget {
     required this.layers,
     required this.aspectRatio,
     required this.isOwn,
-    required this.onDraw,
+    this.onDraw,
     required this.onImageTap,
+    this.onDelete,
   });
 
   /// the currently previewed drawing object. get parents or post recursively.
@@ -28,10 +29,12 @@ class DrawingViewNode extends StatelessWidget {
   final bool isOwn;
 
   /// callback for the draw (comment) button.
-  final VoidCallback onDraw;
+  final VoidCallback? onDraw;
 
   /// callback for when image is tapped (fullscreen)
   final VoidCallback onImageTap;
+
+  final VoidCallback? onDelete;
 
   /// width size of node to display. combine with AspectRatio. image is scaled to fit.
   static const double _imageWidth = 300;
@@ -89,20 +92,7 @@ class DrawingViewNode extends StatelessWidget {
                 onTap: onImageTap,
                 child: AspectRatio(
                   aspectRatio: aspectRatio,
-                  child: layers.isEmpty
-                      ? const Center(child: Icon(Icons.broken_image))
-                      : Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            for (final layer in layers)
-                              Image(
-                                image: layer,
-                                fit: BoxFit.fill,
-                                errorBuilder: (_, _, _) =>
-                                    const SizedBox.shrink(),
-                              ),
-                          ],
-                        ),
+                  child: _canvas(),
                 ),
               ),
             ),
@@ -114,22 +104,57 @@ class DrawingViewNode extends StatelessWidget {
                 color: color,
                 borderRadius: const BorderRadius.vertical(bottom: _tabRadius),
               ),
-              child: IconButton(
-                tooltip: 'Draw',
-                onPressed: onDraw,
-                icon: const Icon(
-                  Icons.edit_square,
-                  color: Colors.black,
-                  size: iconSize,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onDelete != null)
+                    _tabButton('Delete', Icons.delete, onDelete!),
+                  if (onDraw != null)
+                    _tabButton('Draw', Icons.edit_square, onDraw!),
+                ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _canvas() {
+    if (!drawing.active) {
+      return const Center(
+        child: Text(
+          'deleted',
+          style: TextStyle(
+            color: Colors.grey,
+            fontStyle: FontStyle.italic,
+            fontSize: textSize,
+          ),
+        ),
+      );
+    }
+    if (layers.isEmpty) return const Center(child: Icon(Icons.broken_image));
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (final layer in layers)
+          Image(
+            image: layer,
+            fit: BoxFit.fill,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          ),
+      ],
+    );
+  }
+
+  Widget _tabButton(String tooltip, IconData icon, VoidCallback onPressed) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.black, size: iconSize),
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+      constraints: const BoxConstraints(),
+      visualDensity: VisualDensity.compact,
     );
   }
 }

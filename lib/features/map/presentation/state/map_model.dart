@@ -238,6 +238,17 @@ class MapModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteDrawing(Drawing drawing) async {
+    if (drawing.parent_id == -1) {
+      await _postsRepository.deletePost(drawing.post_id);
+      _posts = _posts.where((post) => post.id != drawing.post_id).toList();
+      clearPostToView();
+    } else {
+      await _postsRepository.deleteDrawing(drawing.id!);
+      requestPostView(_postToView!);
+    }
+  }
+
   /// Replaces stored posts with those currently near currentFocusLocation.
   Future<void> refreshPosts() async {
     if (_isFetchingPosts || _isFirstLocation) return;

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/widgets/confirmation_dialog.dart';
 import 'package:frontend/features/map/presentation/state/map_model.dart';
 import 'package:frontend/features/posts/domain/entities/drawing.dart';
 import 'package:frontend/features/posts/domain/entities/post.dart';
@@ -158,7 +159,8 @@ class _PostViewTreeState extends State<PostViewTree> {
       nodeDrawings[drawing.id!] = drawing;
       nodeLayers[drawing.id!] = [
         ...parentLayers,
-        if (imageUrl != null) CachedNetworkImageProvider(imageUrl),
+        if (imageUrl != null && drawing.active)
+          CachedNetworkImageProvider(imageUrl),
       ];
       for (final child in (children[drawing.id!] ?? const []).reversed) {
         graph.addEdge(_node(drawing.id!), _node(child.id!));
@@ -197,20 +199,46 @@ class _PostViewTreeState extends State<PostViewTree> {
         final id = node.key!.value as int;
         final drawing = nodeDrawings[id]!;
         final layers = nodeLayers[id]!;
+        final isOwn = drawing.username == currentUsername;
         return DrawingViewNode(
           drawing: drawing,
           layers: layers,
           aspectRatio: aspectRatio,
-          isOwn: drawing.username == currentUsername,
-          onDraw: () async {
-            if (await widget._postCreationFlow.drawOn(context, drawing, layers)) {
-              map.requestPostView(post);
-            }
-          },
+          isOwn: isOwn,
+          onDraw: drawing.active
+              ? () async {
+                  if (await widget._postCreationFlow.drawOn(context, drawing, layers)) {
+                    map.requestPostView(post);
+                  }
+                }
+              : null,
           onImageTap: () => _fitToScreen(node),
+          onDelete: isOwn && drawing.active ? () => _delete(map, drawing) : null,
         );
       },
     );
+  }
+
+  Future<void> _delete(MapModel map, Drawing drawing) async {
+    final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Delete drawing',
+      content: drawing.parent_id == -1
+          ? 'This will delete the whole post.'
+          : 'This drawing will be deleted.',
+      confirmText: 'Delete',
+      isDestructive: true,
+    );
+    if (!confirmed) return;
+    try {
+      await map.deleteDrawing(drawing);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete: $error')),
+        );
+      }
+    }
   }
 
   // zoom in on a node (kinda-fullscreen)

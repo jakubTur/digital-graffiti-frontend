@@ -13,4 +13,6 @@ abstract class PostsRepository {
   Future<List<Drawing>> getDrawingsByPostId(int postId);
   Future<List<Post>> getPostsByNickname(String nickname);
   Future<Post> getPost(int id);
+  Future<void> deletePost(int id);
+  Future<void> deleteDrawing(int id);
 }
