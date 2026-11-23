@@ -16,4 +16,5 @@ abstract class UserRepository {
   Future<void> updatePassword(int id, CredentialRequest request);
   Future<void> uploadProfilePicture(int id, String imagePath);
   Future<UserResponse> getUserByNickname(String nickname);
+  Future<void> deleteNotification(String notificationId);
 }
