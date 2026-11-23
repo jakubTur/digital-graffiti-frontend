@@ -26,7 +26,7 @@ class NotificationResponse {
       body: json['body'] as String? ?? '',
       type: json['type'] as String? ?? '',
       referenceId: json['referenceId'].toString(),
-      read: json['read'] as bool? ?? false,
+      read: json['isRead'] as bool? ?? false,
     );
   }
 }
