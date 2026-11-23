@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/camera/camera.dart';
 import 'package:frontend/core/widgets/success_screen.dart';
 import 'package:frontend/features/auth/domain/repositories/user_repository.dart';
+import 'package:frontend/features/auth/presentation/forgot_password_form.dart';
 import 'package:frontend/features/auth/presentation/login_ui.dart';
 import 'package:frontend/features/drawing/presentation/paint_screen.dart';
 import 'package:frontend/features/friends/data/datasources/relations_remote_ds.dart';
@@ -249,6 +250,17 @@ class MyApp extends StatelessWidget {
         path: '/password-changed',
         builder: (context, state) =>
             SuccessScreen('Your password was changed', 'Please login again'),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: ((context, state) => ForgotPasswordForm()),
+      ),
+      GoRoute(
+        path: '/forgot-password-success',
+        builder: ((context, state) => SuccessScreen(
+          "Password recovery e-mail has been sent",
+          "Follow the instructions in the email to reset your password",
+        )),
       ),
       // TODO: put other routes here!!!
     ],

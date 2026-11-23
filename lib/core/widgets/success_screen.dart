@@ -32,12 +32,20 @@ class SuccessScreen extends StatelessWidget {
             ),
             Align(
               alignment: Alignment.center,
-              child: Column(
-                children: [
-                  FormMainText(_primaryMessage),
-                  if (_secondaryMessage != null)
-                    FormSecondaryText(_secondaryMessage),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0,
+                ),
+                child: Column(
+                  children: [
+                    FormMainText(_primaryMessage),
+                    if (_secondaryMessage != null) ...[
+                      const SizedBox(height: 8.0),
+                      FormSecondaryText(_secondaryMessage),
+                    ],
+                  ],
+                ),
               ),
             ),
           ],
