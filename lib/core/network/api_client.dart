@@ -58,7 +58,7 @@ class ApiClient {
   Future<dynamic> delete(
     String path, {
     Map<String, String>? queryParameters,
-    int expectedStatusCode = 200,
+    int expectedStatusCode = 204,
   }) => send(
     'DELETE',
     path,
