@@ -13,6 +13,7 @@ class DrawingViewNode extends StatelessWidget {
     required this.isOwn,
     required this.onDraw,
     required this.onImageTap,
+    this.onDelete,
   });
 
   /// the currently previewed drawing object. get parents or post recursively.
@@ -32,6 +33,8 @@ class DrawingViewNode extends StatelessWidget {
 
   /// callback for when image is tapped (fullscreen)
   final VoidCallback onImageTap;
+
+  final VoidCallback? onDelete;
 
   /// width size of node to display. combine with AspectRatio. image is scaled to fit.
   static const double _imageWidth = 300;
@@ -114,22 +117,29 @@ class DrawingViewNode extends StatelessWidget {
                 color: color,
                 borderRadius: const BorderRadius.vertical(bottom: _tabRadius),
               ),
-              child: IconButton(
-                tooltip: 'Draw',
-                onPressed: onDraw,
-                icon: const Icon(
-                  Icons.edit_square,
-                  color: Colors.black,
-                  size: iconSize,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onDelete != null)
+                    _tabButton('Delete', Icons.delete, onDelete!),
+                  _tabButton('Draw', Icons.edit_square, onDraw),
+                ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _tabButton(String tooltip, IconData icon, VoidCallback onPressed) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.black, size: iconSize),
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+      constraints: const BoxConstraints(),
+      visualDensity: VisualDensity.compact,
     );
   }
 }

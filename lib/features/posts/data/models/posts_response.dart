@@ -7,6 +7,7 @@ class PostResponse {
   final String? imageUrl;
   final double latitude;
   final double longitude;
+  final bool active;
 
   const PostResponse({
     required this.id,
@@ -14,7 +15,8 @@ class PostResponse {
     required this.username,
     required this.imageUrl,
     required this.latitude,
-    required this.longitude
+    required this.longitude,
+    required this.active
   });
   factory PostResponse.fromJson(Map<String, dynamic> json) {
     return PostResponse(
@@ -23,7 +25,8 @@ class PostResponse {
       username: json['username'],
       imageUrl: json['imageUrl'],
       latitude: json['latitude'].toDouble(),
-      longitude: json['longitude'].toDouble()
+      longitude: json['longitude'].toDouble(),
+      active: json['active'] as bool? ?? true
     );
   }
 }

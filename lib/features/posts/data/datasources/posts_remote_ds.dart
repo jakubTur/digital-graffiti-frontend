@@ -83,6 +83,14 @@ class PostsRemoteDataSource {
     return parseDrawings(response);
   }
 
+  Future<void> deletePost(int id) async {
+    await api.delete('/api/posts/$id');
+  }
+
+  Future<void> deleteDrawing(int id) async {
+    await api.delete('/api/posts/drawings/$id');
+  }
+
   List<PostResponse> parsePosts(dynamic response) {
     if (response is! List) {
       throw const FormatException('Get posts response is not a list');
@@ -92,6 +100,7 @@ class PostsRemoteDataSource {
           (item) =>
               PostResponse.fromJson(Map<String, dynamic>.from(item as Map)),
         )
+        .where((post) => post.active)
         .toList();
   }
 

@@ -23,6 +23,8 @@ class Drawing {
   /// backend doesn't send this, so it's nullable for now.
   final DateTime? postedAt;
 
+  final bool active;
+
   const Drawing ({
     this.id,
     required this.username,
@@ -30,6 +32,7 @@ class Drawing {
     required this.post_id,
     required this.imageUrl,
     this.imagePath,
-    required this.postedAt
+    required this.postedAt,
+    this.active = true
   });
 }

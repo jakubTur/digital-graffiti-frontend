@@ -6,13 +6,15 @@ class DrawingResponse {
   final int parentId; // set to -1 for drawings parented directly to post.
   final String? imageUrl; // null until the drawing's image upload has finished.
   final DateTime? postedAt; // backend doesn't send createdAt for drawings yet.
+  final bool active;
   const DrawingResponse ({
     required this.id,
     required this.username,
     required this.postId,
     required this.parentId,
     required this.imageUrl,
-    required this.postedAt
+    required this.postedAt,
+    required this.active
   });
   factory DrawingResponse.fromJson(Map<String, dynamic> json) {
     return DrawingResponse(
@@ -21,7 +23,8 @@ class DrawingResponse {
       postId: (json['postId'] as num).toInt(),
       parentId: (json['originId'] is num ? json['originId'] as num : -1).toInt(), // null => -1 (for images parented directly to post)
       imageUrl: json['imageUrl'] as String?,
-      postedAt: json['createdAt'] is String ? DateTime.tryParse(json['createdAt']) : null // backend currently doesn't send createdAt so it's nullable now
+      postedAt: json['createdAt'] is String ? DateTime.tryParse(json['createdAt']) : null, // backend currently doesn't send createdAt so it's nullable now
+      active: json['active'] as bool? ?? true
     );
   }
 }

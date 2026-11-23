@@ -69,6 +69,12 @@ class PostsRepositoryImpl implements PostsRepository {
     return response.map(toDrawing).toList();
   }
 
+  @override
+  Future<void> deletePost(int id) => remoteDataSource.deletePost(id);
+
+  @override
+  Future<void> deleteDrawing(int id) => remoteDataSource.deleteDrawing(id);
+
   Post toPost(PostResponse response) {
     return Post(
       id: response.id,
@@ -88,6 +94,7 @@ class PostsRepositoryImpl implements PostsRepository {
       post_id: response.postId,
       imageUrl: response.imageUrl,
       postedAt: response.postedAt,
+      active: response.active,
     );
   }
 }
