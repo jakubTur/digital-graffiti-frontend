@@ -12,8 +12,8 @@ import 'package:frontend/features/friends/data/datasources/relations_remote_ds.d
 import 'package:frontend/features/friends/data/repositories/relation_repository_impl.dart';
 import 'package:frontend/features/friends/domain/repositories/relation_repository.dart';
 import 'package:frontend/features/friends/presentation/friends_popup.dart';
-import 'package:frontend/features/map/presentation/state/map_model.dart';
 import 'package:frontend/features/map/presentation/map_screen.dart';
+import 'package:frontend/features/map/presentation/state/map_model.dart';
 import 'package:frontend/features/notifications/data/datasources/notifications_remote_data_source.dart';
 import 'package:frontend/features/notifications/data/services/push_notification_service.dart';
 import 'package:frontend/features/profile/presentation/settings/change_email_form.dart';
@@ -29,10 +29,11 @@ import 'features/auth/data/datasources/user_remote_ds.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/registration_successful.dart';
 import 'features/auth/presentation/registration_ui.dart';
+import 'features/notifications/presentation/notification_popup.dart';
 import 'features/posts/data/datasources/posts_remote_ds.dart';
-import 'features/posts/domain/usecases/post_publisher.dart';
 import 'features/posts/data/repositories/posts_repository_impl.dart';
 import 'features/posts/domain/repositories/posts_repository.dart';
+import 'features/posts/domain/usecases/post_publisher.dart';
 import 'features/posts/presentation/post_creation_flow.dart';
 import 'features/profile/presentation/profile_popup.dart';
 import 'features/profile/presentation/settings/change_password_form.dart';
@@ -76,6 +77,7 @@ void main() async {
       authStorage: authStorage,
       isLoggedIn: isLoggedIn,
       pushNotificationService: pushNotificationService,
+      notificationsRemoteDataSource: notificationsDataSource,
     ),
   );
 }
@@ -89,6 +91,7 @@ class MyApp extends StatelessWidget {
     required this.authStorage,
     required this.isLoggedIn,
     required this.pushNotificationService,
+    required this.notificationsRemoteDataSource,
   });
 
   final UserRepository userRepository;
@@ -97,6 +100,7 @@ class MyApp extends StatelessWidget {
   final AuthStorage authStorage;
   final bool isLoggedIn;
   final PushNotificationService pushNotificationService;
+  final NotificationsRemoteDataSource notificationsRemoteDataSource;
 
   late final GoRouter router = GoRouter(
     initialLocation: isLoggedIn ? '/map' : '/',
@@ -171,6 +175,25 @@ class MyApp extends StatelessWidget {
                   relationRepository: relationRepository,
                   userRepository: userRepository,
                   authStorage: authStorage,
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/notifications',
+            pageBuilder: (context, state) {
+              return CustomTransitionPage(
+                key: state.pageKey,
+                opaque: false, // makes the map visible behind the screen
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                child: NotificationPopup(
+                  authStorage: authStorage,
+                  notificationsDataSource: notificationsRemoteDataSource,
+                  relationRepository: relationRepository,
+                  userRepository: userRepository,
                 ),
               );
             },

@@ -10,6 +10,7 @@ class MapBottomPopup extends StatelessWidget {
     required this.child,
     this.currentNickname,
     this.isFriendsOpen = false,
+    this.isNotificationsOpen = false,
     this.showTopButtons = true,
   });
 
@@ -17,6 +18,7 @@ class MapBottomPopup extends StatelessWidget {
   final Widget child;
   final String? currentNickname;
   final bool isFriendsOpen;
+  final bool isNotificationsOpen;
   final bool showTopButtons;
 
   void _popToMap(BuildContext context) {
@@ -34,11 +36,20 @@ class MapBottomPopup extends StatelessWidget {
     }
   }
 
+  Future<void> _handleNotificationsTap(BuildContext context) async {
+    if (isNotificationsOpen) {
+      _popToMap(context);
+    } else {
+      _popToMap(context);
+      context.push('/notifications');
+    }
+  }
+
   Future<void> _handleProfileTap(BuildContext context) async {
     final userNickname = await authStorage.readNickname();
     if (!context.mounted || userNickname == null) return;
 
-    if (!isFriendsOpen && currentNickname == userNickname) {
+    if (!isFriendsOpen && !isNotificationsOpen && currentNickname == userNickname) {
       _popToMap(context);
     } else {
       _popToMap(context);
@@ -71,6 +82,11 @@ class MapBottomPopup extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      MapUiButton(
+                        onTap: () => _handleNotificationsTap(context),
+                        icon: Icons.mail,
+                        heroTag: 'popup_notifications_button',
+                      ),
                       MapUiButton(
                         onTap: () => _handleFriendsTap(context),
                         icon: Icons.people,

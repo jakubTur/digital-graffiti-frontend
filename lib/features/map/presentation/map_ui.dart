@@ -31,6 +31,10 @@ class MapUi extends StatelessWidget {
     context.push('/friends');
   }
 
+  Future<void> _showNotifications(BuildContext context, MapModel map) async {
+    context.push('/notifications');
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -82,6 +86,15 @@ class MapUi extends StatelessWidget {
                 ),
                 Row(
                   children: [
+                    Consumer<MapModel>(
+                      builder: (context, map, child) {
+                        return MapUiButton(
+                          onTap: () => _showNotifications(context, map),
+                          icon: Icons.mail,
+                          heroTag: 'notifications_button',
+                        );
+                      },
+                    ),
                     Consumer<MapModel>(
                       builder: (context, map, child) {
                         return MapUiButton(

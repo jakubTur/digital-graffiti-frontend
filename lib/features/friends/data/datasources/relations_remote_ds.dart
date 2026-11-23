@@ -13,6 +13,13 @@ class RelationsRemoteDataSource {
     await api.post('/api/relations', body: request.toJson());
   }
 
+  Future<RelationResponse> getRelationByRelationId(int id) async {
+    final response = await api.get('/api/relations/$id');
+    return RelationResponse.fromJson(
+      Map<String, dynamic>.from(response as Map),
+    );
+  }
+
   Future<List<RelationResponse>> getRelations(int id, String type) async {
     final response = await api.get('/api/relations/$id/$type');
     if (response == null) return [];

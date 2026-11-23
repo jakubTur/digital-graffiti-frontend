@@ -27,6 +27,11 @@ class PostsRemoteDataSource {
     return postId;
   }
 
+  Future<PostResponse> getPost(int id) async {
+    final response = await api.get('/api/posts/$id');
+    return PostResponse.fromJson(response);
+  }
+
   Future<List<PostResponse>> getPosts() async {
     final response = await api.get('/api/posts/all');
     return parsePosts(response);

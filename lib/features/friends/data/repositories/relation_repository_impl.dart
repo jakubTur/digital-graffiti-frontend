@@ -59,4 +59,9 @@ class RelationRepositoryImpl extends RelationRepository {
   Future<void> updateRelation(RelationNicknameRequest request) async {
     return await remoteDataSource.updateRelation(request);
   }
+
+  @override
+  Future<RelationResponse> getRelation(int id) async {
+    return await remoteDataSource.getRelationByRelationId(id);
+  }
 }

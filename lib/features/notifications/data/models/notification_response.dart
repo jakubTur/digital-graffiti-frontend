@@ -1,3 +1,4 @@
+import '../../domain/notification_type.dart';
 
 class NotificationResponse {
   final String id;
@@ -16,6 +17,8 @@ class NotificationResponse {
     required this.read,
   });
 
+  NotificationType get notificationType => NotificationType.fromString(type);
+
   factory NotificationResponse.fromJson(Map<String, dynamic> json) {
     return NotificationResponse(
       id: json['id'].toString(),
@@ -23,7 +26,7 @@ class NotificationResponse {
       body: json['body'] as String? ?? '',
       type: json['type'] as String? ?? '',
       referenceId: json['referenceId'].toString(),
-      read: json['read'] as bool? ?? false,
+      read: json['isRead'] as bool? ?? false,
     );
   }
 }
