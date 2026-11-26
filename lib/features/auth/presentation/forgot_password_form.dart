@@ -57,7 +57,12 @@ class _ForgetPasswordForm extends State<ForgotPasswordForm> {
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Column(
               children: [
-                Align(alignment: Alignment.topRight, child: ScreenHeader()),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: ScreenHeader(onBackPressed: () {
+                    context.go("/login");
+                  }),
+                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 30,
