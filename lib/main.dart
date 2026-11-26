@@ -84,16 +84,19 @@ class MyApp extends StatelessWidget {
         builder: (context, state) =>
             LoginUi(repo: userRepository, authStorage: authStorage),
       ),
+      
       GoRoute(
         path: '/map',
         builder: (context, state) => MapScreen(
-          postsRepository: postsRepository,
-          authStorage: authStorage,
-          postCreationFlow: PostCreationFlow(
-            PostPublisher(postsRepository, authStorage),
-          ),
+        postsRepository: postsRepository,
+        authStorage: authStorage,
+        relationRepository: relationRepository,
+        postCreationFlow: PostCreationFlow(
+        PostPublisher(postsRepository, authStorage),
         ),
       ),
+    ),
+
       GoRoute(
         path: '/post/draw',
         builder: (context, state) => PaintScreen(

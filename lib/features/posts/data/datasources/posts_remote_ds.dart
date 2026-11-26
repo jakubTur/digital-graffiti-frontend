@@ -34,7 +34,7 @@ class PostsRemoteDataSource {
       queryParameters: {
         'latitude': latitude.toString(),
         'longitude': longitude.toString(),
-        'radius': radius.toString()
+        'radiusMeters': radius.toString(),
       },
     );
     return parsePosts(response);
@@ -74,4 +74,30 @@ class PostsRemoteDataSource {
         ),
     ).toList();
   }
+
+  Future<Set<int>> getReadPostIds() async {
+    final response = await api.get('/api/posts/read-ids');
+
+    if (response is! List) {
+      throw const FormatException(
+        'Read post IDs response is not a list',
+      );
+    }
+
+    return response.map((item) {
+      if (item is! num) {
+        throw const FormatException('Invalid post ID');
+      }
+      return item.toInt();
+    }).toSet();
+  }
+
+  Future<void> markPostAsRead(int postId) async {
+    await api.post(
+      '/api/posts/$postId/read',
+      body: const {},
+      expectedStatusCode: 204,
+    );
+  }
+
 }

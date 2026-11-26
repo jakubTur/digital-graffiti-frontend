@@ -62,7 +62,134 @@ class MapUi extends StatelessWidget {
                 ),
               ],
             ),
-            const Spacer(),
+            
+Consumer<MapModel>(
+  builder: (context, map, child) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MapUiButton(
+          onTap: map.toggleFilters,
+          icon: map.filtersVisible
+              ? Icons.close
+              : Icons.filter_list,
+          heroTag: 'filters_button',
+        ),
+
+        if (map.filtersVisible)
+          Card(
+            margin: const EdgeInsets.only(right: 10),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Filter posts',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text('Post age'),
+
+                  DropdownButton<PostAgeFilter>(
+                    value: map.ageFilter,
+                    items: const [
+                      DropdownMenuItem(
+                        value: PostAgeFilter.all,
+                        child: Text('All posts'),
+                      ),
+                      DropdownMenuItem(
+                        value: PostAgeFilter.today,
+                        child: Text('Today'),
+                      ),
+                      DropdownMenuItem(
+                        value: PostAgeFilter.lastWeek,
+                        child: Text('Last 7 days'),
+                      ),
+                      DropdownMenuItem(
+                        value: PostAgeFilter.lastMonth,
+                        child: Text('Last 30 days'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        map.setAgeFilter(value);
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  const Text('Post author'),
+
+                  DropdownButton<PostAuthorFilter>(
+                    value: map.authorFilter,
+                    items: const [
+                      DropdownMenuItem(
+                        value: PostAuthorFilter.all,
+                        child: Text('Everyone'),
+                      ),
+                      DropdownMenuItem(
+                        value: PostAuthorFilter.friends,
+                        child: Text('Friends'),
+                      ),
+                      DropdownMenuItem(
+                        value: PostAuthorFilter.strangers,
+                        child: Text('Strangers'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        map.setAuthorFilter(value);
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  const Text('Read status'),
+
+                  DropdownButton<PostReadFilter>(
+                    value: map.readFilter,
+                    items: const [
+                      DropdownMenuItem(
+                        value: PostReadFilter.all,
+                        child: Text('All posts'),
+                      ),
+                      DropdownMenuItem(
+                        value: PostReadFilter.read,
+                        child: Text('Read'),
+                      ),
+                      DropdownMenuItem(
+                        value: PostReadFilter.unread,
+                        child: Text('Unread'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        map.setReadFilter(value);
+                      }
+                    },
+                  ),
+
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  },
+),
+
+const Spacer(),
+
             Consumer<MapModel>(
               builder: (context, map, child) {
                 return MapUiButton(

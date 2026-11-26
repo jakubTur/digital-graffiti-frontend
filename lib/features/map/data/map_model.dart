@@ -10,9 +10,33 @@ import 'package:frontend/features/posts/domain/entities/post.dart';
 import 'package:frontend/features/posts/domain/repositories/posts_repository.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:frontend/features/friends/domain/repository/relation_repository.dart';
+import 'package:frontend/features/profile/data/relation_status.dart';
 
 /// Data class storing state local to map (user location and posts) pulled from backend.
 /// Made with help of state management tutorial: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
+/// 
+/// 
+/// 
+enum PostAgeFilter {
+  all,
+  today,
+  lastWeek,
+  lastMonth,
+}
+
+enum PostAuthorFilter {
+  all,
+  friends,
+  strangers,
+}
+
+
+enum PostReadFilter { all,
+ read,
+ unread }
+
+ 
 class MapModel extends ChangeNotifier {
   MapModel({required this._postsRepository, required this._authStorage});
 
@@ -39,6 +63,35 @@ class MapModel extends ChangeNotifier {
 
   List<Post> _posts = const [];
 
+  PostAgeFilter _ageFilter = PostAgeFilter.all;
+
+  PostAuthorFilter _authorFilter = PostAuthorFilter.all;
+
+
+  Set<int> _readPostIds = {};
+  final Set<int> _markingReadPostIds = {};
+
+  PostReadFilter _readFilter = PostReadFilter.all;
+
+  PostReadFilter get readFilter => _readFilter;
+
+  bool isPostRead(Post post) =>
+      post.id != null && _readPostIds.contains(post.id);
+
+  void setReadFilter(PostReadFilter value) {
+    _readFilter = value;
+    notifyListeners();
+  }
+
+
+  Set<String> _friendNicknames = {};
+  String? _loggedInNickname;
+
+  PostAuthorFilter get authorFilter => _authorFilter;
+  bool _filtersVisible = false;
+
+  PostAgeFilter get ageFilter => _ageFilter;
+  bool get filtersVisible => _filtersVisible;
   /// which post is currently being viewed.
   /// this is slightly messy coupling with MapUi, but it's not a massive issue,
   /// and keeping it here allows for easier routing during post viewing.
@@ -75,6 +128,60 @@ class MapModel extends ChangeNotifier {
   /// Getter for posts
   UnmodifiableListView<Post> get posts => UnmodifiableListView(_posts);
 
+
+  
+
+List<Post> get visiblePosts {
+  final now = DateTime.now();
+
+  final DateTime? cutoff = switch (_ageFilter) {
+    PostAgeFilter.all => null,
+    PostAgeFilter.today =>
+      DateTime(now.year, now.month, now.day),
+    PostAgeFilter.lastWeek =>
+      now.subtract(const Duration(days: 7)),
+    PostAgeFilter.lastMonth =>
+      now.subtract(const Duration(days: 30)),
+  };
+
+  return _posts.where((post) {
+    // Filter by age.
+    if (cutoff != null &&
+        post.postedAt.toLocal().isBefore(cutoff)) {
+      return false;
+    }
+
+    // Filter by read status.
+    final read = isPostRead(post);
+
+    if (_readFilter == PostReadFilter.read && !read) {
+      return false;
+    }
+
+    if (_readFilter == PostReadFilter.unread && read) {
+      return false;
+    }
+
+    // Filter by author.
+    switch (_authorFilter) {
+      case PostAuthorFilter.all:
+        return true;
+
+      case PostAuthorFilter.friends:
+        return _friendNicknames.contains(post.username);
+
+      case PostAuthorFilter.strangers:
+        if (_loggedInNickname == null) return false;
+
+        return post.username != _loggedInNickname &&
+            !_friendNicknames.contains(post.username);
+    }
+  }).toList();
+}
+
+
+
+
   Post? get postToView => _postToView;
 
   List<Drawing>? get drawingsOnPostToView => _drawingsOnPostToView;
@@ -104,6 +211,7 @@ class MapModel extends ChangeNotifier {
     _currentUsername = username;
     _postToView = post;
     notifyListeners();
+    unawaited(_markPostAsRead(post.id!));
   }
 
   /// post viewing callback.
@@ -135,13 +243,17 @@ class MapModel extends ChangeNotifier {
     }
   }
 
-  void _startPostPolling() {
-    unawaited(refreshPosts());
-    _postPollTimer = Timer.periodic(
-      postPollInterval,
-      (_) => unawaited(refreshPosts()),
-    );
-  }
+  
+void _startPostPolling() {
+  unawaited(loadReadPostIds());
+  unawaited(refreshPosts());
+
+  _postPollTimer = Timer.periodic(
+    postPollInterval,
+    (_) => unawaited(refreshPosts()),
+  );
+}
+
 
   /// Call to start updating the user's location
   void startUserLocationUpdates() async {
@@ -340,4 +452,104 @@ class MapModel extends ChangeNotifier {
     _locationAnimationController?.dispose();
     super.dispose();
   }
+
+
+void toggleFilters() {
+  _filtersVisible = !_filtersVisible;
+  notifyListeners();
+}
+
+void setAgeFilter(PostAgeFilter value) {
+  _ageFilter = value;
+  notifyListeners();
+}
+
+void setAuthorFilter(PostAuthorFilter value) {
+  _authorFilter = value;
+  notifyListeners();
+}
+
+void setFriendNicknames({
+  required Set<String> friendNicknames,
+  required String currentNickname,
+}) {
+  _friendNicknames = friendNicknames;
+  _loggedInNickname = currentNickname;
+  notifyListeners();
+}
+
+
+Future<void> loadFriends(
+  RelationRepository relationRepository,
+) async {
+  final userId = await _authStorage.readId();
+  final nickname = await _authStorage.readNickname();
+
+  if (userId == null || nickname == null) {
+    return;
+  }
+
+  try {
+    final relations = await relationRepository.getRelations(
+      userId,
+      RelationStatus.accepted,
+    );
+
+    final friendNicknames = relations.map((relation) {
+      if (relation.senderNickname == nickname) {
+        return relation.receiverNickname;
+      }
+
+      return relation.senderNickname;
+    }).where((name) => name.isNotEmpty).toSet();
+
+    if (_isDisposed) return;
+
+    setFriendNicknames(
+      friendNicknames: friendNicknames,
+      currentNickname: nickname,
+    );
+  } catch (e) {
+    debugPrint('Failed to load friends: $e');
+  }
+}
+
+
+Future<void> loadReadPostIds() async {
+  try {
+    final ids = await _postsRepository.getReadPostIds();
+
+    if (_isDisposed) return;
+
+    _readPostIds.addAll(ids);
+    notifyListeners();
+  } catch (e) {
+    debugPrint('Failed to load read posts: $e');
+  }
+}
+
+Future<void> _markPostAsRead(int postId) async {
+  if (_readPostIds.contains(postId) ||
+      _markingReadPostIds.contains(postId)) {
+    return;
+  }
+
+  _markingReadPostIds.add(postId);
+
+  try {
+    await _postsRepository.markPostAsRead(postId);
+
+    if (_isDisposed) return;
+
+    _readPostIds.add(postId);
+    notifyListeners();
+  } catch (e) {
+    debugPrint('Failed to mark post $postId as read: $e');
+  } finally {
+    _markingReadPostIds.remove(postId);
+  }
+}
+
+
+
 }

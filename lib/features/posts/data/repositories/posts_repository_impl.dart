@@ -46,6 +46,18 @@ class PostsRepositoryImpl implements PostsRepository {
     final response = await remoteDataSource.getDrawingsByPostId(postId);
     return response.map(toDrawing).toList();
   }
+
+
+    @override
+    Future<Set<int>> getReadPostIds() async {
+      return await remoteDataSource.getReadPostIds();
+    }
+
+    @override
+    Future<void> markPostAsRead(int postId) async {
+      await remoteDataSource.markPostAsRead(postId);
+    }
+
   Post toPost(PostResponse response) {
     return Post(
       id: response.id,
