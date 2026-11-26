@@ -5,9 +5,11 @@ import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/form_main_text.dart';
 import '../../../core/widgets/screen_header.dart';
+import '../domain/repositories/user_repository.dart';
 
 class ForgotPasswordForm extends StatefulWidget {
-  const ForgotPasswordForm({super.key});
+  final UserRepository repo;
+  const ForgotPasswordForm({super.key, required this.repo});
 
   @override
   State<StatefulWidget> createState() {
@@ -28,17 +30,18 @@ class _ForgetPasswordForm extends State<ForgotPasswordForm> {
     setState(() {
       _emailError = null;
     });
+    try {
+      await widget.repo.resetPassword(_emailController.text);
 
-    //TODO: add sending request
-
-    if (context.mounted) {
-      context.go('/forgot-password-success');
+      if (context.mounted) {
+        context.go('/forgot-password-success');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _emailError = 'Failed to reset password';
+      });
     }
-
-    if (!mounted) return;
-    setState(() {
-      _emailError = 'Incorrect current email';
-    });
   }
 
   @override

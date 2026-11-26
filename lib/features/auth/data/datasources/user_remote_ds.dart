@@ -70,4 +70,8 @@ class UserRemoteDataSource {
   Future<void> deleteNotification(String notificationId) async {
     await api.delete('/api/users/$notificationId', expectedStatusCode: 204);
   }
+
+  Future<void> resetPassword(String email) async {
+    await api.get('/auth/reset-password/$email');
+  }
 }

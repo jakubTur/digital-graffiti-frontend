@@ -253,7 +253,8 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/forgot-password',
-        builder: ((context, state) => ForgotPasswordForm()),
+        builder: ((context, state) =>
+            ForgotPasswordForm(repo: userRepository)),
       ),
       GoRoute(
         path: '/forgot-password-success',

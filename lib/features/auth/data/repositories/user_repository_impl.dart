@@ -70,4 +70,8 @@ class UserRepositoryImpl implements UserRepository {
   Future<void> deleteNotification(String notificationId) async {
     return await remoteDataSource.deleteNotification(notificationId);
   }
+  @override
+  Future<void> resetPassword(String email) async {
+    return await remoteDataSource.resetPassword(email);
+  }
 }
