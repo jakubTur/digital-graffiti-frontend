@@ -60,7 +60,7 @@ class _ForgetPasswordForm extends State<ForgotPasswordForm> {
                 Align(
                   alignment: Alignment.topRight,
                   child: ScreenHeader(onBackPressed: () {
-                    context.go("/login");
+                    context.go("/");
                   }),
                 ),
                 Column(
